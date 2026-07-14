@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>adam, systems that make things lighter</title>
+
+<!-- Prototype / design spec for the SvelteKit build (see BUILD-PLAN.md).
+     Plain CSS + custom properties, portable to src/lib/styles/tokens.css.
+     Fonts load via Google Fonts <link> here; the production build self-hosts.
+     Design system: design/kinetic_architecture/DESIGN.md.
+     Signature interaction: drag the reveal control in the hero to wipe the
+     whole page from site mode (light) to map mode (dark). Partial drag peeks. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Work+Sans:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   TOKENS  (design/kinetic_architecture/DESIGN.md)
+   site mode = light (committed). map mode = dark (committed).
+   ============================================================ */
+:root {
+  --bg:            #f0fdec;
+  --panel:         #ffffff;
+  --panel-2:       #eaf7e6;
+  --panel-hover:   #e5f2e1;
+  --border:        #c1c9be;
+  --border-strong: #727970;
+  --ink:           #131e14;
+  --ink-soft:      #424940;
+  --accent:        #37613b;
+  --accent-hover:  #4f7a52;
+  --on-accent:     #ffffff;
+  --focus:         #4f7a52;
+
+  --gutter: 24px;
+  --section-gap: 128px;
+  --stack-sm: 8px;
+  --stack-md: 16px;
+  --stack-lg: 32px;
+  --stack-xl: 48px;
+  --max: 1180px;
+
+  --font-head: 'Sora', system-ui, sans-serif;
+  --font-body: 'Work Sans', system-ui, sans-serif;
+
+  --nav-h: 68px;
+  --r: 0; /* reveal: 0 = site, 1 = map */
+}
+@media (min-width: 900px) { :root { --gutter: 48px; } }
+
+html.mode-map, html.revealing {
+  --bg:            #10140d;
+  --panel:         #171d13;
+  --panel-2:       #1f271b;
+  --panel-hover:   #283328;
+  --border:        #2b3324;
+  --border-strong: #3a4633;
+  --ink:           #e7f4e3;
+  --ink-soft:      #9aa893;
+  --accent:        #7bb77e;
+  --accent-hover:  #a3d2a3;
+  --on-accent:     #10140d;
+  --focus:         #7bb77e;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  transition: background 0.35s ease, color 0.35s ease;
+}
+html.mode-map, html.mode-map body { height: 100%; overflow: hidden; }
+
+h1, h2, h3, h4 { font-family: var(--font-head); font-weight: 700; letter-spacing: -0.02em; text-transform: lowercase; }
+a { color: inherit; text-decoration: none; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+.wrap { max-width: var(--max); margin: 0 auto; padding: 0 var(--gutter); }
+.label { font-size: 13px; font-weight: 500; letter-spacing: 0.08em; text-transform: lowercase; color: var(--ink-soft); }
+.mono { font-size: 12px; font-weight: 500; letter-spacing: 0.02em; text-transform: lowercase; }
+
+/* ============================================================
+   NAV
+   ============================================================ */
+.nav {
+  position: fixed; top: 0; left: 0; width: 100%; z-index: 70; height: var(--nav-h);
+  background: var(--bg); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; transition: background 0.35s ease, border-color 0.35s ease;
+}
+.nav-inner { width: 100%; max-width: var(--max); margin: 0 auto; padding: 0 var(--gutter); display: flex; align-items: center; justify-content: space-between; gap: var(--stack-lg); }
+.brand-group { display: flex; align-items: center; gap: var(--stack-md); }
+.brand { font-family: var(--font-head); font-weight: 700; font-size: 22px; text-transform: lowercase; color: var(--ink); }
+.avail { display: none; align-items: center; gap: 8px; border: 1px solid var(--border); background: var(--panel-2); padding: 6px 12px; }
+@media (min-width: 760px) { .avail { display: inline-flex; } }
+.avail .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+@media (prefers-reduced-motion: no-preference) { .avail .dot { animation: breathe 2.4s ease-in-out infinite; } }
+@keyframes breathe { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+.nav-right { display: flex; align-items: center; gap: var(--stack-lg); }
+.nav-link { color: var(--ink-soft); transition: color 0.2s; }
+.nav-link:hover { color: var(--accent); }
+@media (max-width: 560px) { .nav-right .nav-link { display: none; } }
+
+/* ============================================================
+   SITE VIEW
+   ============================================================ */
+.site-view { padding-top: var(--nav-h); position: relative; z-index: 20; }
+html.mode-map .site-view { display: none; }
+
+.section { padding: var(--section-gap) 0; border-bottom: 1px solid var(--border); }
+.section:last-of-type { border-bottom: 0; }
+
+/* hero */
+.hero { min-height: calc(100dvh - var(--nav-h)); display: flex; flex-direction: column; justify-content: center; gap: var(--stack-xl); padding: var(--stack-xl) 0; border-bottom: 1px solid var(--border); }
+.hero-grid { display: grid; grid-template-columns: 1fr; gap: var(--stack-lg); align-items: end; }
+@media (min-width: 900px) { .hero-grid { grid-template-columns: 7fr 5fr; gap: var(--stack-xl); } }
+.hero h1 { font-size: clamp(42px, 7vw, 66px); line-height: 1.04; }
+.hero-side { display: flex; flex-direction: column; gap: var(--stack-lg); }
+.hero-side p { font-size: 20px; color: var(--ink-soft); text-transform: lowercase; max-width: 40ch; }
+.cta-row { display: flex; flex-wrap: wrap; gap: var(--stack-md); }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-family: var(--font-body); font-size: 14px; font-weight: 500; letter-spacing: 0.05em; text-transform: lowercase; padding: 15px 30px; border: 1px solid var(--accent); background: var(--accent); color: var(--on-accent); cursor: pointer; transition: background 0.2s, border-color 0.2s, transform 0.1s; }
+.btn:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+.btn:active { transform: translateY(1px); }
+.btn--ghost { background: transparent; color: var(--accent); border-color: var(--border-strong); }
+.btn--ghost:hover { background: var(--panel-2); }
+
+/* reveal control (the swipe), lives in the navbar */
+.reveal-wrap { display: flex; align-items: center; gap: 10px; user-select: none; }
+.reveal-wrap .end { font-size: 12px; letter-spacing: 0.06em; text-transform: lowercase; color: var(--ink-soft); transition: color 0.2s; }
+.reveal-wrap .end.on { color: var(--accent); }
+@media (max-width: 400px) { .reveal-wrap .end { display: none; } }
+.mode-slider { position: relative; width: 132px; height: 30px; border: 1px solid var(--border-strong); background: var(--panel-2); display: flex; align-items: center; flex-shrink: 0; }
+.mode-slider .fill { position: absolute; left: 0; top: 0; bottom: 0; width: calc(var(--r) * 100%); background: var(--panel-hover); border-right: 1px solid var(--accent); pointer-events: none; }
+.mode-knob { position: absolute; top: -1px; bottom: -1px; width: 36px; background: var(--accent); border: 1px solid var(--accent); cursor: ew-resize; touch-action: none; display: flex; align-items: center; justify-content: center; gap: 3px; }
+.mode-knob span { width: 2px; height: 11px; background: var(--on-accent); opacity: 0.85; }
+
+/* section heads */
+.sec-head { margin-bottom: var(--stack-xl); display: flex; align-items: baseline; justify-content: space-between; gap: var(--stack-md); flex-wrap: wrap; }
+.sec-head h2 { font-size: clamp(28px, 4vw, 36px); }
+
+/* featured */
+.featured-list { display: flex; flex-direction: column; gap: var(--stack-xl); }
+.fcard { border: 1px solid var(--border); background: var(--bg); display: grid; grid-template-columns: 1fr; }
+@media (min-width: 880px) { .fcard { grid-template-columns: 5fr 7fr; } .fcard.flip .fcard-figure { order: 2; border-left: 1px solid var(--border); } .fcard.flip .fcard-body { order: 1; } }
+.fcard-figure { border-bottom: 1px solid var(--border); background: var(--panel-2); padding: var(--stack-xl); display: flex; flex-direction: column; justify-content: center; gap: var(--stack-md); min-height: 240px; }
+@media (min-width: 880px) { .fcard-figure { border-bottom: 0; border-right: 1px solid var(--border); } }
+.fig-cap { color: var(--ink-soft); }
+.schematic { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.node-chip { border: 1px solid var(--border-strong); background: var(--bg); padding: 7px 11px; font-size: 12px; font-weight: 500; letter-spacing: 0.02em; text-transform: lowercase; color: var(--ink); }
+.node-chip.accent { border-color: var(--accent); color: var(--accent); }
+.arrow { color: var(--ink-soft); font-size: 13px; }
+.branch { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding-left: 22px; }
+.fcard-body { padding: var(--stack-xl); display: flex; flex-direction: column; gap: var(--stack-lg); justify-content: space-between; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { border: 1px solid var(--border); padding: 5px 9px; }
+.chip.mono { color: var(--ink-soft); }
+.fcard-body h3 { font-size: 27px; }
+.fcard-body p { color: var(--ink-soft); text-transform: lowercase; }
+.fbody-top { display: flex; flex-direction: column; gap: var(--stack-md); }
+.outcome { border-top: 1px solid var(--border); padding-top: var(--stack-md); }
+.outcome h4 { color: var(--ink-soft); margin-bottom: 4px; }
+.outcome p { color: var(--ink); }
+.repo-link { align-self: flex-start; color: var(--accent); font-weight: 500; letter-spacing: 0.02em; text-transform: lowercase; border-bottom: 1px solid transparent; transition: border-color 0.2s; }
+.repo-link:hover { border-color: var(--accent); }
+.stack-line { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* archive */
+.archive-grid { display: grid; grid-template-columns: 1fr; gap: var(--stack-lg); }
+@media (min-width: 880px) { .archive-grid { grid-template-columns: 3fr 9fr; gap: var(--stack-xl); } }
+.archive-note { color: var(--ink-soft); text-transform: lowercase; margin-top: var(--stack-sm); font-size: 14px; }
+.archive-list { border-top: 1px solid var(--border); }
+.arow { display: flex; flex-direction: column; gap: 6px; padding: 20px 10px; margin: 0 -10px; border-bottom: 1px solid var(--border); transition: background 0.2s; }
+@media (min-width: 640px) { .arow { flex-direction: row; align-items: center; justify-content: space-between; } }
+.arow:hover { background: var(--panel-2); }
+.arow-title { display: flex; align-items: center; gap: 14px; }
+.arow-title .sq { width: 5px; height: 5px; background: var(--accent); flex-shrink: 0; }
+.arow-title span { font-size: 20px; text-transform: lowercase; }
+.arow-meta { display: flex; gap: 20px; color: var(--ink-soft); }
+
+/* contact */
+.contact-grid { display: grid; grid-template-columns: 1fr; gap: var(--stack-xl); }
+@media (min-width: 880px) { .contact-grid { grid-template-columns: 5fr 7fr; } }
+.contact-copy { display: flex; flex-direction: column; gap: var(--stack-md); }
+.contact-copy p { color: var(--ink-soft); text-transform: lowercase; max-width: 40ch; }
+.form { display: flex; flex-direction: column; gap: var(--stack-md); border: 1px solid var(--border); background: var(--panel); padding: var(--stack-xl); }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { color: var(--ink); }
+.field input, .field textarea { font-family: var(--font-body); font-size: 16px; color: var(--ink); background: var(--bg); border: 1px solid var(--border-strong); padding: 13px 15px; }
+.field input::placeholder, .field textarea::placeholder { color: var(--ink-soft); opacity: 0.7; }
+.field input:focus, .field textarea:focus { outline: none; border: 2px solid var(--accent); padding: 12px 14px; }
+
+/* footer */
+.footer { border-top: 1px solid var(--border); padding: var(--stack-xl) 0; position: relative; z-index: 20; }
+html.mode-map .footer { display: none; }
+.footer-inner { display: flex; flex-direction: column; gap: var(--stack-md); align-items: flex-start; }
+@media (min-width: 640px) { .footer-inner { flex-direction: row; align-items: center; justify-content: space-between; } }
+.footer .socials { display: flex; gap: var(--stack-lg); }
+.footer .socials a { color: var(--ink-soft); text-transform: lowercase; transition: color 0.2s; }
+.footer .socials a:hover { color: var(--accent); }
+
+/* ============================================================
+   MAP VIEW  (revealed by the swipe; wiped in from the left)
+   ============================================================ */
+.map-view {
+  position: fixed; inset: 0; top: var(--nav-h); z-index: 30; display: none;
+  clip-path: inset(0 calc((1 - var(--r)) * 100%) 0 0);
+}
+html.mode-map .map-view, html.revealing .map-view { display: block; }
+html.revealing .map-view { pointer-events: none; }
+.map-bg { position: absolute; inset: 0; background: var(--bg); }
+.map-bg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(var(--border) 1px, transparent 1px) 0 0 / 66px 66px, linear-gradient(90deg, var(--border) 1px, transparent 1px) 0 0 / 66px 66px; opacity: 0.2; }
+
+.map-canvas { position: absolute; inset: 0; overflow: hidden; }
+@media (max-width: 900px) { .map-canvas { display: none; } }
+#wires { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.wire { fill: none; stroke: var(--border-strong); stroke-width: 1; opacity: 0.55; }
+.wire-pulse { fill: none; stroke: var(--accent-hover); stroke-width: 1.5; stroke-dasharray: 5 190; opacity: 0.9; }
+@media (prefers-reduced-motion: no-preference) { .wire-pulse { animation: flow 4.5s linear infinite; } }
+@keyframes flow { to { stroke-dashoffset: -195; } }
+
+.node { position: absolute; transform: translate(-50%, -50%); font-family: var(--font-body); text-align: left; background: var(--panel); }
+.pnode { border: 1px solid var(--border-strong); cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s; }
+.pnode:hover, .pnode:focus-visible { border-color: var(--accent); }
+.pnode.featured { width: 200px; padding: var(--stack-md); }
+.pnode.featured .n-status { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.pnode.featured .n-status .sq { width: 5px; height: 5px; background: var(--accent); }
+.pnode.featured .n-status .mono { color: var(--accent); }
+.pnode.featured .n-title { font-size: 14px; font-weight: 500; letter-spacing: 0.03em; text-transform: lowercase; color: var(--ink); }
+.pnode.pill { padding: 6px 11px; color: var(--ink-soft); }
+.pnode.pill:hover { color: var(--ink); }
+.pnode.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 0 18px -2px var(--accent); }
+.hub { background: transparent; border: 1px dashed var(--border-strong); padding: 7px 14px; color: var(--accent); letter-spacing: 0.1em; text-transform: lowercase; font-weight: 500; }
+.center-node { background: var(--accent); color: var(--on-accent); padding: 10px 16px; font-family: var(--font-head); font-weight: 700; text-transform: lowercase; letter-spacing: 0.02em; }
+
+/* mobile rail */
+.map-rail { display: none; position: absolute; inset: 0; overflow-y: auto; padding: var(--stack-xl) var(--gutter) 90px; }
+@media (max-width: 900px) { .map-rail { display: block; } }
+.rail-cluster { margin-bottom: var(--stack-lg); }
+.rail-cluster > .label { display: block; margin-bottom: var(--stack-sm); padding-bottom: var(--stack-sm); border-bottom: 1px dashed var(--border-strong); color: var(--accent); }
+.rail-item { width: 100%; text-align: left; background: var(--panel); border: 1px solid var(--border); border-top: 0; padding: var(--stack-md); cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.rail-cluster .rail-item:first-of-type { border-top: 1px solid var(--border); }
+.rail-item .r-title { font-size: 16px; text-transform: lowercase; color: var(--ink); }
+.rail-item .mono { color: var(--ink-soft); }
+
+/* slide-over panel (stays dark, within map theme) */
+.panel { position: fixed; top: var(--nav-h); right: 0; bottom: 0; width: 100%; z-index: 60; background: var(--panel); border-left: 1px solid var(--border); transform: translateX(100%); transition: transform 0.35s ease; visibility: hidden; display: flex; flex-direction: column; }
+@media (min-width: 560px) { .panel { width: 460px; } }
+@media (prefers-reduced-motion: reduce) { .panel { transition: none; } }
+.panel.open { transform: translateX(0); visibility: visible; }
+.panel-head { padding: var(--gutter); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; gap: var(--stack-md); }
+.panel-head .mono { color: var(--accent); margin-bottom: 6px; }
+.panel-head h2 { font-size: 30px; color: var(--ink); }
+.panel-close { flex-shrink: 0; border: 1px solid var(--border); background: transparent; color: var(--ink); font-size: 22px; line-height: 1; width: 42px; height: 42px; cursor: pointer; transition: background 0.2s; }
+.panel-close:hover { background: var(--panel-hover); }
+.panel-body { padding: var(--gutter); overflow-y: auto; display: flex; flex-direction: column; gap: var(--stack-lg); }
+.panel-body p { color: var(--ink); text-transform: lowercase; }
+.panel-fig { border: 1px solid var(--border); background: var(--panel-2); padding: var(--stack-md); }
+.panel-list { display: flex; flex-direction: column; gap: 10px; }
+.panel-list li { display: flex; gap: 12px; align-items: flex-start; list-style: none; color: var(--ink); text-transform: lowercase; }
+.panel-list .sq { width: 5px; height: 5px; background: var(--accent); margin-top: 9px; flex-shrink: 0; }
+.panel .btn { width: 100%; margin-top: auto; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav" aria-label="primary">
+  <div class="nav-inner">
+    <div class="brand-group">
+      <a class="brand" href="#top">adam</a>
+      <span class="avail"><span class="dot" aria-hidden="true"></span><span class="mono">available for new work</span></span>
+    </div>
+    <div class="reveal-wrap" title="drag or tap to switch between site and map">
+      <span class="end on label" id="end-site">site</span>
+      <div class="mode-slider" id="slider">
+        <div class="fill" aria-hidden="true"></div>
+        <div class="mode-knob" id="knob" role="slider" tabindex="0" aria-label="switch between site and map" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <span aria-hidden="true"></span><span aria-hidden="true"></span>
+        </div>
+      </div>
+      <span class="end label" id="end-map">map</span>
+    </div>
+    <div class="nav-right">
+      <a class="nav-link label" href="https://github.com/adxoxo" target="_blank" rel="noopener">github</a>
+    </div>
+  </div>
+</nav>
+
+<!-- SITE VIEW -->
+<div class="site-view" id="top">
+
+  <header class="hero">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div><h1>systems that make things lighter</h1></div>
+        <div class="hero-side">
+          <p>ai engineering, full-stack development, and automation. i build systems that make a business lighter to run.</p>
+          <div class="cta-row">
+            <a class="btn" href="#contact">work with me</a>
+            <a class="btn btn--ghost" href="#work">see the work</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- featured -->
+  <section class="section" id="work">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="label">selected work</span>
+        <span class="mono" style="color:var(--ink-soft)">four systems, one way of thinking</span>
+      </div>
+      <div class="featured-list">
+
+        <article class="fcard">
+          <div class="fcard-figure">
+            <div class="schematic"><span class="node-chip">widget</span><span class="arrow">-&gt;</span><span class="node-chip accent">fastapi</span><span class="arrow">-&gt;</span><span class="node-chip">supabase</span></div>
+            <div class="branch"><span class="arrow">&#8627;</span><span class="node-chip">groq</span><span class="arrow">-&gt;</span><span class="node-chip">n8n</span><span class="arrow">-&gt;</span><span class="node-chip accent">booked call</span></div>
+            <span class="fig-cap mono">fig. lead qualification flow</span>
+          </div>
+          <div class="fcard-body">
+            <div class="fbody-top">
+              <div class="chips"><span class="chip mono">ai engineering</span><span class="chip mono">2026</span></div>
+              <h3>tq chatbot</h3>
+              <p>a multi-tenant funnel chatbot that talks to a visitor, scores how serious they are in real time, and pushes the hot ones straight to a booked call. build it once, reconfigure it per client.</p>
+              <div class="stack-line"><span class="chip mono">react</span><span class="chip mono">fastapi</span><span class="chip mono">supabase</span><span class="chip mono">groq</span><span class="chip mono">n8n</span><span class="chip mono">cloudflare</span></div>
+            </div>
+            <div class="outcome"><h4 class="mono">outcome</h4><p>runs on a laptop for zero dollars with no api keys, then promotes to production one key at a time.</p><a class="repo-link" href="https://github.com/adxoxo/chatbot-closer" target="_blank" rel="noopener">view repository &#8599;</a></div>
+          </div>
+        </article>
+
+        <article class="fcard flip">
+          <div class="fcard-figure">
+            <div class="schematic"><span class="node-chip">agent a</span><span class="arrow">-&gt;</span><span class="node-chip accent">mcp gateway</span></div>
+            <div class="schematic"><span class="node-chip">agent b</span><span class="arrow">-&gt;</span><span class="node-chip accent">mcp gateway</span><span class="arrow">-&gt;</span><span class="node-chip">sqlite-vec</span></div>
+            <span class="fig-cap mono">fig. one memory, many agents</span>
+          </div>
+          <div class="fcard-body">
+            <div class="fbody-top">
+              <div class="chips"><span class="chip mono">ai engineering</span><span class="chip mono">2026</span></div>
+              <h3>grimoire</h3>
+              <p>a local knowledge base that every coding agent reaches through a single mcp gateway. it ingests documents, remembers past sessions, and hands back only what is relevant, project by project. everything runs offline on my own machine.</p>
+              <div class="stack-line"><span class="chip mono">python</span><span class="chip mono">sqlite-vec</span><span class="chip mono">fastmcp</span><span class="chip mono">ollama</span><span class="chip mono">opentelemetry</span></div>
+            </div>
+            <div class="outcome"><h4 class="mono">outcome</h4><p>retrieval, memory, and compaction all built and verified, with embeddings running on a local gpu.</p><a class="repo-link" href="https://github.com/adxoxo/grimoire" target="_blank" rel="noopener">view repository &#8599;</a></div>
+          </div>
+        </article>
+
+        <article class="fcard">
+          <div class="fcard-figure">
+            <div class="schematic"><span class="node-chip">qr ear tag</span><span class="arrow">-&gt;</span><span class="node-chip">phone browser</span></div>
+            <div class="schematic"><span class="node-chip accent">django api</span><span class="arrow">-&gt;</span><span class="node-chip">postgres</span></div>
+            <span class="fig-cap mono">fig. scan a goat, read its history</span>
+          </div>
+          <div class="fcard-body">
+            <div class="fbody-top">
+              <div class="chips"><span class="chip mono">full-stack</span><span class="chip mono">2026</span></div>
+              <h3>goatedtracking</h3>
+              <p>a local-first monitoring system for a small goat farm here in the philippines. every goat wears a qr ear tag. scan it on the farm wifi and its whole profile opens: health records, vaccinations, pen, lineage. the internet is optional, not required.</p>
+              <div class="stack-line"><span class="chip mono">django</span><span class="chip mono">drf</span><span class="chip mono">postgres</span><span class="chip mono">react</span><span class="chip mono">docker</span></div>
+            </div>
+            <div class="outcome"><h4 class="mono">outcome</h4><p>one on-premise server, zero cloud dependencies for the core, working on any phone on the farm wifi.</p><a class="repo-link" href="https://github.com/adxoxo/GoatMonitoring" target="_blank" rel="noopener">view repository &#8599;</a></div>
+          </div>
+        </article>
+
+        <article class="fcard flip">
+          <div class="fcard-figure">
+            <div class="schematic"><span class="node-chip">ph / ec / temp</span><span class="arrow">-&gt;</span><span class="node-chip">arduino</span></div>
+            <div class="schematic"><span class="node-chip">raspberry pi</span><span class="arrow">-&gt;</span><span class="node-chip accent">django api</span></div>
+            <span class="fig-cap mono">fig. sensors to dashboard</span>
+          </div>
+          <div class="fcard-body">
+            <div class="fbody-top">
+              <div class="chips"><span class="chip mono">embedded</span><span class="chip mono">2026</span></div>
+              <h3>grece hydroponics</h3>
+              <p>an automated nutrient film hydroponics setup. a raspberry pi and an arduino hold water flow, lighting, and nutrient dosing steady, while ph, ec, temperature and humidity stream to a django api you can watch and adjust from anywhere.</p>
+              <div class="stack-line"><span class="chip mono">raspberry pi</span><span class="chip mono">arduino</span><span class="chip mono">python</span><span class="chip mono">django rest</span><span class="chip mono">c++</span></div>
+            </div>
+            <div class="outcome"><h4 class="mono">outcome</h4><p>real-time monitoring and remote control over a rest api, with every reading logged for later tuning.</p><a class="repo-link" href="https://github.com/adxoxo/GRECE-Hydroponics-Monitoring-" target="_blank" rel="noopener">view repository &#8599;</a></div>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- archive (sourced from the github public api, cached once, read from the site) -->
+  <section class="section">
+    <div class="wrap archive-grid">
+      <div>
+        <h2>archive</h2>
+        <p class="archive-note">pulled from github once, then cached. the site reads the cache, not github.</p>
+      </div>
+      <div class="archive-list">
+        <div class="arow"><div class="arow-title"><span class="sq" aria-hidden="true"></span><span>standup dashboard</span></div><div class="arow-meta"><span class="mono">fastapi, react, recharts, sqlite</span><span class="mono">2026</span></div></div>
+        <div class="arow"><div class="arow-title"><span class="sq" aria-hidden="true"></span><span>asakape</span></div><div class="arow-meta"><span class="mono">django rest, vanilla js</span><span class="mono">2026</span></div></div>
+        <div class="arow"><div class="arow-title"><span class="sq" aria-hidden="true"></span><span>car detailing client, invoice automation</span></div><div class="arow-meta"><span class="mono">n8n, webhooks, email</span><span class="mono">2026</span></div></div>
+        <div class="arow"><div class="arow-title"><span class="sq" aria-hidden="true"></span><span>moisture sensor</span></div><div class="arow-meta"><span class="mono">esp32, c++, serial</span><span class="mono">2025</span></div></div>
+        <div class="arow"><div class="arow-title"><span class="sq" aria-hidden="true"></span><span>smart pot</span></div><div class="arow-meta"><span class="mono">esp32, sensors, django rest</span><span class="mono">2023</span></div></div>
+        <div class="arow"><div class="arow-title"><span class="sq" aria-hidden="true"></span><span>moa jump</span></div><div class="arow-meta"><span class="mono">phaser 3, javascript</span><span class="mono">2026</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- contact -->
+  <section class="section" id="contact">
+    <div class="wrap contact-grid">
+      <div class="contact-copy">
+        <h2>let's talk</h2>
+        <p>tell me what you are building and where it feels heavy. if we are on the same wavelength, i will show you what the lighter version looks like.</p>
+      </div>
+      <form class="form" onsubmit="return false;">
+        <div class="field"><label for="c-name">name</label><input id="c-name" type="text" placeholder="your name" autocomplete="name"></div>
+        <div class="field"><label for="c-email">email</label><input id="c-email" type="email" placeholder="you@company.com" autocomplete="email"></div>
+        <div class="field"><label for="c-msg">message</label><textarea id="c-msg" rows="4" placeholder="what you are working on"></textarea></div>
+        <button class="btn" type="submit" style="align-self:flex-start">send</button>
+      </form>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <div class="brand">adam</div>
+      <div class="socials">
+        <a href="https://github.com/adxoxo" target="_blank" rel="noopener">github</a>
+        <a href="https://www.threads.net/@ad_yuuu" target="_blank" rel="noopener">threads</a>
+        <a href="mailto:adamgemenez@gmail.com">email</a>
+      </div>
+      <span class="mono" style="color:var(--ink-soft)">davao city, working with foreign clients</span>
+    </div>
+  </footer>
+
+</div>
+
+<!-- MAP VIEW -->
+<div class="map-view" aria-label="project map">
+  <div class="map-bg" aria-hidden="true"></div>
+  <div class="map-canvas" id="mapCanvas">
+    <svg id="wires" aria-hidden="true" preserveAspectRatio="none"></svg>
+    <!-- nodes injected by JS -->
+  </div>
+  <div class="map-rail" id="mapRail"></div>
+</div>
+
+<!-- PANEL -->
+<aside class="panel" id="panel" aria-label="project detail" aria-hidden="true">
+  <div class="panel-head">
+    <div><div class="mono" id="p-id">id:</div><h2 id="p-title">project</h2></div>
+    <button class="panel-close" id="p-close" aria-label="close panel">&times;</button>
+  </div>
+  <div class="panel-body">
+    <div class="panel-fig"><div class="schematic" id="p-schematic"></div></div>
+    <p id="p-summary"></p>
+    <ul class="panel-list" id="p-outcomes"></ul>
+    <div class="chips" id="p-stack"></div>
+    <a class="btn" id="p-repo" href="#" target="_blank" rel="noopener">view repository &#8599;</a>
+  </div>
+</aside>
+
+<script>
+(function () {
+  "use strict";
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var svgns = "http://www.w3.org/2000/svg";
+  var root = document.documentElement;
+
+  /* ---------- data (shape mirrors the projects table in BUILD-PLAN.md) ---------- */
+  var CLUSTERS = ["ai", "fullstack", "automation", "embedded"];
+  var CLUSTER_LABEL = { ai: "ai", fullstack: "full-stack", automation: "automation", embedded: "embedded" };
+
+  var HUBS = [
+    { id: "center", label: "adam", type: "center", x: 50, y: 50 },
+    { id: "hub_ai", label: "ai", type: "hub", cluster: "ai", x: 28, y: 27 },
+    { id: "hub_fullstack", label: "full-stack", type: "hub", cluster: "fullstack", x: 70, y: 27 },
+    { id: "hub_embedded", label: "embedded", type: "hub", cluster: "embedded", x: 71, y: 73 },
+    { id: "hub_automation", label: "automation", type: "hub", cluster: "automation", x: 29, y: 73 }
+  ];
+
+  var PROJECTS = [
+    { id: "tq_chatbot", title: "tq chatbot", cluster: "ai", status: "featured", year: "2026", x: 13, y: 15,
+      summary: "a multi-tenant funnel chatbot that talks to a visitor, scores how serious they are in real time, and pushes the hot ones straight to a booked call.",
+      outcomes: ["runs for zero dollars with no api keys", "promotes to production one key at a time"],
+      stack: ["react","fastapi","supabase","groq","n8n"], schematic: ["widget","fastapi","supabase","groq","n8n"],
+      github: "https://github.com/adxoxo/chatbot-closer" },
+    { id: "grimoire", title: "grimoire", cluster: "ai", status: "featured", year: "2026", x: 31, y: 44,
+      summary: "a local knowledge base that every coding agent reaches through a single mcp gateway. it ingests documents, remembers past sessions, and hands back only what is relevant.",
+      outcomes: ["retrieval, memory and compaction all verified", "embeddings running on a local gpu"],
+      stack: ["python","sqlite-vec","fastmcp","ollama"], schematic: ["agents","mcp gateway","sqlite-vec"],
+      github: "https://github.com/adxoxo/grimoire" },
+    { id: "goatedtracking", title: "goatedtracking", cluster: "fullstack", status: "featured", year: "2026", x: 66, y: 13,
+      summary: "a local-first monitoring system for a small goat farm in the philippines. every goat wears a qr ear tag, scan it on the farm wifi and its whole profile opens.",
+      outcomes: ["one on-premise server, zero cloud for the core", "works on any phone on the farm wifi"],
+      stack: ["django","drf","postgres","react","docker"], schematic: ["qr tag","django api","postgres"],
+      github: "https://github.com/adxoxo/GoatMonitoring" },
+    { id: "standup", title: "standup dashboard", cluster: "fullstack", status: "archive", year: "2026", x: 87, y: 31,
+      summary: "a single-screen github activity dashboard that answers one question: what is on my plate today. open prs, assigned issues, an activity streak and per-repo health, with day-over-day deltas.",
+      outcomes: ["every section fails independently", "deltas are real history, not in-memory guesses"],
+      stack: ["fastapi","react","recharts","sqlite"], schematic: ["browser","fastapi","github api"],
+      github: "https://github.com/adxoxo/GitDashboard" },
+    { id: "moajump", title: "moa jump", cluster: "fullstack", status: "archive", year: "2026", x: 60, y: 42,
+      summary: "a k-pop themed vertical platformer built with phaser 3. three worlds, one target score, and it runs fully offline with no cdn and no backend.",
+      outcomes: ["plays on keyboard, touch and tilt", "static files, hosts anywhere"],
+      stack: ["phaser 3","javascript","gsap"], schematic: ["phaser","static files","github pages"],
+      github: "https://github.com/adxoxo/moa-jump" },
+    { id: "grece", title: "grece hydroponics", cluster: "embedded", status: "featured", year: "2026", x: 66, y: 66,
+      summary: "an automated nutrient film hydroponics setup. a raspberry pi and an arduino hold water flow, lighting and nutrient dosing steady while every reading streams to a django api.",
+      outcomes: ["real-time monitoring and remote control", "every reading logged for later tuning"],
+      stack: ["raspberry pi","arduino","python","django rest"], schematic: ["sensors","arduino","raspberry pi","django api"],
+      github: "https://github.com/adxoxo/GRECE-Hydroponics-Monitoring-" },
+    { id: "moisture", title: "moisture sensor", cluster: "embedded", status: "archive", year: "2025", x: 88, y: 66,
+      summary: "a diy device that measures the moisture content of rough rice grains over an esp32 and a serial link. built cheap and replaceable, on off-the-shelf parts, as the core of a thesis.",
+      outcomes: ["helps farmers judge grain readiness for storage", "built to be replicated and adapted"],
+      stack: ["esp32","c++","serial"], schematic: ["esp32","serial","readout"],
+      github: "https://github.com/adxoxo/MoistureSensor" },
+    { id: "smartpot", title: "smart pot", cluster: "embedded", status: "archive", year: "2023", x: 76, y: 87,
+      summary: "a pot that reads light, temperature, humidity and soil moisture, then reports the plant's health to a web and mobile view.",
+      outcomes: ["four sensors, one health status", "readings served over a rest api"],
+      stack: ["esp32","sensors","django rest"], schematic: ["sensors","esp32","django rest"],
+      github: "https://github.com/adxoxo/SmartPot" },
+    { id: "carwash", title: "invoice automation", cluster: "automation", status: "archive", year: "2026", x: 13, y: 85,
+      summary: "an automation for a car detailing client that turns finished jobs into invoices and follow-ups that send themselves, so the owner stops chasing paperwork after hours.",
+      outcomes: ["invoices and reminders sent automatically", "the owner gets the evening back"],
+      stack: ["n8n","webhooks","email"], schematic: ["job done","n8n","invoice + follow-up"],
+      github: "" }
+  ];
+
+  var byId = {};
+  PROJECTS.forEach(function (p) { byId[p.id] = p; });
+
+  /* connections: every project wires to its own cluster hub; hubs wire to center.
+     result: ai only connects to ai, full-stack to full-stack, embedded to embedded. */
+  var CONNECTIONS = [];
+  PROJECTS.forEach(function (p) { CONNECTIONS.push([p.id, "hub_" + p.cluster]); });
+  ["hub_ai","hub_fullstack","hub_embedded","hub_automation"].forEach(function (h) { CONNECTIONS.push([h, "center"]); });
+
+  /* ---------- reveal control (the swipe) ---------- */
+  var slider = document.getElementById("slider");
+  var knob = document.getElementById("knob");
+  var endSite = document.getElementById("end-site");
+  var endMap = document.getElementById("end-map");
+  var r = 0, dragging = false, moved = false, downX = 0, raf = null;
+
+  function positionKnob() {
+    if (!slider || !knob) return;
+    var usable = slider.clientWidth - knob.offsetWidth;
+    knob.style.left = (r * usable) + "px";
+  }
+  function setR(v) {
+    r = v < 0 ? 0 : (v > 1 ? 1 : v);
+    root.style.setProperty("--r", r);
+    positionKnob();
+    knob.setAttribute("aria-valuenow", Math.round(r * 100));
+    endSite.classList.toggle("on", r < 0.5);
+    endMap.classList.toggle("on", r >= 0.5);
+  }
+  function beginReveal() {
+    root.classList.add("revealing");
+    root.classList.remove("mode-map");
+    requestAnimationFrame(drawWires);
+  }
+  function settleMap() {
+    if (raf) { cancelAnimationFrame(raf); raf = null; }
+    root.classList.remove("revealing");
+    root.classList.add("mode-map");
+    setR(1);
+    requestAnimationFrame(function () { requestAnimationFrame(drawWires); });
+  }
+  function settleSite() {
+    if (raf) { cancelAnimationFrame(raf); raf = null; }
+    root.classList.remove("revealing");
+    root.classList.remove("mode-map");
+    setR(0);
+    closePanel();
+  }
+  function animateTo(target) {
+    if (reduce) { target >= 0.5 ? settleMap() : settleSite(); return; }
+    beginReveal();
+    var start = r, t0 = null, dur = 400;
+    function step(ts) {
+      if (t0 === null) t0 = ts;
+      var k = Math.min(1, (ts - t0) / dur);
+      var e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+      setR(start + (target - start) * e);
+      if (k < 1) { raf = requestAnimationFrame(step); }
+      else { target >= 0.5 ? settleMap() : settleSite(); }
+    }
+    raf = requestAnimationFrame(step);
+  }
+
+  knob.addEventListener("pointerdown", function (e) {
+    e.preventDefault();
+    try { knob.setPointerCapture(e.pointerId); } catch (_) {}
+    dragging = true; moved = false; downX = e.clientX;
+    beginReveal();
+  });
+  knob.addEventListener("pointermove", function (e) {
+    if (!dragging) return;
+    if (Math.abs(e.clientX - downX) > 3) moved = true;
+    var rect = slider.getBoundingClientRect();
+    var usable = rect.width - knob.offsetWidth;
+    setR((e.clientX - rect.left - knob.offsetWidth / 2) / usable);
+  });
+  function endDrag(e) {
+    if (!dragging) return;
+    dragging = false;
+    try { knob.releasePointerCapture(e.pointerId); } catch (_) {}
+    if (!moved) { animateTo(r < 0.5 ? 1 : 0); }   /* tap toggles to the other mode */
+    else { animateTo(r >= 0.5 ? 1 : 0); }         /* drag snaps to the nearer end */
+  }
+  knob.addEventListener("pointerup", endDrag);
+  knob.addEventListener("pointercancel", endDrag);
+  knob.addEventListener("keydown", function (e) {
+    if (e.key === "ArrowRight" || e.key === "ArrowUp" || e.key === "End") { e.preventDefault(); animateTo(1); }
+    else if (e.key === "ArrowLeft" || e.key === "ArrowDown" || e.key === "Home") { e.preventDefault(); animateTo(0); }
+    else if (e.key === "Enter" || e.key === " ") { e.preventDefault(); animateTo(r >= 0.5 ? 0 : 1); }
+  });
+
+  /* ---------- render map nodes + rail ---------- */
+  var canvas = document.getElementById("mapCanvas");
+  var rail = document.getElementById("mapRail");
+
+  HUBS.forEach(function (h) {
+    var el = document.createElement("div");
+    el.id = "node-" + h.id;
+    el.className = "node " + (h.type === "center" ? "center-node" : "hub");
+    el.style.left = h.x + "%"; el.style.top = h.y + "%";
+    el.textContent = h.label;
+    el.setAttribute("aria-hidden", "true");
+    canvas.appendChild(el);
+  });
+
+  PROJECTS.forEach(function (p) {
+    var node = document.createElement("button");
+    node.id = "node-" + p.id;
+    node.className = "node pnode " + (p.status === "featured" ? "featured" : "pill");
+    node.style.left = p.x + "%"; node.style.top = p.y + "%";
+    node.setAttribute("aria-label", p.title + ", open detail");
+    node.innerHTML = p.status === "featured"
+      ? '<span class="n-status"><span class="sq" aria-hidden="true"></span><span class="mono">' + p.cluster + '</span></span><span class="n-title">' + p.title + '</span>'
+      : '<span class="mono">' + p.title + '</span>';
+    node.addEventListener("click", function () { openPanel(p.id); });
+    canvas.appendChild(node);
+  });
+
+  CLUSTERS.forEach(function (cl) {
+    var group = PROJECTS.filter(function (p) { return p.cluster === cl; });
+    if (!group.length) return;
+    var wrap = document.createElement("div");
+    wrap.className = "rail-cluster";
+    wrap.innerHTML = '<span class="label">' + CLUSTER_LABEL[cl] + '</span>';
+    group.forEach(function (p) {
+      var b = document.createElement("button");
+      b.className = "rail-item";
+      b.innerHTML = '<span class="r-title">' + p.title + '</span><span class="mono">' + p.year + '</span>';
+      b.addEventListener("click", function () { openPanel(p.id); });
+      wrap.appendChild(b);
+    });
+    rail.appendChild(wrap);
+  });
+
+  /* ---------- wires ---------- */
+  function drawWires() {
+    if (!root.classList.contains("mode-map") && !root.classList.contains("revealing")) return;
+    var svg = document.getElementById("wires");
+    var cRect = canvas.getBoundingClientRect();
+    if (!cRect.width) return;
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    CONNECTIONS.forEach(function (pair) {
+      var na = document.getElementById("node-" + pair[0]);
+      var nb = document.getElementById("node-" + pair[1]);
+      if (!na || !nb) return;
+      var ra = na.getBoundingClientRect(), rb = nb.getBoundingClientRect();
+      var x1 = ra.left + ra.width / 2 - cRect.left, y1 = ra.top + ra.height / 2 - cRect.top;
+      var x2 = rb.left + rb.width / 2 - cRect.left, y2 = rb.top + rb.height / 2 - cRect.top;
+      var mx = (x1 + x2) / 2;
+      var d = "M " + x1 + " " + y1 + " C " + mx + " " + y1 + ", " + mx + " " + y2 + ", " + x2 + " " + y2;
+      var base = document.createElementNS(svgns, "path");
+      base.setAttribute("d", d); base.setAttribute("class", "wire");
+      svg.appendChild(base);
+      if (!reduce) {
+        var pulse = document.createElementNS(svgns, "path");
+        pulse.setAttribute("d", d); pulse.setAttribute("class", "wire-pulse");
+        svg.appendChild(pulse);
+      }
+    });
+  }
+  var rt;
+  window.addEventListener("resize", function () { clearTimeout(rt); rt = setTimeout(function () { positionKnob(); drawWires(); }, 120); });
+
+  /* ---------- panel ---------- */
+  var panel = document.getElementById("panel");
+  var lastFocus = null;
+  function openPanel(id) {
+    var p = byId[id]; if (!p) return;
+    lastFocus = document.activeElement;
+    document.getElementById("p-id").textContent = "id: " + id;
+    document.getElementById("p-title").textContent = p.title;
+    document.getElementById("p-summary").textContent = p.summary;
+    var sch = document.getElementById("p-schematic"); sch.innerHTML = "";
+    p.schematic.forEach(function (step, i) {
+      var chip = document.createElement("span");
+      chip.className = "node-chip" + (i === p.schematic.length - 1 ? " accent" : "");
+      chip.textContent = step; sch.appendChild(chip);
+      if (i < p.schematic.length - 1) { var ar = document.createElement("span"); ar.className = "arrow"; ar.textContent = "->"; sch.appendChild(ar); }
+    });
+    var outs = document.getElementById("p-outcomes"); outs.innerHTML = "";
+    p.outcomes.forEach(function (o) { var li = document.createElement("li"); li.innerHTML = '<span class="sq" aria-hidden="true"></span><span>' + o + '</span>'; outs.appendChild(li); });
+    var stackWrap = document.getElementById("p-stack"); stackWrap.innerHTML = "";
+    p.stack.forEach(function (s) { var c = document.createElement("span"); c.className = "chip mono"; c.textContent = s; stackWrap.appendChild(c); });
+    var repo = document.getElementById("p-repo");
+    if (p.github) { repo.href = p.github; repo.style.display = ""; } else { repo.style.display = "none"; }
+    document.querySelectorAll(".pnode.active").forEach(function (n) { n.classList.remove("active"); });
+    var an = document.getElementById("node-" + id); if (an) an.classList.add("active");
+    panel.classList.add("open"); panel.setAttribute("aria-hidden", "false");
+    document.getElementById("p-close").focus();
+  }
+  function closePanel() {
+    panel.classList.remove("open"); panel.setAttribute("aria-hidden", "true");
+    document.querySelectorAll(".pnode.active").forEach(function (n) { n.classList.remove("active"); });
+    if (lastFocus && typeof lastFocus.focus === "function") lastFocus.focus();
+  }
+  document.getElementById("p-close").addEventListener("click", closePanel);
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closePanel(); });
+
+  positionKnob();
+})();
+</script>
+
+</body>
+</html>

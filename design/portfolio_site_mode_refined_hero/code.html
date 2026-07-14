@@ -1,0 +1,320 @@
+<!DOCTYPE html><html class="light" lang="en"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;700&amp;family=Work+Sans:wght@400;500&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet"><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">try{
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container": "#e5f2e1",
+                    "on-error-container": "#93000a",
+                    "surface-container-low": "#eaf7e6",
+                    "on-error": "#ffffff",
+                    "on-secondary-container": "#4a6c4c",
+                    "on-surface": "#131e14",
+                    "on-tertiary-fixed-variant": "#6c3646",
+                    "surface-container-highest": "#d9e6d5",
+                    "on-tertiary-container": "#fff2f4",
+                    "secondary-fixed-dim": "#aad0aa",
+                    "surface-tint": "#3e6841",
+                    "background": "#f0fdec",
+                    "secondary-container": "#c5edc4",
+                    "on-secondary-fixed": "#002109",
+                    "primary-fixed": "#bfefbe",
+                    "surface-container-high": "#dfecdb",
+                    "surface-dim": "#d1decd",
+                    "tertiary-fixed": "#ffd9e1",
+                    "error-container": "#ffdad6",
+                    "on-tertiary": "#ffffff",
+                    "surface": "#f0fdec",
+                    "error": "#ba1a1a",
+                    "outline": "#727970",
+                    "on-primary": "#ffffff",
+                    "on-tertiary-fixed": "#370b1b",
+                    "primary-container": "#4f7a52",
+                    "on-surface-variant": "#424940",
+                    "secondary": "#446647",
+                    "on-secondary": "#ffffff",
+                    "inverse-on-surface": "#e7f4e3",
+                    "tertiary": "#804657",
+                    "inverse-primary": "#a3d2a3",
+                    "tertiary-container": "#9c5e6f",
+                    "primary-fixed-dim": "#a3d2a3",
+                    "on-background": "#131e14",
+                    "primary": "#37613b",
+                    "secondary-fixed": "#c5edc4",
+                    "on-primary-fixed": "#002108",
+                    "surface-bright": "#f0fdec",
+                    "tertiary-fixed-dim": "#fdb2c5",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-surface": "#283328",
+                    "on-primary-container": "#daffd7",
+                    "outline-variant": "#c1c9be",
+                    "on-primary-fixed-variant": "#264f2c",
+                    "surface-variant": "#d9e6d5",
+                    "on-secondary-fixed-variant": "#2d4e31"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0px",
+                    "lg": "0px",
+                    "xl": "0px",
+                    "full": "0px"
+            },
+            "spacing": {
+                    "gutter": "24px",
+                    "section_gap": "120px",
+                    "stack_md": "16px",
+                    "stack_lg": "32px",
+                    "container_max_width": "1280px",
+                    "stack_sm": "8px",
+                    "margin_mobile": "20px"
+            },
+            "fontFamily": {
+                    "body-md": [
+                            "Work Sans"
+                    ],
+                    "mono-data": [
+                            "Work Sans"
+                    ],
+                    "h1": [
+                            "Sora"
+                    ],
+                    "h2": [
+                            "Sora"
+                    ],
+                    "body-lg": [
+                            "Work Sans"
+                    ],
+                    "h1-mobile": [
+                            "Sora"
+                    ],
+                    "label": [
+                            "Work Sans"
+                    ]
+            },
+            "fontSize": {
+                    "body-md": [
+                            "16px",
+                            {
+                                    "lineHeight": "1.6",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "mono-data": [
+                            "12px",
+                            {
+                                    "lineHeight": "1.0",
+                                    "fontWeight": "500"
+                            }
+                    ],
+                    "h1": [
+                            "64px",
+                            {
+                                    "lineHeight": "1.1",
+                                    "letterSpacing": "-0.04em",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "h2": [
+                            "32px",
+                            {
+                                    "lineHeight": "1.2",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "body-lg": [
+                            "20px",
+                            {
+                                    "lineHeight": "1.6",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "h1-mobile": [
+                            "40px",
+                            {
+                                    "lineHeight": "1.1",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "label": [
+                            "14px",
+                            {
+                                    "lineHeight": "1.0",
+                                    "letterSpacing": "0.05em",
+                                    "fontWeight": "500"
+                            }
+                    ]
+            }
+    },
+        },
+      }
+    }catch(_e){}</script></head><body class="bg-background text-on-background font-body-md pt-16">
+<!-- TopNavBar (Shared Component) -->
+<nav class="bg-background dark:bg-background border-b border-outline dark:border-outline-variant fixed top-0 left-0 w-full z-50 flex justify-between items-center px-gutter h-16 max-w-container_max_width mx-auto">
+<div class="flex items-center gap-stack_md">
+<a class="font-h2 text-h2 font-bold text-on-surface dark:text-on-surface lowercase" href="#">adam</a>
+<div class="hidden md:flex items-center gap-2 px-3 py-1 border border-outline bg-surface-container rounded-none">
+<div class="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+<span class="font-mono-data text-mono-data text-on-surface">available for q4</span>
+</div>
+</div><div class="hidden md:flex items-center gap-stack_md absolute left-1/2 -translate-x-1/2">
+<a class="font-label text-label text-primary dark:text-primary-fixed font-bold border-b-2 border-primary dark:border-primary-fixed pb-1 active" href="#">site</a>
+<a class="font-label text-label text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors pb-1" href="#">map</a>
+</div>
+<div class="flex items-center gap-stack_lg">
+
+<button class="text-primary dark:text-primary-fixed hover:text-primary dark:hover:text-primary-fixed transition-colors active:opacity-80">
+<span class="material-symbols-outlined" data-icon="radio_button_checked">radio_button_checked</span>
+</button>
+</div>
+</nav>
+<main class="max-w-container_max_width mx-auto px-gutter md:px-[64px]">
+<!-- Hero Section -->
+<section class="flex flex-col justify-center items-start border-b border-outline py-stack_lg min-h-[40vh]"><div class="grid grid-cols-4 md:grid-cols-12 gap-gutter w-full items-start">
+<div class="col-span-4 md:col-span-6 lg:col-span-7">
+<h1 class="font-h2 md:text-h1 text-h1-mobile text-on-surface tracking-tight lowercase leading-tight">systems that make things lighter</h1>
+</div>
+<div class="col-span-4 md:col-span-5 md:col-start-8 flex flex-col gap-stack_lg pt-4">
+<p class="font-body-lg text-body-lg text-on-surface-variant lowercase">ai engineering, full-stack dev, and automation solutions. i work with founders to build systems that finally earn the trust they've already built.</p>
+<div class="flex flex-col sm:flex-row gap-stack_md">
+<a class="inline-flex justify-center items-center px-6 py-4 bg-primary text-on-primary font-label text-label border border-primary hover:bg-surface-tint active:bg-on-primary-container active:text-primary-container transition-colors lowercase" href="#contact">
+                work with me
+            </a>
+<a class="inline-flex justify-center items-center px-6 py-4 bg-transparent text-primary font-label text-label border border-outline hover:bg-surface-container active:bg-surface-container-high transition-colors lowercase" href="#work">
+                see the work
+            </a>
+</div>
+</div>
+</div></section>
+<!-- Featured Projects -->
+<section class="py-stack_lg border-b border-outline" id="work">
+<div class="mb-stack_lg">
+<h2 class="font-label text-label text-on-surface-variant mb-2">featured work // 01</h2>
+</div>
+<div class="flex flex-col gap-stack_lg">
+<!-- Project 1 -->
+<article class="grid grid-cols-4 md:grid-cols-12 gap-gutter border border-outline bg-surface items-stretch">
+<div class="col-span-4 md:col-span-7 border-b md:border-b-0 md:border-r border-outline relative">
+<img alt="" class="w-full h-full object-cover min-h-[250px] md:min-h-[400px]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCDntU9wP2j-dhF72S5wFrKK4v1CS4yw8xusDr9eoDrriicY86H1qJwSQFnMTZSBwot1tzsocACRYRjyvXlgL9OQgELs769hEEWL8kVE8kD0DHvMZVesEZuRi7-9FNosCbjZHDfUb_z7dE_G_iAB4AX_eCka83YcZucLzn24xl1AHEdccicq-P5d4K0YS4LvNFRJQ5UKrzJHOXziqbJGhIUgzjeH4BW3OlOFktEIz-kmpps-5nUy7Mq">
+</div>
+<div class="col-span-4 md:col-span-5 p-stack_lg flex flex-col justify-between gap-stack_lg">
+<div>
+<div class="flex gap-2 mb-stack_md flex-wrap">
+<span class="px-2 py-1 border border-outline font-mono-data text-mono-data text-on-surface-variant">ai engineering</span>
+<span class="px-2 py-1 border border-outline font-mono-data text-mono-data text-on-surface-variant">2023</span>
+</div>
+<h3 class="font-h2 text-h2 text-on-surface mb-stack_md">neural pipeline</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-stack_lg">architected a distributed inference pipeline for large language models, reducing latency by 40% and infrastructure costs by 25%. built entirely on bare-metal kubernetes with custom tensorrt optimizations.</p>
+</div>
+<div class="border-t border-outline pt-stack_md">
+<h4 class="font-mono-data text-mono-data text-on-surface-variant mb-2">outcome</h4>
+<p class="font-body-md text-body-md text-on-surface">processed 2m+ requests daily with 99.99% uptime.</p>
+</div>
+</div>
+</article>
+<!-- Project 2 -->
+<article class="grid grid-cols-4 md:grid-cols-12 gap-gutter border border-outline bg-surface items-stretch">
+<div class="col-span-4 md:col-span-5 p-stack_lg flex flex-col justify-between gap-stack_lg order-2 md:order-1">
+<div>
+<div class="flex gap-2 mb-stack_md flex-wrap">
+<span class="px-2 py-1 border border-outline font-mono-data text-mono-data text-on-surface-variant">embedded systems</span>
+<span class="px-2 py-1 border border-outline font-mono-data text-mono-data text-on-surface-variant">2022</span>
+</div>
+<h3 class="font-h2 text-h2 text-on-surface mb-stack_md">core hardware</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-stack_lg">designed and programmed the primary control unit for a fleet of autonomous logistics drones. implemented real-time sensor fusion (lidar, imu, gps) on stm32 microcontrollers utilizing a custom rtos.</p>
+</div>
+<div class="border-t border-outline pt-stack_md">
+<h4 class="font-mono-data text-mono-data text-on-surface-variant mb-2">outcome</h4>
+<p class="font-body-md text-body-md text-on-surface">successful deployment of 50+ units in warehouse environments.</p>
+</div>
+</div>
+<div class="col-span-4 md:col-span-7 border-b md:border-b-0 md:border-l border-outline relative order-1 md:order-2">
+<!-- Note-->
+<img alt="" class="w-full h-full object-cover min-h-[250px] md:min-h-[400px]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCDntU9wP2j-dhF72S5wFrKK4v1CS4yw8xusDr9eoDrriicY86H1qJwSQFnMTZSBwot1tzsocACRYRjyvXlgL9OQgELs769hEEWL8kVE8kD0DHvMZVesEZuRi7-9FNosCbjZHDfUb_z7dE_G_iAB4AX_eCka83YcZucLzn24xl1AHEdccicq-P5d4K0YS4LvNFRJQ5UKrzJHOXziqbJGhIUgzjeH4BW3OlOFktEIz-kmpps-5nUy7Mq">
+</div>
+</article>
+</div>
+</section>
+<!-- Archive Section -->
+<section class="py-stack_lg border-b border-outline">
+<div class="grid grid-cols-4 md:grid-cols-12 gap-gutter">
+<div class="col-span-4 md:col-span-3">
+<h2 class="font-label text-label text-on-surface-variant mb-stack_lg">archive // 02</h2>
+</div>
+<div class="col-span-4 md:col-span-9">
+<ul class="flex flex-col border-t border-outline">
+<li class="py-stack_md border-b border-outline flex flex-col md:flex-row justify-between items-start md:items-center gap-2 hover:bg-surface-container transition-colors px-2 -mx-2">
+<div class="flex items-center gap-3">
+<div class="w-1 h-1 bg-primary"></div>
+<span class="font-body-lg text-body-lg text-on-surface">ecommerce backend</span>
+</div>
+<div class="flex gap-4">
+<span class="font-mono-data text-mono-data text-on-surface-variant">go, postgres, redis</span>
+<span class="font-mono-data text-mono-data text-on-surface-variant">2021</span>
+</div>
+</li>
+<li class="py-stack_md border-b border-outline flex flex-col md:flex-row justify-between items-start md:items-center gap-2 hover:bg-surface-container transition-colors px-2 -mx-2">
+<div class="flex items-center gap-3">
+<div class="w-1 h-1 bg-primary"></div>
+<span class="font-body-lg text-body-lg text-on-surface">iot sensor mesh</span>
+</div>
+<div class="flex gap-4">
+<span class="font-mono-data text-mono-data text-on-surface-variant">c++, mqtt, aws iot</span>
+<span class="font-mono-data text-mono-data text-on-surface-variant">2020</span>
+</div>
+</li>
+<li class="py-stack_md border-b border-outline flex flex-col md:flex-row justify-between items-start md:items-center gap-2 hover:bg-surface-container transition-colors px-2 -mx-2">
+<div class="flex items-center gap-3">
+<div class="w-1 h-1 bg-primary"></div>
+<span class="font-body-lg text-body-lg text-on-surface">ci/cd automation suite</span>
+</div>
+<div class="flex gap-4">
+<span class="font-mono-data text-mono-data text-on-surface-variant">python, bash, gitlab ci</span>
+<span class="font-mono-data text-mono-data text-on-surface-variant">2019</span>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</section>
+<!-- Contact Section -->
+<section class="py-stack_lg" id="contact">
+<div class="grid grid-cols-4 md:grid-cols-12 gap-gutter">
+<div class="col-span-4 md:col-span-5 flex flex-col gap-stack_lg">
+<div>
+<h2 class="font-label text-label text-on-surface-variant mb-2">contact // 03</h2>
+<h3 class="font-h2 text-h2 text-on-surface">initiate sequence.</h3>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">currently accepting new projects for q4. specialized in architectural overhauls and ground-up engineering.</p>
+</div>
+<div class="col-span-4 md:col-span-6 md:col-start-7">
+<form class="flex flex-col gap-stack_md border border-outline bg-surface p-stack_md">
+<div class="flex flex-col gap-2">
+<label class="font-label text-label text-on-surface" for="name">name</label>
+<input class="bg-surface border border-outline focus:border-primary focus:ring-0 px-4 py-3 font-body-md text-body-md text-on-surface" id="name" placeholder="jane doe" type="text">
+</div>
+<div class="flex flex-col gap-2">
+<label class="font-label text-label text-on-surface" for="email">email</label>
+<input class="bg-surface border border-outline focus:border-primary focus:ring-0 px-4 py-3 font-body-md text-body-md text-on-surface" id="email" placeholder="jane@example.com" type="email">
+</div>
+<div class="flex flex-col gap-2">
+<label class="font-label text-label text-on-surface" for="message">message</label>
+<textarea class="bg-surface border border-outline focus:border-primary focus:ring-0 px-4 py-3 font-body-md text-body-md text-on-surface resize-none" id="message" placeholder="project details..." rows="4"></textarea>
+</div>
+<button class="mt-4 inline-flex justify-center items-center px-6 py-4 bg-primary text-on-primary font-label text-label border border-primary hover:bg-surface-tint active:bg-on-primary-container active:text-primary-container transition-colors w-full md:w-auto self-start" type="submit">
+                            transmit
+                        </button>
+</form>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer (Shared Component) -->
+<footer class="bg-background dark:bg-background border-t border-outline dark:border-outline-variant w-full py-stack_lg px-gutter flex flex-col md:flex-row justify-between items-center gap-stack_md max-w-container_max_width mx-auto">
+<div class="font-h2 text-h2 text-on-surface">adam</div>
+<div class="flex gap-stack_md">
+<a class="font-label text-label lowercase text-on-surface-variant hover:text-primary transition-colors" href="#">github</a>
+<a class="font-label text-label lowercase text-on-surface-variant hover:text-primary transition-colors" href="#">linkedin</a>
+<a class="font-label text-label lowercase text-on-surface-variant hover:text-primary transition-colors" href="#">layers</a>
+</div>
+<div class="font-label text-label lowercase text-on-surface-variant dark:text-on-surface-variant"></div></footer>
+
+</body></html>

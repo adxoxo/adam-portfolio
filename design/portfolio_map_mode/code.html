@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>adam - map mode</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@700&amp;family=Work+Sans:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config from Brand Anchors -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container": "#e5f2e1",
+                        "on-error-container": "#93000a",
+                        "surface-container-low": "#eaf7e6",
+                        "on-error": "#ffffff",
+                        "on-secondary-container": "#4a6c4c",
+                        "on-surface": "#131e14",
+                        "on-tertiary-fixed-variant": "#6c3646",
+                        "surface-container-highest": "#d9e6d5",
+                        "on-tertiary-container": "#fff2f4",
+                        "secondary-fixed-dim": "#aad0aa",
+                        "surface-tint": "#3e6841",
+                        "background": "#f0fdec",
+                        "secondary-container": "#c5edc4",
+                        "on-secondary-fixed": "#002109",
+                        "primary-fixed": "#bfefbe",
+                        "surface-container-high": "#dfecdb",
+                        "surface-dim": "#d1decd",
+                        "tertiary-fixed": "#ffd9e1",
+                        "error-container": "#ffdad6",
+                        "on-tertiary": "#ffffff",
+                        "surface": "#f0fdec",
+                        "error": "#ba1a1a",
+                        "outline": "#727970",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-fixed": "#370b1b",
+                        "primary-container": "#4f7a52",
+                        "on-surface-variant": "#424940",
+                        "secondary": "#446647",
+                        "on-secondary": "#ffffff",
+                        "inverse-on-surface": "#e7f4e3",
+                        "tertiary": "#804657",
+                        "inverse-primary": "#a3d2a3",
+                        "tertiary-container": "#9c5e6f",
+                        "primary-fixed-dim": "#a3d2a3",
+                        "on-background": "#131e14",
+                        "primary": "#37613b",
+                        "secondary-fixed": "#c5edc4",
+                        "on-primary-fixed": "#002108",
+                        "surface-bright": "#f0fdec",
+                        "tertiary-fixed-dim": "#fdb2c5",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-surface": "#283328",
+                        "on-primary-container": "#daffd7",
+                        "outline-variant": "#c1c9be",
+                        "on-primary-fixed-variant": "#264f2c",
+                        "surface-variant": "#d9e6d5",
+                        "on-secondary-fixed-variant": "#2d4e31"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0px",
+                        "lg": "0px",
+                        "xl": "0px",
+                        "full": "0px"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "section_gap": "120px",
+                        "stack_md": "16px",
+                        "stack_lg": "32px",
+                        "container_max_width": "1280px",
+                        "stack_sm": "8px",
+                        "margin_mobile": "20px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Work Sans"],
+                        "mono-data": ["Work Sans"],
+                        "h1": ["Sora"],
+                        "h2": ["Sora"],
+                        "body-lg": ["Work Sans"],
+                        "h1-mobile": ["Sora"],
+                        "label": ["Work Sans"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "mono-data": ["12px", {"lineHeight": "1.0", "fontWeight": "500"}],
+                        "h1": ["64px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "700"}],
+                        "h2": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "body-lg": ["20px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "h1-mobile": ["40px", {"lineHeight": "1.1", "fontWeight": "700"}],
+                        "label": ["14px", {"lineHeight": "1.0", "letterSpacing": "0.05em", "fontWeight": "500"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Force lowercase everywhere as per brand guidelines */
+        * {
+            text-transform: lowercase;
+        }
+        
+        /* Map specific animations */
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.5; stroke-width: 1; }
+            50% { opacity: 1; stroke-width: 2; filter: drop-shadow(0 0 4px #bfefbe); }
+        }
+        .circuit-line {
+            stroke-dasharray: 4 4;
+            animation: pulse-glow 3s infinite;
+        }
+        .circuit-line-active {
+            stroke-dasharray: 100;
+            stroke-dashoffset: 100;
+            animation: dash 2s linear infinite;
+        }
+        @keyframes dash {
+            to { stroke-dashoffset: 0; }
+        }
+    </style>
+</head>
+<body class="bg-on-surface text-surface font-body-md h-screen w-screen overflow-hidden relative m-0 p-0">
+<!-- Background Shader Layer -->
+<!-- STITCH_SHADER_START:ANIMATION_3 class="absolute inset-0 w-full h-full z-0 opacity-40" -->
+<div class="absolute inset-0 w-full h-full z-0 opacity-40" style="display:block;">
+<canvas id="shader-canvas-ANIMATION_3" style="display:block;width:100%;height:100%"></canvas>
+<script>
+(function() {
+  const canvas = document.getElementById('shader-canvas-ANIMATION_3');
+
+  // Sync the WebGL drawing-buffer size with the CSS-driven layout size.
+  // This fires on initial layout and whenever the element is resized.
+  function syncSize() {
+    const w = canvas.clientWidth  || 1280;
+    const h = canvas.clientHeight || 720;
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width  = w;
+      canvas.height = h;
+    }
+  }
+  if (typeof ResizeObserver !== 'undefined') {
+    new ResizeObserver(syncSize).observe(canvas);
+  }
+  syncSize();
+
+  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+  if (!gl) return;
+  const vs = `attribute vec2 a_position;
+varying vec2 v_texCoord;
+void main() {
+  v_texCoord = a_position * 0.5 + 0.5;
+  gl_Position = vec4(a_position, 0.0, 1.0);
+}`;
+  const fs = `precision highp float;
+varying vec2 v_texCoord;
+uniform float u_time;
+uniform vec2 u_resolution;
+uniform vec2 u_mouse;
+
+float grid(vec2 uv, float spacing) {
+    vec2 grid = abs(fract(uv * spacing - 0.5) - 0.5) / fwidth(uv * spacing);
+    return 1.0 - min(min(grid.x, grid.y), 1.0);
+}
+
+void main() {
+    vec2 uv = v_texCoord;
+    vec2 pos = uv * u_resolution;
+    
+    // Background color: #10140D (dark forest black)
+    vec3 bgColor = vec3(0.0627, 0.0784, 0.051);
+    // Accent color: #4F7A52
+    vec3 accentColor = vec3(0.31, 0.478, 0.322);
+    
+    // Subtle grid
+    float g = grid(uv, 10.0);
+    vec3 color = mix(bgColor, accentColor * 0.15, g * 0.2);
+    
+    // Circuit pulse simulation (simplified)
+    float pulse = sin(u_time * 0.5 + uv.x * 5.0 + uv.y * 2.0) * 0.5 + 0.5;
+    float trace = step(0.98, fract(uv.x * 3.0 + u_time * 0.1)) * step(0.98, fract(uv.y * 3.0));
+    color += accentColor * trace * pulse * 0.5;
+    
+    gl_FragColor = vec4(color, 1.0);
+}
+`;
+  function cs(type, src) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    return s;
+  }
+  const prog = gl.createProgram();
+  gl.attachShader(prog, cs(gl.VERTEX_SHADER, vs));
+  gl.attachShader(prog, cs(gl.FRAGMENT_SHADER, fs));
+  gl.linkProgram(prog);
+  gl.useProgram(prog);
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+  const pos = gl.getAttribLocation(prog, 'a_position');
+  gl.enableVertexAttribArray(pos);
+  gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+  const uTime = gl.getUniformLocation(prog, 'u_time');
+  const uRes = gl.getUniformLocation(prog, 'u_resolution');
+  const uMouse = gl.getUniformLocation(prog, 'u_mouse');
+
+  // u_mouse is in pixel coordinates matching u_resolution (ShaderToy convention).
+  // Shaders that need normalized coords should use: u_mouse / u_resolution.
+  let mouse = { x: canvas.width / 2, y: canvas.height / 2 };
+  window.addEventListener('mousemove', (event) => {
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width && rect.height) {
+      const nx = (event.clientX - rect.left) / rect.width;
+      const ny = 1.0 - (event.clientY - rect.top) / rect.height;
+      mouse.x = nx * canvas.width;
+      mouse.y = ny * canvas.height;
+    }
+  });
+
+  function render(t) {
+    if (typeof ResizeObserver === 'undefined') syncSize();
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    if (uTime) gl.uniform1f(uTime, t * 0.001);
+    if (uRes) gl.uniform2f(uRes, canvas.width, canvas.height);
+    if (uMouse) gl.uniform2f(uMouse, mouse.x, mouse.y);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(render);
+  }
+  render(0);
+})();
+</script>
+</div>
+<!-- STITCH_SHADER_END:ANIMATION_3 -->
+<!-- TopNavBar Shared Component -->
+<nav class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-gutter h-16 max-w-container_max_width mx-auto bg-surface border-b border-outline">
+<div class="font-h2 text-h2 font-bold text-on-surface lowercase">
+            adam
+        </div>
+<div class="hidden md:flex gap-stack_lg">
+<a class="text-on-surface-variant hover:text-primary transition-colors font-label text-label pb-1" href="#">
+                site
+            </a>
+<a class="text-primary font-bold border-b-2 border-primary font-label text-label pb-1" href="#">
+                map
+            </a>
+</div>
+<div class="flex items-center gap-stack_sm text-on-surface">
+<span class="material-symbols-outlined hover:text-primary transition-colors cursor-pointer" style="font-variation-settings: 'FILL' 0;">
+                radio_button_checked
+            </span>
+</div>
+</nav>
+<!-- Interactive Canvas Layer -->
+<main class="absolute inset-0 pt-16 z-10 w-full h-full">
+<!-- SVG Connections Layer -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+<path class="stroke-outline" d="M 200 300 Q 400 300 500 450 T 800 500" fill="none" stroke-width="1"></path>
+<path class="circuit-line" d="M 200 300 Q 400 300 500 450 T 800 500" fill="none" stroke="#bfefbe" stroke-width="1"></path>
+<path class="stroke-outline" d="M 800 500 Q 900 500 950 350" fill="none" stroke-width="1"></path>
+<path class="stroke-outline" d="M 500 450 Q 500 600 300 700" fill="none" stroke-width="1"></path>
+<path class="stroke-outline" d="M 500 450 Q 500 200 700 150" fill="none" stroke-width="1"></path>
+</svg>
+<!-- Nodes -->
+<!-- Featured Node 1 -->
+<div class="absolute top-[250px] left-[100px] w-[200px] bg-inverse-surface border border-outline hover:border-primary-fixed cursor-pointer p-stack_md transition-colors group">
+<div class="font-mono-data text-mono-data text-primary-fixed mb-stack_sm flex items-center gap-2">
+<span class="w-1 h-1 bg-primary-fixed block"></span> active
+            </div>
+<div class="font-label text-label text-surface">neural pipeline</div>
+</div>
+<!-- Featured Node 2 (Active/Selected) -->
+<div class="absolute top-[400px] left-[450px] w-[240px] bg-inverse-surface border border-primary-fixed cursor-pointer p-stack_md" style="box-shadow: inset 0 0 0 1px #bfefbe, 0 0 10px rgba(191,239,190,0.1);">
+<div class="border-b border-outline pb-stack_sm mb-stack_sm flex justify-between items-center">
+<div class="font-mono-data text-mono-data text-primary-fixed flex items-center gap-2">
+<span class="w-1 h-1 bg-primary-fixed block"></span> core hardware
+                </div>
+<span class="material-symbols-outlined text-primary-fixed text-[16px]">visibility</span>
+</div>
+<div class="font-body-md text-body-md text-surface-variant">
+                v4 tensor optimization matrix.
+            </div>
+</div>
+<!-- Featured Node 3 -->
+<div class="absolute top-[450px] left-[800px] w-[180px] bg-inverse-surface border border-outline hover:border-primary-fixed cursor-pointer p-stack_md transition-colors">
+<div class="font-mono-data text-mono-data text-outline mb-stack_sm flex items-center gap-2">
+<span class="w-1 h-1 bg-outline block"></span> offline
+            </div>
+<div class="font-label text-label text-surface-variant">vision logic</div>
+</div>
+<!-- Archived Nodes (Small Rectangles) -->
+<div class="absolute top-[120px] left-[700px] border border-outline px-stack_sm py-[4px] bg-inverse-surface text-outline font-mono-data text-mono-data hover:text-surface hover:border-surface cursor-crosshair">
+            ecommerce
+        </div>
+<div class="absolute top-[320px] left-[950px] border border-outline px-stack_sm py-[4px] bg-inverse-surface text-outline font-mono-data text-mono-data hover:text-surface hover:border-surface cursor-crosshair">
+            iot
+        </div>
+<div class="absolute top-[680px] left-[250px] border border-outline px-stack_sm py-[4px] bg-inverse-surface text-outline font-mono-data text-mono-data hover:text-surface hover:border-surface cursor-crosshair">
+            automation
+        </div>
+</main>
+<!-- Slide-over Panel (Project Detail) -->
+<aside class="fixed right-0 top-16 bottom-0 w-full md:w-[480px] bg-surface border-l border-outline z-40 flex flex-col transform transition-transform translate-x-0" style="box-shadow: -20px 0 40px rgba(19, 30, 20, 0.5);">
+<header class="p-gutter border-b border-outline flex justify-between items-start">
+<div>
+<div class="font-mono-data text-mono-data text-primary mb-stack_sm">id: core_hw_04</div>
+<h2 class="font-h2 text-h2 text-on-surface">core hardware</h2>
+</div>
+<button class="border border-outline p-2 hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-on-surface">close</span>
+</button>
+</header>
+<div class="p-gutter flex-1 overflow-y-auto">
+<div class="mb-stack_lg">
+<img class="w-full h-48 object-cover border border-outline grayscale contrast-125 mb-stack_sm" data-alt="A close up, highly detailed macro photograph of an intricate custom printed circuit board inside a modern server rack. The lighting is architectural and cool, with deep shadows and subtle green LED status lights indicating activity. The style is technical, precise, and high-end engineering, reflecting a clean and brutalist aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2XjLHx7vVk8ughA-EMGvHL0u9rABZPsiwmlerfKp5K1ZTAkYbqkO7nEI_fDuPfkYDwLaNvQ-MtXxRg5tCh6rNhrK-7QYjujJbKM8lxhCpz94yKd016PqgL231y-C0k5pOBZIWRuqSFNzVfBBCiK0Udaz1T1ugXABkY3MUzUpdSUzd8wMrihAWvwxSwNsTgAEVER53M5WXGUeJLF20uW0G9MadFeOmDpwYYtEFme4o7gTk--PvRfSU"/>
+<div class="font-mono-data text-mono-data text-on-surface-variant text-right">fig 1. prototype array</div>
+</div>
+<div class="space-y-stack_md text-on-surface">
+<p class="font-body-md text-body-md">
+                    development of custom logic boards to bypass standard bus limitations. utilizing specialized cooling pathways and direct memory access techniques.
+                </p>
+<ul class="space-y-2">
+<li class="flex items-start gap-3">
+<span class="w-1 h-1 bg-on-surface mt-2 shrink-0"></span>
+<span class="font-body-md text-body-md">throughput increased by 400%</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="w-1 h-1 bg-on-surface mt-2 shrink-0"></span>
+<span class="font-body-md text-body-md">thermal load distributed via liquid array</span>
+</li>
+</ul>
+</div>
+<div class="mt-section_gap">
+<button class="w-full bg-primary text-on-primary font-label text-label py-stack_md hover:bg-primary-container hover:text-on-primary-container transition-colors border border-primary">
+                    view repository
+                </button>
+</div>
+</div>
+</aside>
+</body></html>
