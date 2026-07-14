@@ -16,6 +16,7 @@ export interface Project {
 	stack: string[];
 	schematic: string[];
 	github: string;
+	loom?: string; // loom share id -> walkthrough embed, optional
 	x: number; // map position, %
 	y: number;
 }

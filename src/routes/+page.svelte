@@ -4,6 +4,7 @@
 	import { featured, archived, CLUSTER_LABEL } from '$lib/data/projects';
 	import SystemMap from '$lib/components/SystemMap.svelte';
 	import ProjectPanel from '$lib/components/ProjectPanel.svelte';
+	import LoomEmbed from '$lib/components/LoomEmbed.svelte';
 
 	let { data }: { data: PageData } = $props();
 	const feats = $derived(featured(data.projects));
@@ -181,13 +182,17 @@
 					{#each feats as p, i}
 						<article class="fcard" class:flip={i % 2 === 1}>
 							<div class="fcard-figure">
-								<div class="schematic">
-									{#each p.schematic as step, j}
-										<span class="node-chip {j === p.schematic.length - 1 ? 'accent' : ''}">{step}</span>
-										{#if j < p.schematic.length - 1}<span class="arrow">-&gt;</span>{/if}
-									{/each}
-								</div>
-								<span class="fig-cap mono">fig. {p.title} architecture</span>
+								{#if p.loom}
+									<LoomEmbed id={p.loom} title={p.title} />
+								{:else}
+									<div class="schematic">
+										{#each p.schematic as step, j}
+											<span class="node-chip {j === p.schematic.length - 1 ? 'accent' : ''}">{step}</span>
+											{#if j < p.schematic.length - 1}<span class="arrow">-&gt;</span>{/if}
+										{/each}
+									</div>
+									<span class="fig-cap mono">fig. {p.title} architecture</span>
+								{/if}
 							</div>
 							<div class="fcard-body">
 								<div class="fbody-top">

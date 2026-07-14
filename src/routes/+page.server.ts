@@ -14,6 +14,7 @@ function rowToProject(row: Record<string, unknown>): Project {
 		stack: (row.stack as string[]) ?? [],
 		schematic: (row.schematic as string[]) ?? [],
 		github: String(row.github_url ?? ''),
+		loom: row.loom_id ? String(row.loom_id) : '',
 		x: Number(row.map_x ?? 50),
 		y: Number(row.map_y ?? 50)
 	};

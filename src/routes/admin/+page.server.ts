@@ -56,6 +56,15 @@ export const actions: Actions = {
 			map_x: Number(f.get('map_x') ?? 50),
 			map_y: Number(f.get('map_y') ?? 50),
 			github_url: String(f.get('github_url') ?? ''),
+			loom_id: String(f.get('loom_id') ?? '').trim(),
+			outcome: String(f.get('outcome') ?? '')
+				.split('\n')
+				.map((s) => s.trim())
+				.filter(Boolean),
+			schematic: String(f.get('schematic') ?? '')
+				.split(',')
+				.map((s) => s.trim())
+				.filter(Boolean),
 			stack: String(f.get('stack') ?? '')
 				.split(',')
 				.map((s) => s.trim())

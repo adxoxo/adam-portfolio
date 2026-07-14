@@ -99,10 +99,26 @@
 								<label>title <input name="title" value={p.title ?? ''} /></label>
 								<label>summary <textarea name="summary" rows="3">{p.summary ?? ''}</textarea></label>
 								<label
+									>outcomes (one per line)
+									<textarea name="outcome" rows="2">{Array.isArray(p.outcome) ? p.outcome.join('\n') : ''}</textarea></label
+								>
+								<label
+									>schematic steps (comma separated)
+									<input name="schematic" value={Array.isArray(p.schematic) ? p.schematic.join(', ') : ''} /></label
+								>
+								<label
 									>stack (comma separated)
 									<input name="stack" value={Array.isArray(p.stack) ? p.stack.join(', ') : ''} /></label
 								>
 								<label>github url <input name="github_url" value={p.github_url ?? ''} /></label>
+								<label
+									>loom walkthrough id
+									<input
+										name="loom_id"
+										value={p.loom_id ?? ''}
+										placeholder="the part after loom.com/share/"
+									/></label
+								>
 								<button class="btn" type="submit">save</button>
 							</form>
 						</details>

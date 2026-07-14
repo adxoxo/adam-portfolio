@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { panel, closePanel } from '$lib/state/app.svelte';
+	import LoomEmbed from './LoomEmbed.svelte';
 
 	let closeBtn = $state<HTMLButtonElement>();
 
@@ -27,6 +28,7 @@
 			>
 		</div>
 		<div class="panel-body">
+			{#if p.loom}<LoomEmbed id={p.loom} title={p.title} />{/if}
 			<div class="panel-fig">
 				<div class="schematic">
 					{#each p.schematic as step, i}
