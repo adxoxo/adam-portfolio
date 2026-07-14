@@ -1,0 +1,22 @@
+{
+	// Cloudflare Workers config for the SvelteKit app (adapter-cloudflare).
+	// Committing this stops `wrangler deploy` from running its non-interactive
+	// auto-config, which was injecting a broken `wrangler types --check` build
+	// step. Here the build is just `npm run build` (vite build), and the
+	// adapter emits _worker.js + assets into .svelte-kit/cloudflare.
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "adam-portfolio",
+	"compatibility_date": "2025-05-01",
+	"compatibility_flags": ["nodejs_compat"],
+	"main": ".svelte-kit/cloudflare/_worker.js",
+	"assets": {
+		"binding": "ASSETS",
+		"directory": ".svelte-kit/cloudflare"
+	},
+	"build": {
+		"command": "npm run build"
+	},
+	"observability": {
+		"enabled": true
+	}
+}
