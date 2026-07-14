@@ -1,13 +1,16 @@
 <script lang="ts">
 	import {
-		PROJECTS,
 		HUBS,
-		CONNECTIONS,
 		CLUSTERS,
 		CLUSTER_LABEL,
-		type Cluster
+		buildConnections,
+		type Cluster,
+		type Project
 	} from '$lib/data/projects';
 	import { view, panel, openPanel } from '$lib/state/app.svelte';
+
+	let { projects }: { projects: Project[] } = $props();
+	const connections = $derived(buildConnections(projects));
 
 	let canvas = $state<HTMLDivElement>();
 	let wires = $state<string[]>([]);
@@ -18,7 +21,7 @@
 		const cRect = canvas.getBoundingClientRect();
 		if (!cRect.width) return;
 		const paths: string[] = [];
-		for (const [a, b] of CONNECTIONS) {
+		for (const [a, b] of connections) {
 			const na = canvas.querySelector<HTMLElement>(`#node-${a}`);
 			const nb = canvas.querySelector<HTMLElement>(`#node-${b}`);
 			if (!na || !nb) continue;
@@ -34,7 +37,6 @@
 		wires = paths;
 	}
 
-	// recompute when the map becomes visible (mode/reveal change) or on resize
 	$effect(() => {
 		const visible = view.mode === 'map' || view.revealing;
 		if (visible) requestAnimationFrame(() => requestAnimationFrame(computeWires));
@@ -51,7 +53,7 @@
 		return () => window.removeEventListener('resize', onResize);
 	});
 
-	const inCluster = (cl: Cluster) => PROJECTS.filter((p) => p.cluster === cl);
+	const inCluster = (cl: Cluster) => projects.filter((p) => p.cluster === cl);
 </script>
 
 <div class="map-view" aria-label="project map">
@@ -76,7 +78,7 @@
 			</div>
 		{/each}
 
-		{#each PROJECTS as p}
+		{#each projects as p}
 			<button
 				id="node-{p.id}"
 				class="node pnode {p.status === 'featured' ? 'featured' : 'pill'}"

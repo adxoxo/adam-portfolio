@@ -140,5 +140,17 @@ export const CONNECTIONS: [string, string][] = [
 	['hub_automation', 'center']
 ];
 
-export const featured = () => PROJECTS.filter((p) => p.status === 'featured');
-export const archived = () => PROJECTS.filter((p) => p.status === 'archive');
+// Build the map wiring for any project list: each project to its cluster hub,
+// each hub to the center. Keeps the graph cluster-coherent (ai to ai, etc.).
+export function buildConnections(list: Pick<Project, 'id' | 'cluster'>[]): [string, string][] {
+	return [
+		...list.map((p) => [p.id, `hub_${p.cluster}`] as [string, string]),
+		['hub_ai', 'center'],
+		['hub_fullstack', 'center'],
+		['hub_embedded', 'center'],
+		['hub_automation', 'center']
+	];
+}
+
+export const featured = (list: Project[] = PROJECTS) => list.filter((p) => p.status === 'featured');
+export const archived = (list: Project[] = PROJECTS) => list.filter((p) => p.status === 'archive');

@@ -1,12 +1,15 @@
 <script lang="ts">
+	import type { PageData } from './$types';
 	import { view, setR, beginReveal, animateTo } from '$lib/state/app.svelte';
 	import { featured, archived, CLUSTER_LABEL } from '$lib/data/projects';
 	import SystemMap from '$lib/components/SystemMap.svelte';
 	import ProjectPanel from '$lib/components/ProjectPanel.svelte';
 
-	const feats = featured();
-	const arch = archived();
+	let { data }: { data: PageData } = $props();
+	const feats = $derived(featured(data.projects));
+	const arch = $derived(archived(data.projects));
 
+	// reveal-swipe control -------------------------------------------------
 	let slider = $state<HTMLDivElement>();
 	let knob = $state<HTMLDivElement>();
 	let dragging = false;
@@ -37,7 +40,7 @@
 			/* ignore */
 		}
 		if (!moved) animateTo(view.r < 0.5 ? 1 : 0); // tap toggles
-		else animateTo(view.r >= 0.5 ? 1 : 0); // drag snaps to nearer end
+		else animateTo(view.r >= 0.5 ? 1 : 0); // drag snaps to the nearer end
 	}
 	function onKey(e: KeyboardEvent) {
 		if (['ArrowRight', 'ArrowUp', 'End'].includes(e.key)) {
@@ -60,6 +63,41 @@
 			document.body.style.overflow = '';
 		};
 	});
+
+	// contact form -> /api/lead --------------------------------------------
+	let sending = $state(false);
+	let sent = $state(false);
+	let sendError = $state('');
+
+	async function submitLead(e: SubmitEvent) {
+		e.preventDefault();
+		const formEl = e.currentTarget as HTMLFormElement;
+		const fd = new FormData(formEl);
+		sending = true;
+		sendError = '';
+		try {
+			const res = await fetch('/api/lead', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({
+					name: fd.get('name'),
+					email: fd.get('email'),
+					message: fd.get('message')
+				})
+			});
+			const j = await res.json();
+			if (j.ok) {
+				sent = true;
+				formEl.reset();
+			} else {
+				sendError = j.error === 'rate_limited' ? 'too many messages, try again later.' : 'check the fields and try again.';
+			}
+		} catch {
+			sendError = 'could not send, try again.';
+		} finally {
+			sending = false;
+		}
+	}
 </script>
 
 <svelte:head>
@@ -70,12 +108,7 @@
 	/>
 </svelte:head>
 
-<div
-	class="app"
-	class:map={view.mode === 'map'}
-	class:revealing={view.revealing}
-	style:--r={view.r}
->
+<div class="app" class:map={view.mode === 'map'} class:revealing={view.revealing} style:--r={view.r}>
 	<!-- nav -->
 	<nav class="nav" aria-label="primary">
 		<div class="nav-inner">
@@ -188,7 +221,9 @@
 			<div class="wrap archive-grid">
 				<div>
 					<h2>archive</h2>
-					<p class="archive-note">pulled from github once, then cached. the site reads the cache, not github.</p>
+					<p class="archive-note">
+						pulled from github once, then cached. the site reads the cache, not github.
+					</p>
 				</div>
 				<div class="archive-list">
 					{#each arch as p}
@@ -214,20 +249,24 @@
 						i will show you what the lighter version looks like.
 					</p>
 				</div>
-				<form class="form" onsubmit={(e) => e.preventDefault()}>
+				<form class="form" onsubmit={submitLead}>
 					<div class="field">
 						<label for="c-name">name</label>
-						<input id="c-name" type="text" placeholder="your name" autocomplete="name" />
+						<input id="c-name" name="name" type="text" placeholder="your name" autocomplete="name" required />
 					</div>
 					<div class="field">
 						<label for="c-email">email</label>
-						<input id="c-email" type="email" placeholder="you@company.com" autocomplete="email" />
+						<input id="c-email" name="email" type="email" placeholder="you@company.com" autocomplete="email" required />
 					</div>
 					<div class="field">
 						<label for="c-msg">message</label>
-						<textarea id="c-msg" rows="4" placeholder="what you are working on"></textarea>
+						<textarea id="c-msg" name="message" rows="4" placeholder="what you are working on" required></textarea>
 					</div>
-					<button class="btn" type="submit" style="align-self:flex-start">send</button>
+					<button class="btn" type="submit" style="align-self:flex-start" disabled={sending}>
+						{sending ? 'sending' : sent ? 'sent' : 'send'}
+					</button>
+					{#if sent}<p class="mono" style="color:var(--accent)">thanks, i will get back to you.</p>{/if}
+					{#if sendError}<p class="mono" style="color:var(--ink-soft)">{sendError}</p>{/if}
 				</form>
 			</div>
 		</section>
@@ -245,6 +284,6 @@
 		</footer>
 	</div>
 
-	<SystemMap />
+	<SystemMap projects={data.projects} />
 	<ProjectPanel />
 </div>
