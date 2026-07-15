@@ -105,7 +105,7 @@
 	<title>adam, systems that make things lighter</title>
 	<meta
 		name="description"
-		content="adam, ai engineer and full-stack developer. systems that make a business lighter to run."
+		content="adam, ai engineer and full-stack developer. i build systems that make things lighter."
 	/>
 </svelte:head>
 
@@ -160,8 +160,8 @@
 					<div><h1>systems that make things lighter</h1></div>
 					<div class="hero-side">
 						<p>
-							ai engineering, full-stack development, and automation. i build systems that make a
-							business lighter to run.
+							i build systems. ai, full-stack, embedded, whatever the problem needs. i do it
+							because i love it, and the good ones make life lighter, not just work.
 						</p>
 						<div class="cta-row">
 							<a class="btn" href="#contact">work with me</a>
