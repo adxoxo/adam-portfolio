@@ -21,3 +21,16 @@ Thumbs.db
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# internal build/design docs (kept locally, not published)
+CLAUDE.md
+ARCHITECTURE.md
+BUILDPLAN.md
+BUILD-PLAN.md
+BUILD_PLAN.md
+DESIGN.md
+DEPLOY.md
+REMOTE.md
+COSTS.md
+RECONFIG.md
+ASSETS.md

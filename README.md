@@ -1,42 +1,27 @@
-# sv
+# adam-portfolio
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+My personal portfolio and lead site. One page, two modes: a light editorial "site" view of selected work, and a dark, pannable node-graph "map" that shows how the projects connect. Clicking any project grows it into a detail view, and a "work with me" flow handles contact and call booking.
 
-## Creating a project
+Live at [portfolio.aquryu.space](https://portfolio.aquryu.space).
 
-If you're seeing this, you've probably already done this step. Congrats!
+## Tech stack
 
-```sh
-# create a new project
-npx sv create my-app
-```
+- **SvelteKit** + **Svelte 5** (runes)
+- Plain CSS with design tokens (no Tailwind)
+- **Supabase** for content, with a seed-only fallback so it runs with no keys
+- **n8n** webhooks for leads and call booking
+- Deployed on **Cloudflare Pages**
 
-To recreate this project with the same configuration:
+## Develop
 
-```sh
-# recreate this project
-npx sv@0.16.3 create --template minimal --types ts --no-install .
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```sh
+```bash
+npm install
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
 
-## Building
+## Build
 
-To create a production version of your app:
-
-```sh
+```bash
 npm run build
+npm run preview
 ```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
