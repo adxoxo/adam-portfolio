@@ -9,28 +9,16 @@ export interface Service {
 
 export const SERVICES: Service[] = [
 	{
-		title: 'full-stack web development',
-		desc: 'web apps built end to end, from the database to the interface.'
+		title: 'full-stack development',
+		desc: 'end-to-end app development, from the database to the interface.'
 	},
 	{
-		title: 'ai engineering',
-		desc: 'rag systems, agents, and llm features wired into real products.'
+		title: 'ai engineering and automation',
+		desc: 'rag systems, agents, and automations wired into real products.'
 	},
 	{
-		title: 'ai automation',
-		desc: 'systems that quietly handle the repetitive work for you.'
-	},
-	{
-		title: 'crm management',
-		desc: 'crm builds and the pipelines that keep them fed and clean.'
-	},
-	{
-		title: 'dashboards',
-		desc: 'one screen that answers the question you keep asking.'
-	},
-	{
-		title: 'cloud workflows',
-		desc: 'pipelines and services that run in the cloud, not on your machine.'
+		title: 'crm, dashboards and cloud',
+		desc: 'crm builds, dashboards, and workflows that run in the cloud.'
 	},
 	{
 		title: 'embedded engineering',
@@ -45,10 +33,10 @@ export interface StackGroup {
 
 export const STACK: StackGroup[] = [
 	{ label: 'languages', items: ['python', 'javascript', 'typescript'] },
-	{ label: 'frontend', items: ['react', 'svelte', 'next.js'] },
-	{ label: 'backend', items: ['django', 'rest', 'fastapi', 'mcp servers'] },
+	{ label: 'frontend', items: ['react', 'svelte', 'next.js', 'angular'] },
+	{ label: 'backend', items: ['django', 'rest', 'fastapi', 'node.js', 'mcp servers'] },
 	{ label: 'ai', items: ['claude', 'groq', 'ollama'] },
 	{ label: 'automation and infra', items: ['n8n', 'supabase', 'cloudflare', 'docker'] },
-	{ label: 'embedded', items: ['esp32', 'arduino', 'raspberry pi', 'c++'] },
+	{ label: 'embedded', items: ['esp32', 'stm32', 'arduino', 'raspberry pi', 'c++'] },
 	{ label: 'design', items: ['figma', 'google stitch'] }
 ];

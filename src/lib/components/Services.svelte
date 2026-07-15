@@ -6,7 +6,7 @@
 	<div class="wrap">
 		<div class="sec-head">
 			<span class="label">what i do</span>
-			<span class="mono" style="color:var(--ink-soft)">full-stack, ai, automation, embedded</span>
+			<span class="mono" style="color:var(--ink-soft)">full-stack, ai, cloud, embedded</span>
 		</div>
 
 		<div class="svc-list">

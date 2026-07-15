@@ -133,8 +133,6 @@
 			</div>
 		</header>
 
-		<Services />
-
 		<section class="section" id="work">
 			<div class="wrap">
 				<div class="sec-head">
@@ -154,6 +152,8 @@
 			</div>
 			<Archive projects={data.projects} />
 		</section>
+
+		<Services />
 
 		<footer class="footer">
 			<div class="wrap in">
