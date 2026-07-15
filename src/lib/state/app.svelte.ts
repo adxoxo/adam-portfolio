@@ -10,9 +10,9 @@ export const view = $state<{ r: number; mode: Mode; revealing: boolean }>({
 });
 
 // the currently opened project (drives the detail modal). `from` records which
-// surface it was opened from (featured grid, map canvas, mobile tree, archive)
-// as provenance; the modal opens self-contained so the surface behind it never
-// moves.
+// surface it was opened from and keys the crossfade: 'map'/'tree' nodes "send"
+// so the modal morphs out of the tapped node, while 'feat'/'arch' don't send, so
+// the modal falls back to a still scale+fade and the site grid never moves.
 export type DetailFrom = 'feat' | 'map' | 'tree' | 'arch';
 export const detail = $state<{ project: Project | null; from: DetailFrom }>({
 	project: null,

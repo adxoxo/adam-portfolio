@@ -2,7 +2,7 @@
 	import { detail, closeDetail } from '$lib/state/app.svelte';
 	import { CLUSTER_LABEL } from '$lib/data/projects';
 	import { fade } from 'svelte/transition';
-	import { panelPop } from '$lib/transition';
+	import { send, receive } from '$lib/transition';
 	import LoomEmbed from './LoomEmbed.svelte';
 
 	function onKeydown(e: KeyboardEvent) {
@@ -14,10 +14,14 @@
 
 {#if detail.project}
 	{@const p = detail.project}
+	{@const key = detail.from + ':' + p.id}
 	<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
 	<div class="morph-backdrop" onclick={closeDetail} transition:fade={{ duration: 200 }}></div>
 	<div class="morph-wrap">
-		<div class="morph" role="dialog" aria-modal="true" aria-label={p.title} transition:panelPop>
+		<!-- opened from the map/tree: the tapped node "sent", so this morphs out of it.
+		     opened from featured/archive: no counterpart, so `receive` uses the still
+		     fallback and the grid behind it never moves. -->
+		<div class="morph" role="dialog" aria-modal="true" aria-label={p.title} in:receive={{ key }} out:send={{ key }}>
 			<div class="m-inner">
 				<div class="m-head">
 					<div class="m-head-l">

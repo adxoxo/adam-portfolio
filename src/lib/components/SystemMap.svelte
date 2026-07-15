@@ -7,7 +7,8 @@
 		type Cluster,
 		type Project
 	} from '$lib/data/projects';
-	import { view, openDetail } from '$lib/state/app.svelte';
+	import { view, detail, openDetail } from '$lib/state/app.svelte';
+	import { send, receive } from '$lib/transition';
 
 	let { projects }: { projects: Project[] } = $props();
 
@@ -161,19 +162,23 @@
 			{/each}
 
 			{#each projects as p (p.id)}
-				<button
-					class="node pnode {p.status === 'featured' ? 'featured' : 'pill-n'}"
-					style="left:{p.x}%; top:{p.y}%"
-					onclick={() => openDetail(p, 'map')}
-					aria-label="{p.title}, open detail"
-				>
-					{#if p.status === 'featured'}
-						<span class="st"><i></i><span class="mono">{p.cluster}</span></span>
-						<span class="t">{p.title}</span>
-					{:else}
-						<span class="mono">{p.title}</span>
-					{/if}
-				</button>
+				{#if detail.project?.id !== p.id}
+					<button
+						class="node pnode {p.status === 'featured' ? 'featured' : 'pill-n'}"
+						style="left:{p.x}%; top:{p.y}%"
+						onclick={() => openDetail(p, 'map')}
+						aria-label="{p.title}, open detail"
+						in:receive={{ key: 'map:' + p.id }}
+						out:send={{ key: 'map:' + p.id }}
+					>
+						{#if p.status === 'featured'}
+							<span class="st"><i></i><span class="mono">{p.cluster}</span></span>
+							<span class="t">{p.title}</span>
+						{:else}
+							<span class="mono">{p.title}</span>
+						{/if}
+					</button>
+				{/if}
 			{/each}
 		</div>
 	</div>
@@ -202,14 +207,18 @@
 					</div>
 					<div class="tleaves">
 						{#each inCluster(cl) as p (p.id)}
-							<button
-								class="tleaf {p.status === 'featured' ? 'featured' : ''}"
-								onclick={() => openDetail(p, 'tree')}
-								aria-label="{p.title}, open detail"
-							>
-								<span class="tl-t">{p.title}</span>
-								<span class="mono tl-y">{p.year}</span>
-							</button>
+							{#if detail.project?.id !== p.id}
+								<button
+									class="tleaf {p.status === 'featured' ? 'featured' : ''}"
+									onclick={() => openDetail(p, 'tree')}
+									aria-label="{p.title}, open detail"
+									in:receive={{ key: 'tree:' + p.id }}
+									out:send={{ key: 'tree:' + p.id }}
+								>
+									<span class="tl-t">{p.title}</span>
+									<span class="mono tl-y">{p.year}</span>
+								</button>
+							{/if}
 						{/each}
 					</div>
 				</div>
