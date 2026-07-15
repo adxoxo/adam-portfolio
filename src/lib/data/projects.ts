@@ -16,6 +16,7 @@ export interface Project {
 	stack: string[];
 	schematic: string[];
 	github: string;
+	live?: string; // hosted/live site url, optional
 	loom?: string; // loom share id -> walkthrough embed, optional
 	x: number; // map position, %
 	y: number;
@@ -43,7 +44,7 @@ export const HUBS: Hub[] = [
 	{ id: 'center', label: 'adam', type: 'center', x: 50, y: 50 },
 	{ id: 'hub_ai', label: 'ai', type: 'hub', cluster: 'ai', x: 28, y: 27 },
 	{ id: 'hub_fullstack', label: 'full-stack', type: 'hub', cluster: 'fullstack', x: 70, y: 27 },
-	{ id: 'hub_embedded', label: 'embedded', type: 'hub', cluster: 'embedded', x: 71, y: 73 },
+	{ id: 'hub_embedded', label: 'embedded', type: 'hub', cluster: 'embedded', x: 85, y: 82 },
 	{ id: 'hub_automation', label: 'automation', type: 'hub', cluster: 'automation', x: 29, y: 73 }
 ];
 

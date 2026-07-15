@@ -31,6 +31,9 @@ create table if not exists projects (
 
 create index if not exists projects_status_sort_idx on projects (status, sort_order);
 
+-- Added after initial launch. Safe to re-run: upgrades an existing table.
+alter table projects add column if not exists live_url text;
+
 -- ----------------------------------------------------------------------------
 -- site_settings: single-row key/value for editable global copy (availability,
 -- hero line, socials). Optional; the app has sensible defaults without it.

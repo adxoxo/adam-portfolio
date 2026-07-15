@@ -46,8 +46,17 @@
 			<div class="chips">
 				{#each p.stack as s}<span class="chip mono">{s}</span>{/each}
 			</div>
-			{#if p.github}
-				<a class="btn" href={p.github} target="_blank" rel="noopener">view repository &#8599;</a>
+			{#if p.live || p.github}
+				<div class="panel-links">
+					{#if p.live}
+						<a class="btn" href={p.live} target="_blank" rel="noopener">visit site &#8599;</a>
+					{/if}
+					{#if p.github}
+						<a class="btn {p.live ? 'btn--ghost' : ''}" href={p.github} target="_blank" rel="noopener"
+							>view repository &#8599;</a
+						>
+					{/if}
+				</div>
 			{/if}
 		</div>
 	{/if}

@@ -209,10 +209,19 @@
 								<div class="outcome">
 									<h4 class="mono">outcome</h4>
 									<p>{p.outcomes[0]}</p>
-									{#if p.github}
-										<a class="repo-link" href={p.github} target="_blank" rel="noopener"
-											>view repository &#8599;</a
-										>
+									{#if p.live || p.github}
+										<div class="card-links">
+											{#if p.live}
+												<a class="repo-link" href={p.live} target="_blank" rel="noopener"
+													>visit site &#8599;</a
+												>
+											{/if}
+											{#if p.github}
+												<a class="repo-link" href={p.github} target="_blank" rel="noopener"
+													>view repository &#8599;</a
+												>
+											{/if}
+										</div>
 									{/if}
 								</div>
 							</div>

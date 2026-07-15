@@ -112,6 +112,10 @@
 								>
 								<label>github url <input name="github_url" value={p.github_url ?? ''} /></label>
 								<label
+									>live site url
+									<input name="live_url" value={p.live_url ?? ''} placeholder="https://..." /></label
+								>
+								<label
 									>loom walkthrough id
 									<input
 										name="loom_id"
