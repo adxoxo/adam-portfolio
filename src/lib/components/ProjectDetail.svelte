@@ -1,0 +1,61 @@
+<script lang="ts">
+	import { detail, closeDetail } from '$lib/state/app.svelte';
+	import { CLUSTER_LABEL } from '$lib/data/projects';
+	import { send, receive } from '$lib/transition';
+	import LoomEmbed from './LoomEmbed.svelte';
+
+	function onKeydown(e: KeyboardEvent) {
+		if (e.key === 'Escape') closeDetail();
+	}
+</script>
+
+<svelte:window onkeydown={onKeydown} />
+
+{#if detail.project}
+	{@const p = detail.project}
+	<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+	<div class="morph-backdrop" onclick={closeDetail}></div>
+	<div
+		class="morph"
+		role="dialog"
+		aria-modal="true"
+		aria-label={p.title}
+		in:receive={{ key: p.id }}
+		out:send={{ key: p.id }}
+	>
+		<div class="m-inner">
+			<div class="m-head">
+				<div class="m-head-l">
+					<span class="chip mono">{CLUSTER_LABEL[p.cluster]}</span>
+					<h2>{p.title}</h2>
+				</div>
+				<button class="m-x" onclick={closeDetail} aria-label="close">&times;</button>
+			</div>
+			{#if p.loom}<LoomEmbed id={p.loom} title={p.title} />{/if}
+			{#if p.live}
+				<div class="live-frame">
+					<iframe src={p.live} title="{p.title} live preview" loading="lazy"></iframe>
+				</div>
+			{/if}
+			<div class="fig">
+				<div class="schem">
+					{#each p.schematic as step, i (i)}
+						<span class="chip2 {i === p.schematic.length - 1 ? 'a' : ''}">{step}</span>
+						{#if i < p.schematic.length - 1}<span class="arrow">-&gt;</span>{/if}
+					{/each}
+				</div>
+			</div>
+			<p style="color:var(--ink);text-transform:lowercase">{p.summary}</p>
+			<div class="olist">
+				{#each p.outcomes as o (o)}<div><i></i><span>{o}</span></div>{/each}
+			</div>
+			<div class="chips">{#each p.stack as s (s)}<span>{s}</span>{/each}</div>
+			{#if p.live || p.github}
+				<div class="fd-links">
+					{#if p.live}<a class="repo-link" href={p.live} target="_blank" rel="noopener">visit site &#8599;</a>{/if}
+					{#if p.github}<a class="repo-link" href={p.github} target="_blank" rel="noopener">view repository &#8599;</a>{/if}
+				</div>
+			{/if}
+		</div>
+	</div>
+{/if}

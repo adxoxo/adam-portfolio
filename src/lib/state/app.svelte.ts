@@ -1,5 +1,4 @@
-// Shared reveal + panel state (Svelte 5 runes). Mutate the exported objects'
-// properties; components that read them react automatically.
+// Shared UI state (Svelte 5 runes). Mutate the exported objects' properties.
 import type { Project } from '$lib/data/projects';
 
 type Mode = 'site' | 'map';
@@ -10,12 +9,17 @@ export const view = $state<{ r: number; mode: Mode; revealing: boolean }>({
 	revealing: false
 });
 
-export const panel = $state<{ open: boolean; project: Project | null }>({
+// the currently opened project (drives the crossfade morph detail)
+export const detail = $state<{ project: Project | null }>({ project: null });
+
+// contact / booking modal
+export const contact = $state<{ open: boolean; view: 'menu' | 'book' }>({
 	open: false,
-	project: null
+	view: 'menu'
 });
 
 let raf = 0;
+let savedScroll = 0;
 
 function reduceMotion(): boolean {
 	return typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -26,6 +30,7 @@ export function setR(v: number): void {
 }
 
 export function beginReveal(): void {
+	if (view.mode === 'site' && typeof window !== 'undefined') savedScroll = window.scrollY;
 	view.revealing = true;
 }
 
@@ -35,7 +40,11 @@ function settle(mode: Mode): void {
 	view.revealing = false;
 	view.mode = mode;
 	view.r = mode === 'map' ? 1 : 0;
-	if (mode === 'site') closePanel();
+	if (mode === 'site') {
+		closeDetail();
+		if (typeof window !== 'undefined')
+			requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo(0, savedScroll)));
+	}
 }
 
 // target: 0 = site, 1 = map
@@ -44,7 +53,7 @@ export function animateTo(target: number): void {
 		settle(target >= 0.5 ? 'map' : 'site');
 		return;
 	}
-	view.revealing = true;
+	beginReveal();
 	const start = view.r;
 	let t0 = 0;
 	const step = (ts: number) => {
@@ -58,11 +67,20 @@ export function animateTo(target: number): void {
 	raf = requestAnimationFrame(step);
 }
 
-export function openPanel(p: Project): void {
-	panel.project = p;
-	panel.open = true;
+export function openDetail(p: Project): void {
+	detail.project = p;
+}
+export function closeDetail(): void {
+	detail.project = null;
 }
 
-export function closePanel(): void {
-	panel.open = false;
+export function openContact(): void {
+	contact.view = 'menu';
+	contact.open = true;
+}
+export function closeContact(): void {
+	contact.open = false;
+}
+export function setContactView(v: 'menu' | 'book'): void {
+	contact.view = v;
 }

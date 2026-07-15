@@ -7,106 +7,198 @@
 		type Cluster,
 		type Project
 	} from '$lib/data/projects';
-	import { view, panel, openPanel } from '$lib/state/app.svelte';
+	import { view, detail, openDetail } from '$lib/state/app.svelte';
+	import { send, receive } from '$lib/transition';
 
 	let { projects }: { projects: Project[] } = $props();
+
 	const connections = $derived(buildConnections(projects));
+	const POS = $derived.by(() => {
+		const m: Record<string, { x: number; y: number }> = {};
+		for (const h of HUBS) m[h.id] = { x: h.x, y: h.y };
+		for (const p of projects) m[p.id] = { x: p.x, y: p.y };
+		return m;
+	});
+	const inCluster = (cl: Cluster) => projects.filter((p) => p.cluster === cl);
 
 	let canvas = $state<HTMLDivElement>();
 	let wires = $state<string[]>([]);
 	let reduce = $state(false);
+	let sc = $state(1);
+	let tx = $state(0);
+	let ty = $state(0);
+	let grabbing = $state(false);
 
 	function computeWires() {
 		if (!canvas) return;
-		const cRect = canvas.getBoundingClientRect();
-		if (!cRect.width) return;
-		const paths: string[] = [];
+		const W = canvas.clientWidth;
+		const H = canvas.clientHeight;
+		if (!W) return;
+		const out: string[] = [];
 		for (const [a, b] of connections) {
-			const na = canvas.querySelector<HTMLElement>(`#node-${a}`);
-			const nb = canvas.querySelector<HTMLElement>(`#node-${b}`);
-			if (!na || !nb) continue;
-			const ra = na.getBoundingClientRect();
-			const rb = nb.getBoundingClientRect();
-			const x1 = ra.left + ra.width / 2 - cRect.left;
-			const y1 = ra.top + ra.height / 2 - cRect.top;
-			const x2 = rb.left + rb.width / 2 - cRect.left;
-			const y2 = rb.top + rb.height / 2 - cRect.top;
-			const mx = (x1 + x2) / 2;
-			paths.push(`M ${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}`);
+			const pa = POS[a];
+			const pb = POS[b];
+			if (!pa || !pb) continue;
+			const x1 = (pa.x / 100) * W,
+				y1 = (pa.y / 100) * H,
+				x2 = (pb.x / 100) * W,
+				y2 = (pb.y / 100) * H,
+				mx = (x1 + x2) / 2;
+			out.push(`M ${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}`);
 		}
-		wires = paths;
+		wires = out;
+	}
+	function zoomAt(mx: number, my: number, ns: number) {
+		ns = Math.min(3, Math.max(0.4, ns));
+		tx = mx - (mx - tx) * (ns / sc);
+		ty = my - (my - ty) * (ns / sc);
+		sc = ns;
+	}
+	function zoomBtn(factor: number) {
+		if (!canvas) return;
+		const r = canvas.getBoundingClientRect();
+		zoomAt(r.width / 2, r.height / 2, sc * factor);
+	}
+	function resetView() {
+		sc = 1;
+		tx = 0;
+		ty = 0;
 	}
 
+	// reset the view whenever we enter map mode
 	$effect(() => {
-		const visible = view.mode === 'map' || view.revealing;
-		if (visible) requestAnimationFrame(() => requestAnimationFrame(computeWires));
+		if (view.mode === 'map') resetView();
 	});
 
+	// (re)draw wires when the map becomes visible; keep them in sync on resize
+	$effect(() => {
+		const visible = view.mode === 'map' || view.revealing;
+		if (visible && canvas) requestAnimationFrame(() => requestAnimationFrame(computeWires));
+	});
 	$effect(() => {
 		reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-		let t: ReturnType<typeof setTimeout>;
+		let rt: ReturnType<typeof setTimeout>;
 		const onResize = () => {
-			clearTimeout(t);
-			t = setTimeout(computeWires, 120);
+			clearTimeout(rt);
+			rt = setTimeout(computeWires, 120);
 		};
 		window.addEventListener('resize', onResize);
 		return () => window.removeEventListener('resize', onResize);
 	});
 
-	const inCluster = (cl: Cluster) => projects.filter((p) => p.cluster === cl);
+	// pan + zoom listeners (wheel needs passive:false; drag pans, ctrl+wheel zooms)
+	$effect(() => {
+		const el = canvas;
+		if (!el) return;
+		let panning = false,
+			lx = 0,
+			ly = 0;
+		const onWheel = (e: WheelEvent) => {
+			if (!e.ctrlKey) return;
+			e.preventDefault();
+			const r = el.getBoundingClientRect();
+			zoomAt(e.clientX - r.left, e.clientY - r.top, sc * (1 - e.deltaY * 0.0016));
+		};
+		const onDown = (e: PointerEvent) => {
+			if ((e.target as HTMLElement).closest('.pnode')) return;
+			panning = true;
+			grabbing = true;
+			lx = e.clientX;
+			ly = e.clientY;
+			el.setPointerCapture(e.pointerId);
+		};
+		const onMove = (e: PointerEvent) => {
+			if (!panning) return;
+			tx += e.clientX - lx;
+			ty += e.clientY - ly;
+			lx = e.clientX;
+			ly = e.clientY;
+		};
+		const onUp = (e: PointerEvent) => {
+			if (!panning) return;
+			panning = false;
+			grabbing = false;
+			try {
+				el.releasePointerCapture(e.pointerId);
+			} catch {
+				/* ignore */
+			}
+		};
+		el.addEventListener('wheel', onWheel, { passive: false });
+		el.addEventListener('pointerdown', onDown);
+		el.addEventListener('pointermove', onMove);
+		el.addEventListener('pointerup', onUp);
+		el.addEventListener('pointercancel', onUp);
+		return () => {
+			el.removeEventListener('wheel', onWheel);
+			el.removeEventListener('pointerdown', onDown);
+			el.removeEventListener('pointermove', onMove);
+			el.removeEventListener('pointerup', onUp);
+			el.removeEventListener('pointercancel', onUp);
+		};
+	});
 </script>
 
 <div class="map-view" aria-label="project map">
 	<div class="map-bg" aria-hidden="true"></div>
 
-	<div class="map-canvas" bind:this={canvas}>
-		<svg class="wires" aria-hidden="true" preserveAspectRatio="none">
-			{#each wires as d}
-				<path class="wire" {d}></path>
-				{#if !reduce}<path class="wire-pulse" {d}></path>{/if}
+	<div class="canvas" bind:this={canvas}>
+		<div class="stage" class:grab={grabbing} style:transform={`translate(${tx}px, ${ty}px) scale(${sc})`}>
+			<svg class="wires" aria-hidden="true" preserveAspectRatio="none">
+				{#each wires as d (d)}
+					<path class="wire" {d}></path>
+					{#if !reduce}<path class="wire-p" {d}></path>{/if}
+				{/each}
+			</svg>
+
+			{#each HUBS as h (h.id)}
+				<div
+					class="node {h.type === 'center' ? 'center-node' : 'hub'}"
+					style="left:{h.x}%; top:{h.y}%"
+					aria-hidden="true"
+				>
+					{h.label}
+				</div>
 			{/each}
-		</svg>
 
-		{#each HUBS as h}
-			<div
-				id="node-{h.id}"
-				class="node {h.type === 'center' ? 'center-node' : 'hub'}"
-				style="left:{h.x}%; top:{h.y}%"
-				aria-hidden="true"
-			>
-				{h.label}
-			</div>
-		{/each}
-
-		{#each projects as p}
-			<button
-				id="node-{p.id}"
-				class="node pnode {p.status === 'featured' ? 'featured' : 'pill'}"
-				class:active={panel.open && panel.project?.id === p.id}
-				style="left:{p.x}%; top:{p.y}%"
-				onclick={() => openPanel(p)}
-				aria-label="{p.title}, open detail"
-			>
-				{#if p.status === 'featured'}
-					<span class="n-status"
-						><span class="sq" aria-hidden="true"></span><span class="mono">{p.cluster}</span></span
+			{#each projects as p (p.id)}
+				{#if detail.project?.id !== p.id}
+					<button
+						class="node pnode {p.status === 'featured' ? 'featured' : 'pill-n'}"
+						style="left:{p.x}%; top:{p.y}%"
+						onclick={() => openDetail(p)}
+						aria-label="{p.title}, open detail"
+						in:receive={{ key: p.id }}
+						out:send={{ key: p.id }}
 					>
-					<span class="n-title">{p.title}</span>
-				{:else}
-					<span class="mono">{p.title}</span>
+						{#if p.status === 'featured'}
+							<span class="st"><i></i><span class="mono">{p.cluster}</span></span>
+							<span class="t">{p.title}</span>
+						{:else}
+							<span class="mono">{p.title}</span>
+						{/if}
+					</button>
 				{/if}
-			</button>
-		{/each}
+			{/each}
+		</div>
 	</div>
 
-	<div class="map-rail">
-		{#each CLUSTERS as cl}
+	<div class="map-hint">hold ctrl and scroll to zoom, drag to pan</div>
+	<div class="zoom-ctrl">
+		<button onclick={() => zoomBtn(1.25)} aria-label="zoom in">+</button>
+		<button onclick={() => zoomBtn(1 / 1.25)} aria-label="zoom out">&#8722;</button>
+		<button onclick={resetView} aria-label="reset view">&#8226;</button>
+	</div>
+
+	<div class="rail">
+		{#each CLUSTERS as cl (cl)}
 			{#if inCluster(cl).length}
-				<div class="rail-cluster">
+				<div class="grp">
 					<span class="label">{CLUSTER_LABEL[cl]}</span>
-					{#each inCluster(cl) as p}
-						<button class="rail-item" onclick={() => openPanel(p)}>
-							<span class="r-title">{p.title}</span><span class="mono">{p.year}</span>
+					{#each inCluster(cl) as p (p.id)}
+						<button onclick={() => openDetail(p)}>
+							<span style="text-transform:lowercase">{p.title}</span>
+							<span class="mono" style="color:var(--ink-soft)">{p.year}</span>
 						</button>
 					{/each}
 				</div>

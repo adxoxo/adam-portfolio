@@ -1,16 +1,16 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { view, setR, beginReveal, animateTo } from '$lib/state/app.svelte';
-	import { featured, archived, CLUSTER_LABEL } from '$lib/data/projects';
+	import { view, setR, beginReveal, animateTo, openContact } from '$lib/state/app.svelte';
+	import HeroCanvas from '$lib/components/HeroCanvas.svelte';
+	import Socials from '$lib/components/Socials.svelte';
+	import Featured from '$lib/components/Featured.svelte';
+	import Archive from '$lib/components/Archive.svelte';
 	import SystemMap from '$lib/components/SystemMap.svelte';
-	import ProjectPanel from '$lib/components/ProjectPanel.svelte';
-	import LoomEmbed from '$lib/components/LoomEmbed.svelte';
+	import ProjectDetail from '$lib/components/ProjectDetail.svelte';
+	import ContactModal from '$lib/components/ContactModal.svelte';
 
 	let { data }: { data: PageData } = $props();
-	const feats = $derived(featured(data.projects));
-	const arch = $derived(archived(data.projects));
 
-	// reveal-swipe control -------------------------------------------------
 	let slider = $state<HTMLDivElement>();
 	let knob = $state<HTMLDivElement>();
 	let dragging = false;
@@ -29,8 +29,7 @@
 		if (!dragging || !slider || !knob) return;
 		if (Math.abs(e.clientX - downX) > 3) moved = true;
 		const rect = slider.getBoundingClientRect();
-		const usable = rect.width - knob.offsetWidth;
-		setR((e.clientX - rect.left - knob.offsetWidth / 2) / usable);
+		setR((e.clientX - rect.left - knob.offsetWidth / 2) / (rect.width - knob.offsetWidth));
 	}
 	function onUp(e: PointerEvent) {
 		if (!dragging) return;
@@ -40,8 +39,8 @@
 		} catch {
 			/* ignore */
 		}
-		if (!moved) animateTo(view.r < 0.5 ? 1 : 0); // tap toggles
-		else animateTo(view.r >= 0.5 ? 1 : 0); // drag snaps to the nearer end
+		if (!moved) animateTo(view.r < 0.5 ? 1 : 0);
+		else animateTo(view.r >= 0.5 ? 1 : 0);
 	}
 	function onKey(e: KeyboardEvent) {
 		if (['ArrowRight', 'ArrowUp', 'End'].includes(e.key)) {
@@ -56,6 +55,8 @@
 		}
 	}
 
+	const wipe = $derived(((1 - view.r) * 100).toFixed(2) + '%');
+
 	// lock page scroll while the map is up
 	$effect(() => {
 		if (typeof document === 'undefined') return;
@@ -64,41 +65,6 @@
 			document.body.style.overflow = '';
 		};
 	});
-
-	// contact form -> /api/lead --------------------------------------------
-	let sending = $state(false);
-	let sent = $state(false);
-	let sendError = $state('');
-
-	async function submitLead(e: SubmitEvent) {
-		e.preventDefault();
-		const formEl = e.currentTarget as HTMLFormElement;
-		const fd = new FormData(formEl);
-		sending = true;
-		sendError = '';
-		try {
-			const res = await fetch('/api/lead', {
-				method: 'POST',
-				headers: { 'content-type': 'application/json' },
-				body: JSON.stringify({
-					name: fd.get('name'),
-					email: fd.get('email'),
-					message: fd.get('message')
-				})
-			});
-			const j = await res.json();
-			if (j.ok) {
-				sent = true;
-				formEl.reset();
-			} else {
-				sendError = j.error === 'rate_limited' ? 'too many messages, try again later.' : 'check the fields and try again.';
-			}
-		} catch {
-			sendError = 'could not send, try again.';
-		} finally {
-			sending = false;
-		}
-	}
 </script>
 
 <svelte:head>
@@ -109,64 +75,57 @@
 	/>
 </svelte:head>
 
-<div class="app" class:map={view.mode === 'map'} class:revealing={view.revealing} style:--r={view.r}>
-	<!-- nav -->
-	<nav class="nav" aria-label="primary">
-		<div class="nav-inner">
-			<div class="brand-group">
-				<a class="brand" href="#top">adam</a>
-				<span class="avail"
-					><span class="dot" aria-hidden="true"></span><span class="mono">available for new work</span
-					></span
+<div class="app" class:map={view.mode === 'map'} class:revealing={view.revealing} style:--r={view.r} style:--wipe={wipe}>
+	<nav class="pill">
+		<a class="brand" href="#top">adam</a>
+		<div class="divider"></div>
+		<div class="reveal" title="drag or tap to switch site and map">
+			<button class="end" class:on={view.r < 0.5} onclick={() => animateTo(0)}>site</button>
+			<div class="slider" bind:this={slider}>
+				<div class="fill"></div>
+				<div
+					class="knob"
+					bind:this={knob}
+					role="slider"
+					tabindex="0"
+					aria-label="switch site and map"
+					aria-valuemin={0}
+					aria-valuemax={100}
+					aria-valuenow={Math.round(view.r * 100)}
+					onpointerdown={onDown}
+					onpointermove={onMove}
+					onpointerup={onUp}
+					onpointercancel={onUp}
+					onkeydown={onKey}
 				>
-			</div>
-			<div class="reveal-wrap" title="drag or tap to switch between site and map">
-				<span class="end label" class:on={view.r < 0.5}>site</span>
-				<div class="mode-slider" bind:this={slider}>
-					<div class="fill" aria-hidden="true"></div>
-					<div
-						class="mode-knob"
-						bind:this={knob}
-						role="slider"
-						tabindex="0"
-						aria-label="switch between site and map"
-						aria-valuemin="0"
-						aria-valuemax="100"
-						aria-valuenow={Math.round(view.r * 100)}
-						onpointerdown={onDown}
-						onpointermove={onMove}
-						onpointerup={onUp}
-						onpointercancel={onUp}
-						onkeydown={onKey}
-					>
-						<span aria-hidden="true"></span><span aria-hidden="true"></span>
-					</div>
+					<span></span><span></span>
 				</div>
-				<span class="end label" class:on={view.r >= 0.5}>map</span>
 			</div>
-			<div class="nav-right">
-				<a class="nav-link label" href="https://github.com/adxoxo" target="_blank" rel="noopener"
-					>github</a
-				>
-			</div>
+			<button class="end" class:on={view.r >= 0.5} onclick={() => animateTo(1)}>map</button>
 		</div>
+		<div class="divider"></div>
+		<button class="pill-cta" onclick={openContact}>work with me</button>
 	</nav>
 
-	<!-- site view -->
 	<div class="site-view" id="top">
 		<header class="hero">
+			<HeroCanvas />
 			<div class="wrap">
 				<div class="hero-grid">
-					<div><h1>systems that make things lighter</h1></div>
+					<div>
+						<span class="avail"><span class="dot"></span><span class="mono">available for new work</span></span>
+						<h1>systems that make things lighter</h1>
+					</div>
 					<div class="hero-side">
-						<p>
-							i build systems. ai, full-stack, embedded, whatever the problem needs. i do it
-							because i love it, and the good ones make life lighter, not just work.
+						<p class="sub">
+							i build systems. ai, full-stack, embedded, whatever the problem needs. i do it because
+							i love it, and the good ones make life lighter, not just work.
 						</p>
 						<div class="cta-row">
-							<a class="btn" href="#contact">work with me</a>
-							<a class="btn btn--ghost" href="#work">see the work</a>
+							<button class="btn" onclick={openContact}>work with me</button>
+							<a class="btn btn--ghost" href="#work">see adam's work</a>
 						</div>
+						<Socials />
 					</div>
 				</div>
 			</div>
@@ -176,128 +135,31 @@
 			<div class="wrap">
 				<div class="sec-head">
 					<span class="label">selected work</span>
-					<span class="mono" style="color:var(--ink-soft)">four systems, one way of thinking</span>
+					<span class="mono" style="color:var(--ink-soft)">tap any to open it</span>
 				</div>
-				<div class="featured-list">
-					{#each feats as p, i}
-						<article class="fcard" class:flip={i % 2 === 1}>
-							<div class="fcard-figure">
-								{#if p.loom}
-									<LoomEmbed id={p.loom} title={p.title} />
-								{:else}
-									<div class="schematic">
-										{#each p.schematic as step, j}
-											<span class="node-chip {j === p.schematic.length - 1 ? 'accent' : ''}">{step}</span>
-											{#if j < p.schematic.length - 1}<span class="arrow">-&gt;</span>{/if}
-										{/each}
-									</div>
-									<span class="fig-cap mono">fig. {p.title} architecture</span>
-								{/if}
-							</div>
-							<div class="fcard-body">
-								<div class="fbody-top">
-									<div class="chips">
-										<span class="chip mono">{CLUSTER_LABEL[p.cluster]}</span>
-										<span class="chip mono">{p.year}</span>
-									</div>
-									<h3>{p.title}</h3>
-									<p>{p.summary}</p>
-									<div class="stack-line">
-										{#each p.stack as s}<span class="chip mono">{s}</span>{/each}
-									</div>
-								</div>
-								<div class="outcome">
-									<h4 class="mono">outcome</h4>
-									<p>{p.outcomes[0]}</p>
-									{#if p.live || p.github}
-										<div class="card-links">
-											{#if p.live}
-												<a class="repo-link" href={p.live} target="_blank" rel="noopener"
-													>visit site &#8599;</a
-												>
-											{/if}
-											{#if p.github}
-												<a class="repo-link" href={p.github} target="_blank" rel="noopener"
-													>view repository &#8599;</a
-												>
-											{/if}
-										</div>
-									{/if}
-								</div>
-							</div>
-						</article>
-					{/each}
-				</div>
+				<Featured projects={data.projects} />
 			</div>
 		</section>
 
 		<section class="section">
-			<div class="wrap archive-grid">
-				<div>
+			<div class="wrap">
+				<div class="sec-head">
 					<h2>archive</h2>
-					<p class="archive-note">
-						pulled from github once, then cached. the site reads the cache, not github.
-					</p>
-				</div>
-				<div class="archive-list">
-					{#each arch as p}
-						<div class="arow">
-							<div class="arow-title">
-								<span class="sq" aria-hidden="true"></span><span>{p.title}</span>
-							</div>
-							<div class="arow-meta">
-								<span class="mono">{p.stack.join(', ')}</span><span class="mono">{p.year}</span>
-							</div>
-						</div>
-					{/each}
+					<span class="mono" style="color:var(--ink-soft)">newest first, click to open the repo</span>
 				</div>
 			</div>
-		</section>
-
-		<section class="section" id="contact">
-			<div class="wrap contact-grid">
-				<div class="contact-copy">
-					<h2>let's talk</h2>
-					<p>
-						tell me what you are building and where it feels heavy. if we are on the same wavelength,
-						i will show you what the lighter version looks like.
-					</p>
-				</div>
-				<form class="form" onsubmit={submitLead}>
-					<div class="field">
-						<label for="c-name">name</label>
-						<input id="c-name" name="name" type="text" placeholder="your name" autocomplete="name" required />
-					</div>
-					<div class="field">
-						<label for="c-email">email</label>
-						<input id="c-email" name="email" type="email" placeholder="you@company.com" autocomplete="email" required />
-					</div>
-					<div class="field">
-						<label for="c-msg">message</label>
-						<textarea id="c-msg" name="message" rows="4" placeholder="what you are working on" required></textarea>
-					</div>
-					<button class="btn" type="submit" style="align-self:flex-start" disabled={sending}>
-						{sending ? 'sending' : sent ? 'sent' : 'send'}
-					</button>
-					{#if sent}<p class="mono" style="color:var(--accent)">thanks, i will get back to you.</p>{/if}
-					{#if sendError}<p class="mono" style="color:var(--ink-soft)">{sendError}</p>{/if}
-				</form>
-			</div>
+			<Archive projects={data.projects} />
 		</section>
 
 		<footer class="footer">
-			<div class="wrap footer-inner">
-				<div class="brand">adam</div>
-				<div class="socials">
-					<a href="https://github.com/adxoxo" target="_blank" rel="noopener">github</a>
-					<a href="https://www.threads.net/@ad_yuuu" target="_blank" rel="noopener">threads</a>
-					<a href="mailto:adamgemenez@gmail.com">email</a>
-				</div>
+			<div class="wrap in">
+				<div class="brand" style="font-family:var(--font-head);font-weight:700;font-size:20px;text-transform:lowercase">adam</div>
 				<span class="mono" style="color:var(--ink-soft)">davao city, working with foreign clients</span>
 			</div>
 		</footer>
 	</div>
 
 	<SystemMap projects={data.projects} />
-	<ProjectPanel />
+	<ProjectDetail />
+	<ContactModal />
 </div>
