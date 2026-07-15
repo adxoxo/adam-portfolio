@@ -21,7 +21,7 @@
 					<span class="ext">open repo &#8599;</span>
 				</a>
 			{:else}
-				<button class="acard" onclick={() => openDetail(p)}>
+				<button class="acard" onclick={() => openDetail(p, 'arch')}>
 					<span class="yr mono">{p.year}</span>
 					<h4>{p.title}</h4>
 					<span class="st">{p.stack.join(', ')}</span>

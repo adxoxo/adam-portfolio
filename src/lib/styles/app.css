@@ -166,12 +166,26 @@ button { font-family: inherit; }
 .pnode.pill-n { padding: 6px 11px; color: var(--ink-soft); }
 .hub { background: transparent; border: 1px dashed var(--border-strong); padding: 7px 14px; color: var(--accent); letter-spacing: 0.1em; text-transform: lowercase; font-weight: 500; }
 .center-node { background: var(--accent); color: var(--on-accent); padding: 10px 16px; font-family: var(--font-head); font-weight: 700; text-transform: lowercase; }
-.rail { display: none; position: absolute; inset: 0; overflow-y: auto; padding: 90px var(--gutter) 40px; }
-@media (max-width: 520px) { .rail { display: block; } }
-.rail .grp { margin-bottom: 24px; }
-.rail .grp > .label { display: block; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed var(--border-strong); color: var(--accent); }
-.rail button { width: 100%; text-align: left; background: var(--panel); border: 1px solid var(--border); border-top: 0; padding: 16px; cursor: pointer; display: flex; justify-content: space-between; gap: 12px; }
-.rail .grp button:first-of-type { border-top: 1px solid var(--border); }
+/* mobile map: a vertical tree. one continuous trunk on the left, cluster hubs
+   are dots on the trunk, each project branches off with an elbow connector. */
+.tree { display: none; position: absolute; inset: 0; overflow-y: auto; padding: 92px 22px 76px; }
+@media (max-width: 520px) { .tree { display: block; } }
+.tbranch { position: relative; }
+.tbranch::before { content: ""; position: absolute; left: 11px; top: 0; bottom: 0; width: 2px; background: var(--border-strong); }
+.tbranch.troot::before { top: 16px; }
+.thub-row { position: relative; display: flex; align-items: center; gap: 12px; min-height: 32px; padding: 6px 0 6px 36px; }
+.thub-row::before { content: ""; position: absolute; left: 11px; top: 50%; width: 25px; height: 2px; background: var(--border-strong); transform: translateY(-50%); }
+.tdot { position: absolute; left: 11px; top: 50%; transform: translate(-50%, -50%); width: 12px; height: 12px; background: var(--accent); box-shadow: 0 0 0 3px var(--bg), 0 0 12px 1px var(--accent-hover); z-index: 1; }
+.thub-label { text-transform: lowercase; letter-spacing: 0.1em; color: var(--accent); font-weight: 500; }
+.tbranch.troot .tdot { width: 16px; height: 16px; }
+.tbranch.troot .thub-label { font-family: var(--font-head); font-weight: 700; font-size: 19px; letter-spacing: 0; color: var(--ink); }
+.tleaves { position: relative; padding-left: 36px; padding-bottom: 8px; }
+.tleaf { position: relative; width: 100%; text-align: left; display: flex; justify-content: space-between; align-items: center; gap: 12px; background: var(--panel); border: 1px solid var(--border); padding: 15px 16px; margin: 9px 0; cursor: pointer; transition: border-color 0.2s; }
+.tleaf::before { content: ""; position: absolute; left: -25px; top: 50%; width: 25px; height: 2px; background: var(--border-strong); transform: translateY(-50%); }
+.tleaf:hover, .tleaf:focus-visible { border-color: var(--accent); outline: none; }
+.tleaf.featured { border-left: 3px solid var(--accent); }
+.tleaf .tl-t { text-transform: lowercase; color: var(--ink); }
+.tleaf .tl-y { color: var(--ink-soft); }
 
 /* shared detail schematic + lists (used in the morph) */
 .schem { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }

@@ -9,8 +9,15 @@ export const view = $state<{ r: number; mode: Mode; revealing: boolean }>({
 	revealing: false
 });
 
-// the currently opened project (drives the crossfade morph detail)
-export const detail = $state<{ project: Project | null }>({ project: null });
+// the currently opened project (drives the crossfade morph detail). `from`
+// records which surface it was opened from (featured grid, map canvas, mobile
+// tree, archive) so the crossfade key is unique per surface and the morph
+// always grows from the box that was actually tapped.
+export type DetailFrom = 'feat' | 'map' | 'tree' | 'arch';
+export const detail = $state<{ project: Project | null; from: DetailFrom }>({
+	project: null,
+	from: 'feat'
+});
 
 // contact / booking modal
 export const contact = $state<{ open: boolean; view: 'menu' | 'book' }>({
@@ -67,10 +74,12 @@ export function animateTo(target: number): void {
 	raf = requestAnimationFrame(step);
 }
 
-export function openDetail(p: Project): void {
+export function openDetail(p: Project, from: DetailFrom = 'feat'): void {
+	detail.from = from;
 	detail.project = p;
 }
 export function closeDetail(): void {
+	// leave `from` untouched so the outgoing morph keeps the key it entered with
 	detail.project = null;
 }
 

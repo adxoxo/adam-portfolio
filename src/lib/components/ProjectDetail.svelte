@@ -13,6 +13,7 @@
 
 {#if detail.project}
 	{@const p = detail.project}
+	{@const key = detail.from + ':' + p.id}
 	<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
 	<div class="morph-backdrop" onclick={closeDetail}></div>
 	<div
@@ -20,8 +21,8 @@
 		role="dialog"
 		aria-modal="true"
 		aria-label={p.title}
-		in:receive={{ key: p.id }}
-		out:send={{ key: p.id }}
+		in:receive={{ key }}
+		out:send={{ key }}
 	>
 		<div class="m-inner">
 			<div class="m-head">

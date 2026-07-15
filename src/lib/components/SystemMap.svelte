@@ -166,10 +166,10 @@
 					<button
 						class="node pnode {p.status === 'featured' ? 'featured' : 'pill-n'}"
 						style="left:{p.x}%; top:{p.y}%"
-						onclick={() => openDetail(p)}
+						onclick={() => openDetail(p, 'map')}
 						aria-label="{p.title}, open detail"
-						in:receive={{ key: p.id }}
-						out:send={{ key: p.id }}
+						in:receive={{ key: 'map:' + p.id }}
+						out:send={{ key: 'map:' + p.id }}
 					>
 						{#if p.status === 'featured'}
 							<span class="st"><i></i><span class="mono">{p.cluster}</span></span>
@@ -190,17 +190,37 @@
 		<button onclick={resetView} aria-label="reset view">&#8226;</button>
 	</div>
 
-	<div class="rail">
+	<!-- mobile: the map reads as a vertical tree, one trunk with branching limbs -->
+	<div class="tree">
+		<div class="tbranch troot">
+			<div class="thub-row">
+				<span class="tdot"></span>
+				<span class="thub-label">adam</span>
+			</div>
+		</div>
 		{#each CLUSTERS as cl (cl)}
 			{#if inCluster(cl).length}
-				<div class="grp">
-					<span class="label">{CLUSTER_LABEL[cl]}</span>
-					{#each inCluster(cl) as p (p.id)}
-						<button onclick={() => openDetail(p)}>
-							<span style="text-transform:lowercase">{p.title}</span>
-							<span class="mono" style="color:var(--ink-soft)">{p.year}</span>
-						</button>
-					{/each}
+				<div class="tbranch">
+					<div class="thub-row">
+						<span class="tdot"></span>
+						<span class="thub-label">{CLUSTER_LABEL[cl]}</span>
+					</div>
+					<div class="tleaves">
+						{#each inCluster(cl) as p (p.id)}
+							{#if detail.project?.id !== p.id}
+								<button
+									class="tleaf {p.status === 'featured' ? 'featured' : ''}"
+									onclick={() => openDetail(p, 'tree')}
+									aria-label="{p.title}, open detail"
+									in:receive={{ key: 'tree:' + p.id }}
+									out:send={{ key: 'tree:' + p.id }}
+								>
+									<span class="tl-t">{p.title}</span>
+									<span class="mono tl-y">{p.year}</span>
+								</button>
+							{/if}
+						{/each}
+					</div>
 				</div>
 			{/if}
 		{/each}

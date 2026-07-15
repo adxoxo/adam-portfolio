@@ -12,9 +12,9 @@
 		{#if detail.project?.id !== p.id}
 			<button
 				class="fcard"
-				onclick={() => openDetail(p)}
-				in:receive={{ key: p.id }}
-				out:send={{ key: p.id }}
+				onclick={() => openDetail(p, 'feat')}
+				in:receive={{ key: 'feat:' + p.id }}
+				out:send={{ key: 'feat:' + p.id }}
 			>
 				<div class="top">
 					<span class="chip mono">{CLUSTER_LABEL[p.cluster]}</span>
