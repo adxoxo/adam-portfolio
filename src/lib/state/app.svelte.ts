@@ -9,10 +9,10 @@ export const view = $state<{ r: number; mode: Mode; revealing: boolean }>({
 	revealing: false
 });
 
-// the currently opened project (drives the crossfade morph detail). `from`
-// records which surface it was opened from (featured grid, map canvas, mobile
-// tree, archive) so the crossfade key is unique per surface and the morph
-// always grows from the box that was actually tapped.
+// the currently opened project (drives the detail modal). `from` records which
+// surface it was opened from (featured grid, map canvas, mobile tree, archive)
+// as provenance; the modal opens self-contained so the surface behind it never
+// moves.
 export type DetailFrom = 'feat' | 'map' | 'tree' | 'arch';
 export const detail = $state<{ project: Project | null; from: DetailFrom }>({
 	project: null,

@@ -1,8 +1,9 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { view, setR, beginReveal, animateTo, openContact } from '$lib/state/app.svelte';
+	import { view, detail, contact, setR, beginReveal, animateTo, openContact } from '$lib/state/app.svelte';
 	import HeroCanvas from '$lib/components/HeroCanvas.svelte';
 	import Socials from '$lib/components/Socials.svelte';
+	import Services from '$lib/components/Services.svelte';
 	import Featured from '$lib/components/Featured.svelte';
 	import Archive from '$lib/components/Archive.svelte';
 	import SystemMap from '$lib/components/SystemMap.svelte';
@@ -57,10 +58,11 @@
 
 	const wipe = $derived(((1 - view.r) * 100).toFixed(2) + '%');
 
-	// lock page scroll while the map is up
+	// lock page scroll while the map, a project detail, or the contact modal is up
 	$effect(() => {
 		if (typeof document === 'undefined') return;
-		document.body.style.overflow = view.mode === 'map' ? 'hidden' : '';
+		const lock = view.mode === 'map' || !!detail.project || contact.open;
+		document.body.style.overflow = lock ? 'hidden' : '';
 		return () => {
 			document.body.style.overflow = '';
 		};
@@ -131,6 +133,8 @@
 			</div>
 		</header>
 
+		<Services />
+
 		<section class="section" id="work">
 			<div class="wrap">
 				<div class="sec-head">
@@ -153,8 +157,7 @@
 
 		<footer class="footer">
 			<div class="wrap in">
-				<div class="brand" style="font-family:var(--font-head);font-weight:700;font-size:20px;text-transform:lowercase">adam</div>
-				<span class="mono" style="color:var(--ink-soft)">davao city, working with foreign clients</span>
+				<Socials />
 			</div>
 		</footer>
 	</div>

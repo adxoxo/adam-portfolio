@@ -13,15 +13,30 @@
 <div class="marquee">
 	<div class="mtrack" style:--dur={dur}>
 		{#each loop as p, i (i)}
+			{@const dup = i >= arch.length}
 			{#if p.github}
-				<a class="acard" href={p.github} target="_blank" rel="noopener">
+				<a
+					class="acard"
+					class:dup
+					href={p.github}
+					target="_blank"
+					rel="noopener"
+					aria-hidden={dup ? 'true' : undefined}
+					tabindex={dup ? -1 : undefined}
+				>
 					<span class="yr mono">{p.year}</span>
 					<h4>{p.title}</h4>
 					<span class="st">{p.stack.join(', ')}</span>
 					<span class="ext">open repo &#8599;</span>
 				</a>
 			{:else}
-				<button class="acard" onclick={() => openDetail(p, 'arch')}>
+				<button
+					class="acard"
+					class:dup
+					onclick={() => openDetail(p, 'arch')}
+					aria-hidden={dup ? 'true' : undefined}
+					tabindex={dup ? -1 : undefined}
+				>
 					<span class="yr mono">{p.year}</span>
 					<h4>{p.title}</h4>
 					<span class="st">{p.stack.join(', ')}</span>
