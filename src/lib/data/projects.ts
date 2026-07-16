@@ -87,6 +87,24 @@ export const PROJECTS: Project[] = [
 		github: 'https://github.com/adxoxo/grimoire'
 	},
 	{
+		id: 'vault', title: 'aquryu vault', cluster: 'fullstack', status: 'featured', year: '2026', x: 80, y: 42,
+		summary:
+			'a personal money operating system. a mobile-first pwa for logging income, expenses, and transfers across multiple wallets, with one glanceable picture of total money. it earns in both php and usd and converts usd at the official bsp rate captured at log time.',
+		why:
+			'i wanted logging money to be friction-free. every added tap is a logged expense that never happens, so the whole app is built around three taps or fewer, or by voice.',
+		features: [
+			{ label: 'three taps or fewer', detail: 'the app opens on the quick-log screen with a glanceable total balance, so recording money is the first thing you do, not something buried in menus.' },
+			{ label: 'voice logging in taglish', detail: 'speak an entry and groq whisper transcribes it, then llama parses it into a structured transaction and maps spoken wallet names to your real accounts, with a one-line confirm before it commits.' },
+			{ label: 'multi-currency at the bsp rate', detail: 'usd income converts to php at the official bsp rate for the day it landed, stored per transaction so history is never retroactively recomputed.' },
+			{ label: 'balances that never drift', detail: 'every wallet balance is derived from a starting balance plus every transaction, stored as integer centavos so rounding never creeps in.' },
+			{ label: 'offline-first pwa', detail: 'installable on a mid-range phone and tuned for high-glare outdoor use, it keeps logging offline then reconciles when the connection returns.' }
+		],
+		outcomes: ['secrets never reach the browser; every table locked by row-level security', 'runs on cloudflare pages with supabase, no server to manage'],
+		stack: ['sveltekit', 'supabase', 'cloudflare', 'groq', 'typescript'],
+		schematic: ['pwa', 'cloudflare functions', 'supabase', 'groq'],
+		github: 'https://github.com/adxoxo/aquryu-vault'
+	},
+	{
 		id: 'goatedtracking', title: 'goatedtracking', cluster: 'fullstack', status: 'featured', year: '2026', x: 66, y: 13,
 		summary:
 			'a local-first monitoring system for a small goat farm here in the philippines. every goat wears a qr ear tag. scan it on the farm wifi and its whole profile opens: health records, vaccinations, pen, lineage. the internet is optional, not required.',
@@ -105,7 +123,7 @@ export const PROJECTS: Project[] = [
 		github: 'https://github.com/adxoxo/GRECE-Hydroponics-Monitoring-'
 	},
 	{
-		id: 'standup', title: 'standup dashboard', cluster: 'fullstack', status: 'archive', year: '2026', x: 87, y: 31,
+		id: 'standup', title: 'standup dashboard', cluster: 'fullstack', status: 'featured', year: '2026', x: 87, y: 31,
 		summary:
 			'a single-screen github activity dashboard that answers one question: what is on my plate today. open prs, assigned issues, an activity streak and per-repo health, with day-over-day deltas.',
 		outcomes: ['every section fails independently', 'deltas are real history, not in-memory guesses'],
