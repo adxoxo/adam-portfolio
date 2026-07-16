@@ -79,7 +79,10 @@
 
 <div class="app" class:map={view.mode === 'map'} class:revealing={view.revealing} style:--r={view.r} style:--wipe={wipe}>
 	<nav class="pill">
-		<a class="brand" href="#top">adam</a>
+		<a class="brand" href="#top">
+			<img class="brand-pic" src="/adam.jpg" alt="adam" width="30" height="30" decoding="async" />
+			<span>adam</span>
+		</a>
 		<div class="divider"></div>
 		<div class="reveal" title="drag or tap to switch site and map">
 			<button class="end" class:on={view.r < 0.5} onclick={() => animateTo(0)}>site</button>
