@@ -118,6 +118,16 @@ export const PROJECTS: Project[] = [
 		id: 'goatedtracking', title: 'goatedtracking', cluster: 'fullstack', status: 'featured', year: '2026', x: 66, y: 13,
 		summary:
 			'a local-first monitoring system for a small goat farm here in the philippines. every goat wears a qr ear tag. scan it on the farm wifi and its whole profile opens: health records, vaccinations, pen, lineage. the internet is optional, not required.',
+		why:
+			'the farm is in a part of the philippines where the internet drops and the power cuts, so i built it local-first: one server on the farm wifi with no cloud in the path. and it has two doors on one system, because a worker out in the pens should just scan a tag and see the goat, while the office needs a full dashboard behind a login.',
+		features: [
+			{ label: 'qr ear tag to profile', detail: 'registering a goat generates a qr printed on its ear tag. scanning it opens that goat profile in any phone browser on the farm wifi, with no app to install and no login for the worker.' },
+			{ label: 'runs with the internet off', detail: 'one on-premise server holds everything, reachable at goatfarm.local over the farm wifi. the cloud is never in the path, because rural power and internet are not something to depend on.' },
+			{ label: 'two doors, one system', detail: 'admins log in for the full dashboard to register goats, transfer pens, print tags and read alerts. field workers just scan and log a quick health note, no account needed.' },
+			{ label: 'inbreeding check on every transfer', detail: 'moving a goat walks its lineage and flags whether the pen already holds close relatives, then warns the admin and lets them decide. it advises, it never blocks.' },
+			{ label: 'health that surfaces itself', detail: 'each vaccination records its next due date, and an alerts feed lists overdue and due-soon goats, so a missed shot gets caught instead of forgotten.' },
+			{ label: 'nothing is ever deleted', detail: 'a goat is marked sold, deceased or quarantined, never removed, so its full history and lineage stay intact for the herd records.' }
+		],
 		outcomes: ['one on-premise server, zero cloud for the core', 'works on any phone on the farm wifi'],
 		stack: ['django', 'drf', 'postgres', 'react', 'docker'],
 		schematic: ['qr tag', 'phone browser', 'django api', 'postgres'],
@@ -127,6 +137,15 @@ export const PROJECTS: Project[] = [
 		id: 'grece', title: 'grece hydroponics', cluster: 'embedded', status: 'featured', year: '2026', x: 66, y: 66,
 		summary:
 			'an automated nutrient film hydroponics setup. a raspberry pi and an arduino hold water flow, lighting, and nutrient dosing steady, while ph, ec, temperature and humidity stream to a django api you can watch and adjust from anywhere.',
+		why:
+			'i wanted a hydroponics setup that holds the right conditions on its own and lets me watch and tune it from anywhere, instead of checking the water by hand every day. so i split it the way embedded work should: the arduino handles the real-time hardware, and a raspberry pi runs the logic, the history and the api.',
+		features: [
+			{ label: 'arduino runs the hardware, the pi runs the logic', detail: 'the arduino reads the sensors and drives the pumps, lights and dosing relays in real time, then streams readings to a raspberry pi over serial. the pi holds the control logic, the database and the api.' },
+			{ label: 'holds ph, ec, temp and humidity in range', detail: 'ph, ec, water temperature and humidity are read continuously, and the system manages water flow, lighting and nutrient dosing to keep the nutrient film in the right band without someone standing over it.' },
+			{ label: 'watch and tune it from anywhere', detail: 'a django rest api exposes live readings and settings, so you can check the setup and adjust targets remotely instead of walking to the tank.' },
+			{ label: 'every reading logged', detail: 'sensor data is stored over time, so you can see how conditions moved across a grow and set the targets from real history instead of guesswork.' },
+			{ label: 'thresholds that alert', detail: 'set a safe range per variable and anything outside it is flagged, so a bad ph or ec swing is caught early instead of after the plants suffer.' }
+		],
 		outcomes: ['real-time monitoring and remote control', 'every reading logged for later tuning'],
 		stack: ['raspberry pi', 'arduino', 'python', 'django rest', 'c++'],
 		schematic: ['sensors', 'arduino', 'raspberry pi', 'django api'],
