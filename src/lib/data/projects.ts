@@ -62,6 +62,16 @@ export const PROJECTS: Project[] = [
 		id: 'tq_chatbot', title: 'tq chatbot', cluster: 'ai', status: 'featured', year: '2026', x: 13, y: 15,
 		summary:
 			'a multi-tenant funnel chatbot that talks to a visitor, scores how serious they are in real time, and pushes the hot ones straight to a booked call. build it once, reconfigure it per client.',
+		why:
+			'i wanted one closer i could reuse for any client instead of rebuilding it each time, so a whole client setup, the personality, the qualifying logic, the scoring weights, is a single database row. and i built it as a closer, not a support bot. the only test that matters is whether it books a high-intent visitor faster than a contact form would.',
+		features: [
+			{ label: 'scores intent in real time', detail: 'on every message the model pulls five buying signals and weights them into one score. that score, not a keyword, decides what the bot does next.' },
+			{ label: 'knows when to stop selling', detail: 'a state machine walks greeting to qualifying to closing. once a lead is hot it stops asking and drops the calendly card, so it never talks a booked call back out of the room.' },
+			{ label: 'three lead paths', detail: 'hot leads book a call and notify the team, warm leads get their email captured for follow-up, and cold leads get a polite exit and are stored quietly. no lead is spammed or lost.' },
+			{ label: 'one row per client', detail: 'the same engine runs every client bot. swapping a client means swapping one supabase row, so nothing is rebuilt and nothing is shared between them.' },
+			{ label: 'runs for zero dollars until it earns', detail: 'with no api keys it runs on local storage, a mock closer, and log-only alerts, so i can build and demo it for free. each part promotes to production one key at a time.' },
+			{ label: 'no crm lock-in', detail: 'hot-lead events fire to a single per-client n8n webhook, and n8n fans them out to email, slack, or wherever the client already works.' }
+		],
 		outcomes: ['runs for zero dollars with no api keys', 'promotes to production one key at a time'],
 		stack: ['react', 'fastapi', 'supabase', 'groq', 'n8n', 'cloudflare'],
 		schematic: ['widget', 'fastapi', 'supabase', 'groq', 'n8n', 'booked call'],
