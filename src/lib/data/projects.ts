@@ -5,6 +5,13 @@
 export type Cluster = 'ai' | 'fullstack' | 'automation' | 'embedded';
 export type Status = 'featured' | 'archive' | 'hidden';
 
+// A technical highlight shown in the detail modal under "how it works". Optional per
+// project, so most projects render nothing extra and only the ones worth explaining do.
+export interface Feature {
+	label: string; // short lowercase title
+	detail: string; // one sentence, lowercase, no em-dash
+}
+
 export interface Project {
 	id: string;
 	title: string;
@@ -16,6 +23,8 @@ export interface Project {
 	stack: string[];
 	schematic: string[];
 	github: string;
+	why?: string; // short motivation, optional (shown in the detail modal)
+	features?: Feature[]; // technical highlights, optional (shown as "how it works")
 	live?: string; // hosted/live site url, optional
 	loom?: string; // loom share id -> walkthrough embed, optional
 	x: number; // map position, %
@@ -62,6 +71,16 @@ export const PROJECTS: Project[] = [
 		id: 'grimoire', title: 'grimoire', cluster: 'ai', status: 'featured', year: '2026', x: 31, y: 44,
 		summary:
 			'a local knowledge base that every coding agent reaches through a single mcp gateway. it ingests documents, remembers past sessions, and hands back only what is relevant, project by project. everything runs offline on my own machine.',
+		why:
+			'i wanted a second brain. one store my coding agents and i both read from, so nothing gets repeated. it also runs my day, with a to-do list on the eisenhower matrix and a timetable that regenerates as the day shifts, since i never keep a fixed schedule.',
+		features: [
+			{ label: 'runs on my own machine', detail: 'chunking and embedding happen locally on my own gpu. nothing about my notes leaves the device.' },
+			{ label: '500-token chunks, small overlap', detail: 'text is split into ~500-token chunks with a small carry-over overlap, so an idea that straddles a boundary is never lost.' },
+			{ label: '768-dimension local embeddings', detail: 'a local nomic-embed model turns each chunk into a 768-dimension vector, stored in sqlite-vec.' },
+			{ label: 'graph-tree, one to two hop retrieval', detail: 'a query starts at the project node and walks one to two hops out through the graph, so it pulls only related context, never the whole base.' },
+			{ label: 'narrow vector search', detail: 'the vector search runs only over that graph-narrowed set of candidates, not across everything.' },
+			{ label: 'time-weighted scoring', detail: 'results rank by similarity times a recency decay, so what i touched recently surfaces first.' }
+		],
 		outcomes: ['retrieval, memory and compaction all verified', 'embeddings running on a local gpu'],
 		stack: ['python', 'sqlite-vec', 'fastmcp', 'ollama', 'opentelemetry'],
 		schematic: ['agents', 'mcp gateway', 'sqlite-vec'],

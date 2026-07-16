@@ -45,6 +45,22 @@
 					</div>
 				</div>
 				<p style="color:var(--ink);text-transform:lowercase">{p.summary}</p>
+				{#if p.why}
+					<p class="why">{p.why}</p>
+				{/if}
+				{#if p.features?.length}
+					<div class="feats">
+						<span class="mono feats-label">how it works</span>
+						<div class="feat-list">
+							{#each p.features as f (f.label)}
+								<div class="feat">
+									<span class="feat-k">{f.label}</span>
+									<span class="feat-v">{f.detail}</span>
+								</div>
+							{/each}
+						</div>
+					</div>
+				{/if}
 				<div class="olist">
 					{#each p.outcomes as o (o)}<div><i></i><span>{o}</span></div>{/each}
 				</div>
@@ -59,3 +75,48 @@
 		</div>
 	</div>
 {/if}
+
+<style>
+	/* short motivation line, set off from the summary with a left accent rule */
+	.why {
+		color: var(--ink-soft);
+		text-transform: lowercase;
+		font-size: 15px;
+		line-height: 1.6;
+		border-left: 2px solid var(--accent);
+		padding-left: 14px;
+	}
+	/* "how it works": an eyebrow label over a list of labelled technical highlights */
+	.feats {
+		display: flex;
+		flex-direction: column;
+		gap: 14px;
+	}
+	.feats-label {
+		color: var(--ink-soft);
+	}
+	.feat-list {
+		display: flex;
+		flex-direction: column;
+		gap: 14px;
+	}
+	.feat {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+		border-left: 2px solid var(--border-strong);
+		padding-left: 12px;
+	}
+	.feat-k {
+		color: var(--accent);
+		text-transform: lowercase;
+		font-size: 13px;
+		letter-spacing: 0.02em;
+	}
+	.feat-v {
+		color: var(--ink);
+		text-transform: lowercase;
+		font-size: 14px;
+		line-height: 1.55;
+	}
+</style>
