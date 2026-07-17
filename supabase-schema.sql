@@ -43,6 +43,11 @@ alter table projects add column if not exists features jsonb not null default '[
 -- has no loom video). Safe to re-run.
 alter table projects add column if not exists cover_image text;
 
+-- Cached loom oEmbed thumbnail (animated gif). Auto-filled by /admin on save so
+-- the featured card can show a video preview without the browser calling loom.
+-- Safe to re-run.
+alter table projects add column if not exists loom_thumb text;
+
 -- ----------------------------------------------------------------------------
 -- site_settings: single-row key/value for editable global copy (availability,
 -- hero line, socials). Optional; the app has sensible defaults without it.

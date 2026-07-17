@@ -16,6 +16,7 @@ function rowToProject(row: Record<string, unknown>): Project {
 		github: String(row.github_url ?? ''),
 		live: row.live_url ? String(row.live_url) : '',
 		loom: row.loom_id ? String(row.loom_id) : '',
+		loomThumb: row.loom_thumb ? String(row.loom_thumb) : undefined,
 		cover: row.cover_image ? String(row.cover_image) : undefined,
 		why: row.why ? String(row.why) : undefined,
 		features: Array.isArray(row.features) ? (row.features as Feature[]) : undefined,

@@ -2,6 +2,23 @@ import type { Actions, PageServerLoad } from './$types';
 import { fail } from '@sveltejs/kit';
 import { supabaseConfigured } from '$lib/server/supabase';
 
+// Fetch loom's oEmbed thumbnail_url (an animated gif) for a share id, so the
+// card can show a preview without the browser ever calling loom. Best-effort:
+// the thumbnail url carries a per-video hash that can't be guessed, so oEmbed is
+// the only way to get it. Returns null on any failure.
+async function loomThumb(loomId: string): Promise<string | null> {
+	try {
+		const res = await fetch(
+			`https://www.loom.com/v1/oembed?url=https://www.loom.com/share/${encodeURIComponent(loomId)}`
+		);
+		if (!res.ok) return null;
+		const j = (await res.json()) as { thumbnail_url?: string };
+		return j.thumbnail_url ?? null;
+	} catch {
+		return null;
+	}
+}
+
 export const load: PageServerLoad = async ({ locals, url }) => {
 	// A failed magic-link exchange redirects here with ?error=; surface it.
 	const loginError = url.searchParams.get('error');
@@ -118,6 +135,15 @@ export const actions: Actions = {
 		if (Object.keys(patch).length === 0) return { saved: id };
 		const { error } = await locals.supabase!.from('projects').update(patch).eq('id', id);
 		if (error) return fail(400, { message: error.message });
+
+		// best-effort: cache the loom oEmbed thumbnail in a second write, so a loom
+		// hiccup or an un-migrated loom_thumb column can never break the save itself.
+		if (f.has('loom_id')) {
+			const lid = String(f.get('loom_id') ?? '').trim();
+			const thumb = lid ? await loomThumb(lid) : null;
+			await locals.supabase!.from('projects').update({ loom_thumb: thumb }).eq('id', id);
+		}
+
 		return { saved: id };
 	},
 
