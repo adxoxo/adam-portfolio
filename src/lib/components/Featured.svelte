@@ -5,28 +5,55 @@
 	let { projects }: { projects: Project[] } = $props();
 	const feats = $derived(featured(projects));
 
-	// Loom serves a still poster per video; used as a lightweight <img> so the
-	// home page loads no video iframes (the player only mounts in the modal on
-	// click). If the poster 404s we fall back to the branded panel underneath.
-	const loomPoster = (id: string) => `https://cdn.loom.com/sessions/thumbnails/${id}-with-play.jpg`;
-	let failed = $state<Record<string, boolean>>({});
+	// Loom serves a still poster and an animated preview gif per video. The still
+	// loads with the card (lightweight, no iframe); the animated gif is swapped in
+	// only while the card is on screen, so scrolling the grid previews each video.
+	const loomStill = (id: string) => `https://cdn.loom.com/sessions/thumbnails/${id}-with-play.jpg`;
+	const loomAnim = (id: string) => `https://cdn.loom.com/sessions/thumbnails/${id}-with-play.gif`;
+	let stillFailed = $state<Record<string, boolean>>({});
+	let animFailed = $state<Record<string, boolean>>({});
+	let inview = $state<Record<string, boolean>>({});
+
+	// Mark a card in/out of view so its animated preview can mount only on screen.
+	// Skipped under reduced-motion (the still poster stays), and it's a plain
+	// image swap, so no video player ever loads in the grid.
+	function preview(id: string) {
+		return (node: HTMLElement) => {
+			if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+			const io = new IntersectionObserver(([e]) => (inview[id] = e.isIntersecting), {
+				threshold: 0.6
+			});
+			io.observe(node);
+			return () => io.disconnect();
+		};
+	}
 </script>
 
 <div class="feat-grid">
 	{#each feats as p (p.id)}
 		<button class="fcard" onclick={() => openDetail(p, 'feat')}>
 			{#if p.loom}
-				<div class="media video">
-					{#if !failed[p.id]}
+				<div class="media video" {@attach preview(p.id)}>
+					{#if !stillFailed[p.id]}
 						<img
 							class="media-img"
-							src={loomPoster(p.loom)}
+							src={loomStill(p.loom)}
 							alt=""
 							loading="lazy"
-							onerror={() => (failed[p.id] = true)}
+							onerror={() => (stillFailed[p.id] = true)}
 						/>
+						{#if inview[p.id] && !animFailed[p.id]}
+							<img
+								class="media-img anim"
+								src={loomAnim(p.loom)}
+								alt=""
+								loading="lazy"
+								onerror={() => (animFailed[p.id] = true)}
+							/>
+						{/if}
+					{:else}
+						<span class="play" aria-hidden="true"></span>
 					{/if}
-					<span class="play" aria-hidden="true"></span>
 					<span class="media-tag mono">watch walkthrough</span>
 				</div>
 			{:else if p.cover}
@@ -64,14 +91,26 @@
 		object-fit: cover;
 		display: block;
 	}
-	/* branded poster sits behind the loom thumbnail, and shows alone if it fails */
+	/* animated preview fades over the still once the card scrolls into view */
+	.media-img.anim {
+		animation: preview-in 0.3s ease both;
+	}
+	@keyframes preview-in {
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
+		}
+	}
+	/* branded poster + square play badge, shown only when no loom thumbnail loads
+	   (real loom thumbnails already carry their own play button) */
 	.media.video {
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		background: linear-gradient(160deg, var(--panel), var(--bg));
 	}
-	/* square play badge (the design system is 0px radius, so no circle) */
 	.play {
 		position: relative;
 		z-index: 1;
@@ -100,6 +139,15 @@
 		padding: 4px 8px;
 		border: 1px solid var(--border);
 	}
-	.fcard:hover .media { border-bottom-color: var(--accent); }
-	.fcard:hover .play { background: var(--accent-hover); }
+	.fcard:hover .media {
+		border-bottom-color: var(--accent);
+	}
+	.fcard:hover .play {
+		background: var(--accent-hover);
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.media-img.anim {
+			animation: none;
+		}
+	}
 </style>
