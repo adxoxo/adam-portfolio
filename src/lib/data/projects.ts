@@ -27,6 +27,7 @@ export interface Project {
 	features?: Feature[]; // technical highlights, optional (shown as "how it works")
 	live?: string; // hosted/live site url, optional
 	loom?: string; // loom share id -> walkthrough embed, optional
+	cover?: string; // card cover image url, optional (used when there is no loom)
 	x: number; // map position, %
 	y: number;
 }

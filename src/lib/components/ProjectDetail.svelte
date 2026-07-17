@@ -36,6 +36,9 @@
 						<iframe src={p.live} title="{p.title} live preview" loading="lazy"></iframe>
 					</div>
 				{/if}
+				{#if p.cover && !p.loom && !p.live}
+					<div class="cover-frame"><img src={p.cover} alt="" loading="lazy" /></div>
+				{/if}
 				<div class="fig">
 					<div class="schem">
 						{#each p.schematic as step, i (i)}
@@ -52,7 +55,7 @@
 					<div class="feats">
 						<span class="mono feats-label">how it works</span>
 						<div class="feat-list">
-							{#each p.features as f (f.label)}
+							{#each p.features as f, i (i)}
 								<div class="feat">
 									<span class="feat-k">{f.label}</span>
 									<span class="feat-v">{f.detail}</span>
@@ -77,6 +80,9 @@
 {/if}
 
 <style>
+	/* cover image shown in the modal when a project has an image but no video/live */
+	.cover-frame { width: 100%; border: 1px solid var(--border); overflow: hidden; }
+	.cover-frame img { display: block; width: 100%; height: auto; }
 	/* short motivation line, set off from the summary with a left accent rule */
 	.why {
 		color: var(--ink-soft);

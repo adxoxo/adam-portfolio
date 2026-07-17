@@ -34,6 +34,15 @@ create index if not exists projects_status_sort_idx on projects (status, sort_or
 -- Added after initial launch. Safe to re-run: upgrades an existing table.
 alter table projects add column if not exists live_url text;
 
+-- Detail-modal showcase content (added later). why = short motivation;
+-- features = jsonb [{label, detail}] "how it works" list. Safe to re-run.
+alter table projects add column if not exists why text;
+alter table projects add column if not exists features jsonb not null default '[]'::jsonb;
+
+-- Optional card cover image (used as the featured-card poster when a project
+-- has no loom video). Safe to re-run.
+alter table projects add column if not exists cover_image text;
+
 -- ----------------------------------------------------------------------------
 -- site_settings: single-row key/value for editable global copy (availability,
 -- hero line, socials). Optional; the app has sensible defaults without it.

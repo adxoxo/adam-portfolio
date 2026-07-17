@@ -1,5 +1,5 @@
 import type { PageServerLoad } from './$types';
-import { PROJECTS, type Project } from '$lib/data/projects';
+import { PROJECTS, type Project, type Feature } from '$lib/data/projects';
 
 // Map a Supabase `projects` row to the shape the components consume.
 function rowToProject(row: Record<string, unknown>): Project {
@@ -16,6 +16,9 @@ function rowToProject(row: Record<string, unknown>): Project {
 		github: String(row.github_url ?? ''),
 		live: row.live_url ? String(row.live_url) : '',
 		loom: row.loom_id ? String(row.loom_id) : '',
+		cover: row.cover_image ? String(row.cover_image) : undefined,
+		why: row.why ? String(row.why) : undefined,
+		features: Array.isArray(row.features) ? (row.features as Feature[]) : undefined,
 		x: Number(row.map_x ?? 50),
 		y: Number(row.map_y ?? 50)
 	};

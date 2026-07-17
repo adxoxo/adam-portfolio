@@ -6,6 +6,15 @@
 	// adapter emits _worker.js + assets into .svelte-kit/cloudflare.
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "adam-portfolio",
+	// Browser-safe config, committed so `wrangler deploy` cannot strip it.
+	// The anon key is already shipped to the client on every load; RLS is the
+	// real guard. SUPABASE_SERVICE_ROLE_KEY + any tokens/webhooks stay dashboard
+	// SECRETS (never committed).
+	"vars": {
+		"PUBLIC_SUPABASE_URL": "https://vldogzagemaatnzszhiu.supabase.co",
+		"PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsZG9nemFnZW1hYXRuenN6aGl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQwNDg3NzMsImV4cCI6MjA5OTYyNDc3M30.awmVTTEdGEs56u53v3OC0VobpYS35YRvPsjivTcerMM",
+		"PUBLIC_GITHUB_USER": "adxoxo"
+	},
 	"compatibility_date": "2025-05-01",
 	"compatibility_flags": ["nodejs_compat"],
 	"main": ".svelte-kit/cloudflare/_worker.js",
