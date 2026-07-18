@@ -137,7 +137,10 @@ button { font-family: inherit; }
 
 /* archive marquee */
 .marquee { overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); }
-.mtrack { display: flex; gap: 14px; width: max-content; padding: 4px 0; }
+.mtrack { display: flex; width: max-content; padding: 4px 0; }
+/* one repeat of the archive list; margin-right carries the same 14px as the inner
+   gap so consecutive sequences tile evenly and the -50% shift stays seamless */
+.mseq { display: flex; gap: 14px; margin-right: 14px; flex-shrink: 0; }
 @media (prefers-reduced-motion: no-preference) { .mtrack { animation: marq var(--dur, 44s) linear infinite; } .marquee:hover .mtrack { animation-play-state: paused; } }
 @keyframes marq { to { transform: translateX(-50%); } }
 .acard { flex: 0 0 230px; border: 1px solid var(--border); background: var(--bg); padding: 20px; display: flex; flex-direction: column; gap: 10px; transition: border-color 0.2s; cursor: pointer; }
@@ -150,8 +153,9 @@ button { font-family: inherit; }
 @media (max-width: 640px) {
 	.marquee { overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; scroll-snap-type: x proximity; scroll-padding-left: var(--gutter); -webkit-mask-image: none; mask-image: none; }
 	.mtrack { width: max-content; padding: 4px var(--gutter); animation: none; }
+	.mseq { margin-right: 0; }
 	.acard { scroll-snap-align: start; }
-	.acard.dup { display: none; }
+	.mseq.dup { display: none; }
 }
 
 /* footer */
