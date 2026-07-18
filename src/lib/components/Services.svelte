@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { SERVICES, STACK } from '$lib/data/services';
+	import StackLogos from './StackLogos.svelte';
 </script>
 
 <section class="section" id="services">
@@ -25,7 +26,7 @@
 				{#each STACK as g (g.label)}
 					<div class="stack-g">
 						<span class="stack-glabel mono">{g.label}</span>
-						<div class="chips">{#each g.items as it (it)}<span>{it}</span>{/each}</div>
+						<StackLogos stack={g.items} variant="stack" />
 					</div>
 				{/each}
 			</div>

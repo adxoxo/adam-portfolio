@@ -33,7 +33,18 @@ const FILES: Record<string, string> = {
 	'c++': 'cplusplus',
 	cplusplus: 'cplusplus',
 	gsap: 'gsap',
-	esp32: 'espressif'
+	esp32: 'espressif',
+	'next.js': 'nextjs',
+	nextjs: 'nextjs',
+	angular: 'angular',
+	'node.js': 'nodejs',
+	nodejs: 'nodejs',
+	node: 'nodejs',
+	figma: 'figma',
+	claude: 'claude',
+	'mcp servers': 'mcp',
+	mcp: 'mcp',
+	stm32: 'stm32'
 };
 
 // Returns the logo src for a stack label, or null when there is no logo for it.
