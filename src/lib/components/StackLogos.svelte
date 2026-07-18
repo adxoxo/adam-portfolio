@@ -1,18 +1,25 @@
 <script lang="ts">
 	import { techIcon } from '$lib/data/tech';
 
-	// Renders a project's stack as brand logos. Each logo sits on a constant light
+	// Renders a project's stack. In logo mode each mark sits on a constant light
 	// tile (--logo-surface) so full-colour marks stay legible in both site (light)
-	// and map (dark) modes. Labels with no logo fall back to a small text chip.
+	// and map (dark) modes; labels with no logo fall back to a text chip. Pass
+	// `text` to render every item as a text chip instead (the stack section stays
+	// logo-only, the per-project listings render as text).
 	let {
 		stack,
-		variant = 'card'
-	}: { stack: string[]; variant?: 'card' | 'detail' | 'archive' | 'stack' } = $props();
+		variant = 'card',
+		text = false
+	}: {
+		stack: string[];
+		variant?: 'card' | 'detail' | 'archive' | 'stack';
+		text?: boolean;
+	} = $props();
 </script>
 
 <ul class="stack-logos {variant}" aria-label="stack">
 	{#each stack as s (s)}
-		{@const src = techIcon(s)}
+		{@const src = text ? null : techIcon(s)}
 		{#if src}
 			<li class="logo" title={s}><img {src} alt={s} loading="lazy" /></li>
 		{:else}

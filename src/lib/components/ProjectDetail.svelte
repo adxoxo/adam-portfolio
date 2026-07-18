@@ -68,7 +68,7 @@
 				<div class="olist">
 					{#each p.outcomes as o (o)}<div><i></i><span>{o}</span></div>{/each}
 				</div>
-				<StackLogos stack={p.stack} variant="detail" />
+				<StackLogos stack={p.stack} variant="detail" text />
 				{#if p.live || p.github}
 					<div class="fd-links">
 						{#if p.live}<a class="repo-link" href={p.live} target="_blank" rel="noopener">visit site &#8599;</a>{/if}

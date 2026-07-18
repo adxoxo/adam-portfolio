@@ -27,7 +27,7 @@
 				>
 					<span class="yr mono">{p.year}</span>
 					<h4>{p.title}</h4>
-					<StackLogos stack={p.stack} variant="archive" />
+					<StackLogos stack={p.stack} variant="archive" text />
 					<span class="ext">open repo &#8599;</span>
 				</a>
 			{:else}
@@ -40,7 +40,7 @@
 				>
 					<span class="yr mono">{p.year}</span>
 					<h4>{p.title}</h4>
-					<StackLogos stack={p.stack} variant="archive" />
+					<StackLogos stack={p.stack} variant="archive" text />
 				</button>
 			{/if}
 		{/each}

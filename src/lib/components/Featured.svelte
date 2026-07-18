@@ -42,7 +42,7 @@
 			</div>
 			<h3>{p.title}</h3>
 			<p>{p.summary}</p>
-			<StackLogos stack={p.stack} variant="card" />
+			<StackLogos stack={p.stack} variant="card" text />
 			<span class="go">{p.loom ? 'watch + open' : 'open'} &#8599;</span>
 		</button>
 	{/each}
