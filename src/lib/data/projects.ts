@@ -131,7 +131,7 @@ export const PROJECTS: Project[] = [
 			{ label: 'nothing is ever deleted', detail: 'a goat is marked sold, deceased or quarantined, never removed, so its full history and lineage stay intact for the herd records.' }
 		],
 		outcomes: ['one on-premise server, zero cloud for the core', 'works on any phone on the farm wifi'],
-		stack: ['django', 'drf', 'postgres', 'react', 'docker'],
+		stack: ['django', 'postgres', 'react', 'docker'],
 		schematic: ['qr tag', 'phone browser', 'django api', 'postgres'],
 		github: 'https://github.com/adxoxo/GoatMonitoring'
 	},
@@ -149,7 +149,7 @@ export const PROJECTS: Project[] = [
 			{ label: 'thresholds that alert', detail: 'set a safe range per variable and anything outside it is flagged, so a bad ph or ec swing is caught early instead of after the plants suffer.' }
 		],
 		outcomes: ['real-time monitoring and remote control', 'every reading logged for later tuning'],
-		stack: ['raspberry pi', 'arduino', 'python', 'django rest', 'c++'],
+		stack: ['raspberry pi', 'arduino', 'python', 'django', 'c++'],
 		schematic: ['sensors', 'arduino', 'raspberry pi', 'django api'],
 		github: 'https://github.com/adxoxo/GRECE-Hydroponics-Monitoring-'
 	},
@@ -185,7 +185,7 @@ export const PROJECTS: Project[] = [
 		summary:
 			"a pot that reads light, temperature, humidity and soil moisture, then reports the plant's health to a web and mobile view.",
 		outcomes: ['four sensors, one health status', 'readings served over a rest api'],
-		stack: ['esp32', 'sensors', 'django rest'],
+		stack: ['esp32', 'sensors', 'django'],
 		schematic: ['sensors', 'esp32', 'django rest'],
 		github: 'https://github.com/adxoxo/SmartPot'
 	},

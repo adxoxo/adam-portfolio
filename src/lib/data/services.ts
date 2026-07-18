@@ -34,7 +34,7 @@ export interface StackGroup {
 export const STACK: StackGroup[] = [
 	{ label: 'languages', items: ['python', 'javascript', 'typescript'] },
 	{ label: 'frontend', items: ['react', 'svelte', 'next.js', 'angular'] },
-	{ label: 'backend', items: ['django', 'rest', 'fastapi', 'node.js', 'mcp servers'] },
+	{ label: 'backend', items: ['django', 'fastapi', 'node.js', 'mcp servers'] },
 	{ label: 'ai', items: ['claude', 'groq', 'ollama'] },
 	{ label: 'automation and infra', items: ['n8n', 'supabase', 'cloudflare', 'docker'] },
 	{ label: 'embedded', items: ['esp32', 'stm32', 'arduino', 'raspberry pi', 'c++'] },
