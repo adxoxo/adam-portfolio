@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { archived, type Project } from '$lib/data/projects';
 	import { openDetail } from '$lib/state/app.svelte';
+	import StackLogos from './StackLogos.svelte';
 
 	let { projects }: { projects: Project[] } = $props();
 	const arch = $derived(
@@ -26,7 +27,7 @@
 				>
 					<span class="yr mono">{p.year}</span>
 					<h4>{p.title}</h4>
-					<span class="st">{p.stack.join(', ')}</span>
+					<StackLogos stack={p.stack} variant="archive" />
 					<span class="ext">open repo &#8599;</span>
 				</a>
 			{:else}
@@ -39,7 +40,7 @@
 				>
 					<span class="yr mono">{p.year}</span>
 					<h4>{p.title}</h4>
-					<span class="st">{p.stack.join(', ')}</span>
+					<StackLogos stack={p.stack} variant="archive" />
 				</button>
 			{/if}
 		{/each}

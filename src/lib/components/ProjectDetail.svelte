@@ -4,6 +4,7 @@
 	import { fade } from 'svelte/transition';
 	import { send, receive } from '$lib/transition';
 	import LoomEmbed from './LoomEmbed.svelte';
+	import StackLogos from './StackLogos.svelte';
 
 	function onKeydown(e: KeyboardEvent) {
 		if (e.key === 'Escape') closeDetail();
@@ -67,7 +68,7 @@
 				<div class="olist">
 					{#each p.outcomes as o (o)}<div><i></i><span>{o}</span></div>{/each}
 				</div>
-				<div class="chips">{#each p.stack as s (s)}<span>{s}</span>{/each}</div>
+				<StackLogos stack={p.stack} variant="detail" />
 				{#if p.live || p.github}
 					<div class="fd-links">
 						{#if p.live}<a class="repo-link" href={p.live} target="_blank" rel="noopener">visit site &#8599;</a>{/if}

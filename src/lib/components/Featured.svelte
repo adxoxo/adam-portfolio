@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { featured, CLUSTER_LABEL, type Project } from '$lib/data/projects';
 	import { openDetail } from '$lib/state/app.svelte';
+	import StackLogos from './StackLogos.svelte';
 
 	let { projects }: { projects: Project[] } = $props();
 	const feats = $derived(featured(projects));
@@ -41,7 +42,7 @@
 			</div>
 			<h3>{p.title}</h3>
 			<p>{p.summary}</p>
-			<div class="stk">{#each p.stack as s (s)}<span>{s}</span>{/each}</div>
+			<StackLogos stack={p.stack} variant="card" />
 			<span class="go">{p.loom ? 'watch + open' : 'open'} &#8599;</span>
 		</button>
 	{/each}

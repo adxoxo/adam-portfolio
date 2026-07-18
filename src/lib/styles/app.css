@@ -18,6 +18,9 @@
 	--accent-hover: #4f7a52;
 	--on-accent: #ffffff;
 	--focus: #4f7a52;
+	/* constant light tile behind full-colour stack logos. deliberately not
+	   overridden in map mode, so dark marks (django, ollama) stay legible on dark */
+	--logo-surface: #f5f6f3;
 	--gutter: 24px;
 	--max: 1180px;
 	--r: 0;
@@ -116,8 +119,6 @@ button { font-family: inherit; }
 .fcard .top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .fcard h3 { font-size: 22px; }
 .fcard p { color: var(--ink-soft); text-transform: lowercase; font-size: 15px; flex: 1; }
-.fcard .stk { display: flex; flex-wrap: wrap; gap: 6px; }
-.fcard .stk span { font-size: 11px; letter-spacing: 0.02em; text-transform: lowercase; color: var(--ink-soft); }
 .fcard .go { font-size: 12px; letter-spacing: 0.04em; text-transform: lowercase; color: var(--accent); }
 .chip { border: 1px solid var(--border); padding: 4px 8px; color: var(--ink-soft); }
 
@@ -143,7 +144,6 @@ button { font-family: inherit; }
 .acard:hover { border-color: var(--accent); }
 .acard .yr { color: var(--ink-soft); }
 .acard h4 { font-size: 17px; text-transform: lowercase; }
-.acard .st { color: var(--ink-soft); font-size: 12px; text-transform: lowercase; }
 .acard .ext { color: var(--accent); font-size: 12px; text-transform: lowercase; }
 /* mobile / touch: swap the auto-marquee for a swipeable snap strip so cards are a
    still target you can actually tap, and drop the duplicate loop copies. */
@@ -222,8 +222,6 @@ button { font-family: inherit; }
 .olist { display: flex; flex-direction: column; gap: 10px; }
 .olist div { display: flex; gap: 12px; color: var(--ink); text-transform: lowercase; font-size: 15px; }
 .olist i { width: 5px; height: 5px; background: var(--accent); margin-top: 9px; flex-shrink: 0; }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.chips span { border: 1px solid var(--border); padding: 5px 9px; font-size: 12px; text-transform: lowercase; color: var(--ink-soft); }
 .fd-links { display: flex; gap: 12px; flex-wrap: wrap; }
 .repo-link { color: var(--accent); font-weight: 500; letter-spacing: 0.02em; text-transform: lowercase; border-bottom: 1px solid transparent; }
 .repo-link:hover { border-color: var(--accent); }
