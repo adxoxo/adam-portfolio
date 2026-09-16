@@ -1,0 +1,147 @@
+/* ============================================================
+   public site styles (design v2, 2026-09-14)
+   Everything is scoped under `.pf`, the root element of the public page, so
+   these rules never reach /admin, which keeps its own stylesheet
+   (src/lib/styles/app.css). Fonts come from src/lib/styles/fonts.css, loaded
+   by the root layout for every route.
+   ============================================================ */
+
+/* ---------- tokens (design profile 2026-07-14) ---------- */
+.pf {
+	--bg: #FAFBF7;
+	--surface: #EEF1E7;
+	--surface-2: #FFFFFF;
+	--border: #DCE3D3;
+	--border-strong: #C5CFB9;
+	--text: #212C21;
+	--muted: #66735F;
+	--accent: #4F7A52;
+	--accent-deep: #3D5F40;
+	--on-accent: #FFFFFF;
+	--pill-bg: rgba(250, 251, 247, 0.86);
+	--shadow: rgba(33, 44, 33, 0.16);
+	--font-head: 'Sora', system-ui, sans-serif;
+	--font-body: 'Work Sans', system-ui, sans-serif;
+	--section-gap: 104px;
+	--radius: 0px;
+	--container: 1200px;
+	--gutter: 24px;
+	--pill-h: 56px;
+	--top-offset: 92px;
+}
+/* dark map mode: the original palette from the previous site */
+.pf.dark {
+	--bg: #10140d;
+	--surface: #171d13;
+	--surface-2: #1f271b;
+	--border: #2b3324;
+	--border-strong: #3a4633;
+	--text: #e7f4e3;
+	--muted: #9aa893;
+	--accent: #7bb77e;
+	--accent-deep: #7bb77e;
+	--on-accent: #10140d;
+	--pill-bg: rgba(23, 29, 19, 0.8);
+	--shadow: rgba(0, 0, 0, 0.5);
+	color-scheme: dark;
+}
+@media (max-width: 760px) { .pf { --section-gap: 64px; --gutter: 18px; --top-offset: 84px; } }
+
+/* ---------- document ---------- */
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; }
+body:has(.pf) { background: #FAFBF7; overflow-x: hidden; scroll-behavior: smooth; }
+body:has(.pf.dark) { background: #10140d; }
+@media (prefers-reduced-motion: reduce) {
+	body:has(.pf) { scroll-behavior: auto; }
+	.pf *, .pf *::before, .pf *::after { transition-duration: 0.001s !important; animation-duration: 0.001s !important; animation-iteration-count: 1 !important; }
+}
+
+/* ---------- base ---------- */
+.pf, .pf *, .pf *::before, .pf *::after { box-sizing: border-box; }
+.pf { background: var(--bg); color: var(--text); min-height: 100vh; font-family: var(--font-body); font-weight: 400; font-size: 17px; line-height: 1.7; -webkit-font-smoothing: antialiased; transition: background-color 0.35s ease, color 0.35s ease; }
+.pf h1, .pf h2, .pf h3, .pf h4 { font-family: var(--font-head); font-weight: 700; line-height: 1.15; margin: 0; letter-spacing: -0.01em; overflow-wrap: anywhere; }
+.pf h3, .pf h4 { font-weight: 600; }
+.pf p { margin: 0; }
+.pf a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+.pf a:hover { color: var(--accent-deep); }
+.pf button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+.pf :focus-visible { outline: 2px solid var(--accent-deep); outline-offset: 3px; }
+.pf ul, .pf ol { margin: 0; padding: 0; list-style: none; }
+.pf img { max-width: 100%; }
+.pf .visually-hidden { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.pf .skip { position: absolute; left: 8px; top: 8px; z-index: 100; background: var(--accent-deep); color: var(--on-accent); padding: 10px 14px; transform: translateY(-200%); }
+.pf .skip:focus { transform: none; }
+.pf .container { width: 100%; max-width: var(--container); margin: 0 auto; padding: 0 var(--gutter); }
+.pf section.block { padding: var(--section-gap) 0; }
+/* anchored sections stop below the floating pill */
+.pf section[id] { scroll-margin-top: calc(var(--pill-h) + 20px); }
+.pf .hairline { border-top: 1px solid var(--border); }
+
+/* ---------- type helpers ---------- */
+.pf .eyebrow { font-family: var(--font-body); font-weight: 500; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); display: flex; align-items: center; gap: 10px; }
+.pf .eyebrow::before { content: ""; width: 8px; height: 8px; background: var(--accent); flex: none; }
+.pf .h-section { font-size: clamp(1.75rem, 3vw, 2.5rem); margin-top: 14px; max-width: 18ch; }
+.pf .lede { font-size: 19px; color: var(--muted); max-width: 56ch; }
+.pf .small { font-size: 14px; line-height: 1.55; }
+.pf .muted { color: var(--muted); }
+.pf .kind { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500; color: var(--muted); }
+.pf .kind b { font-weight: 500; color: var(--accent); }
+.pf .chip { font-size: 12px; font-weight: 500; letter-spacing: 0.02em; border: 1px solid var(--border); background: var(--bg); padding: 3px 8px; color: var(--muted); }
+
+/* ---------- buttons ---------- */
+.pf .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; font-family: var(--font-body); font-size: 14px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none; color: var(--on-accent); background: var(--accent-deep); border: 1px solid var(--accent-deep); border-radius: var(--radius); padding: 12px 30px; transition: opacity 0.2s ease, background-color 0.2s ease; white-space: nowrap; }
+.pf .btn:hover { opacity: 0.85; color: var(--on-accent); }
+.pf .btn:disabled { opacity: 0.6; cursor: default; }
+.pf .btn--secondary { background: transparent; color: var(--accent-deep); }
+.pf .btn--secondary:hover { background: var(--surface); opacity: 1; color: var(--accent-deep); }
+.pf .btn--small { min-height: 44px; padding: 10px 20px; font-size: 13px; }
+.pf .textlink { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-weight: 500; color: var(--accent-deep); text-decoration: none; }
+.pf .textlink::after { content: "\2192"; transition: transform 0.2s ease; }
+.pf .textlink:hover::after { transform: translateX(3px); }
+.pf .textlink:hover { color: var(--accent); }
+
+/* ---------- brand ---------- */
+.pf .mark { display: inline-block; width: 22px; aspect-ratio: 448 / 577; background: var(--accent-deep); -webkit-mask: var(--mark-url) center / contain no-repeat; mask: var(--mark-url) center / contain no-repeat; flex: none; }
+.pf .brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); font-family: var(--font-head); font-weight: 700; font-size: 21px; letter-spacing: -0.01em; min-height: 44px; }
+.pf .brand:hover { color: var(--text); }
+
+/* ---------- dialogs (shared by project + contact) ---------- */
+.pf dialog { overflow: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); color: var(--text); padding: 0; width: min(760px, calc(100% - 32px)); max-height: min(90vh, 100% - 32px); margin: auto; box-shadow: 0 24px 60px var(--shadow); }
+.pf dialog::backdrop { background: rgba(16, 20, 13, 0.55); }
+/* one explicit column with a zero minimum. The implicit `auto` track sized
+   itself to the widest child's min-content contribution, and the media frame
+   (aspect-ratio 16 / 10, taller than that on a phone because its content sets
+   the height) contributes its height transferred through the ratio: at 390px
+   the track grew to 560px and the whole dialog scrolled sideways. With a zero
+   track minimum every child shrinks to the dialog instead. */
+.pf .dlg { padding: 36px 40px 40px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; }
+.pf .dlg > * { min-width: 0; }
+.pf .dlg-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.pf .dlg-head .eyebrow { flex-wrap: wrap; }
+.pf .dlg h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); letter-spacing: -0.02em; }
+.pf .dlg h2:focus { outline: none; }
+.pf .dlg h2 .tag { display: block; font-family: var(--font-body); font-weight: 400; font-size: 17px; color: var(--muted); letter-spacing: 0; margin-top: 4px; line-height: 1.4; }
+.pf .close { width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); flex: none; transition: background-color 0.15s ease; }
+.pf .close:hover { background: var(--surface); }
+.pf .close svg { width: 18px; height: 18px; }
+@media (max-width: 640px) { .pf .dlg { padding: 24px 20px 28px; gap: 18px; } }
+
+/* contact form */
+.pf .form { display: grid; gap: 16px; }
+.pf .form .two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.pf .field { display: grid; gap: 6px; }
+.pf .field label { font-size: 13px; font-weight: 500; }
+.pf .field input, .pf .field select, .pf .field textarea { font: inherit; font-size: 16px; padding: 11px 12px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); border-radius: var(--radius); width: 100%; min-height: 48px; }
+.pf .field textarea { min-height: 120px; resize: vertical; }
+.pf .field input:focus, .pf .field select:focus, .pf .field textarea:focus { outline: 2px solid var(--accent-deep); outline-offset: 1px; border-color: var(--accent-deep); }
+.pf .field [aria-invalid="true"] { border-color: #a0463c; }
+.pf .field .err { font-size: 13px; color: #a0463c; }
+.pf.dark .field [aria-invalid="true"] { border-color: #e0938a; }
+.pf.dark .field .err { color: #e0938a; }
+.pf .form-note { font-size: 13px; color: var(--muted); border-left: 2px solid var(--accent); padding-left: 12px; }
+.pf .form-result { border: 1px solid var(--accent-deep); padding: 14px 16px; font-size: 15px; background: var(--surface); }
+.pf .form-result.error { border-color: #a0463c; }
+.pf .form-result.error:focus { outline-color: #a0463c; }
+.pf .form .actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+@media (max-width: 560px) { .pf .form .two { grid-template-columns: 1fr; } }

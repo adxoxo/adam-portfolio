@@ -1,4 +1,5 @@
 <script lang="ts">
+	import '$lib/styles/app.css';
 	import { enhance } from '$app/forms';
 	import type { PageData } from './$types';
 
