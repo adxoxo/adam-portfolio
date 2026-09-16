@@ -101,6 +101,19 @@ async function phone(browser, vp) {
 
 	// overview: the hero's primary action on the first screen, readable text, 44px controls
 	await fits(page, 'overview');
+	// the brand word: one unwrapped line (line rects of the text, not the box), not
+	// clipped by its own box, next to the portrait, inside the pill, and rigid (no
+	// shrink, no wrap) so a browser with wider font metrics cannot break it
+	const brand = await page.evaluate(() => {
+		const pill = document.querySelector('.pill').getBoundingClientRect();
+		const a = document.querySelector('.pill .brand'), w = a.querySelector('.word'), i = a.querySelector('.pic');
+		const b = a.getBoundingClientRect(), r = w.getBoundingClientRect(), p = i.getBoundingClientRect();
+		const range = document.createRange(); range.selectNodeContents(w);
+		const cs = getComputedStyle(w), as = getComputedStyle(a);
+		const inside = (x, box) => x.left >= box.left - 1 && x.right <= box.right + 1 && x.top >= box.top - 1 && x.bottom <= box.bottom + 1;
+		return { text: w.textContent, lines: range.getClientRects().length, visible: cs.display !== 'none' && cs.visibility !== 'hidden' && r.width > 0 && r.height > 0, unclipped: w.scrollWidth <= w.clientWidth + 1 && inside(r, b) && inside(b, pill), beside: r.left >= p.right && Math.abs((r.top + r.bottom) / 2 - (p.top + p.bottom) / 2) < 4, rigid: as.flexShrink === '0' && as.whiteSpace === 'nowrap' && cs.flexShrink === '0', w: Math.round(r.width) };
+	});
+	check(brand.text === 'adam' && brand.visible && brand.lines === 1 && brand.unclipped && brand.beside && brand.rigid, `brand word "adam" visible on one line, unclipped, beside the portrait, inside the pill, non-shrinking (${brand.w}px, ${brand.lines} line${brand.rigid ? '' : ', shrinkable'})`);
 	const cta = await rect(page, '.hero .actions .btn');
 	check(cta.docTop >= 0 && cta.docTop + cta.height <= vp.height, `primary hero action inside the first screen (ends at ${Math.round(cta.docTop + cta.height)} of ${vp.height})`);
 	const words = await page.evaluate(() => [...document.querySelectorAll('.rotor .word')].map((w) => ({ t: w.textContent, lines: w.getClientRects().length, right: w.getBoundingClientRect().right })));

@@ -91,7 +91,11 @@
 		box-shadow: 0 10px 30px -14px var(--shadow), 0 1px 0 var(--surface-2) inset;
 		transition: background-color 0.35s ease, border-color 0.35s ease;
 	}
-	.brand { gap: 8px; font-size: 18px; padding: 0 8px 0 2px; border-radius: 999px; }
+	/* the brand is one rigid unit: it never shrinks and the word never wraps.
+	   As a shrinkable nested flex item Safari could squeeze it below its text
+	   on an iPhone and break "adam"; chromium happened to keep it whole */
+	.brand { gap: 8px; font-size: 18px; padding: 0 8px 0 2px; border-radius: 999px; flex: none; white-space: nowrap; }
+	.brand .word { flex: none; }
 	.pic { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; object-position: 50% 22%; border: 1px solid var(--border); display: block; flex: none; }
 	.brand .mark { width: 12px; }
 	.divider { width: 1px; height: 22px; background: var(--border); flex: none; }
