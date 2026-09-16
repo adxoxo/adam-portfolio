@@ -55,8 +55,7 @@
 			<!-- a disabled-looking strip: the composer is part of the picture, not a working input -->
 			<div class="chat-input" aria-hidden="true"><span class="field">message input disabled in this demo</span><b>send</b></div>
 		</div>
-		<aside class="lead-panel" aria-label="lead panel">
-			<h4>what the business sees</h4>
+		{#snippet leadRows()}
 			<div class="lead-row">
 				<span class="k">intent score</span>
 				<span class="meter" aria-hidden="true"><i style:width="{current.score * 10}%"></i></span>
@@ -70,9 +69,20 @@
 					{/each}
 				</span>
 			</div>
-			<div class="lead-row"><span class="k">path</span><span class="v">{current.path}</span></div>
-			<div class="lead-row"><span class="k">next action</span><span class="v">{current.next}</span></div>
+			<!-- every step's value is laid out in the same cell and only the current one is visible,
+			     so the panel is as tall as its tallest state and never changes size with the step -->
+			<div class="lead-row"><span class="k">path</span><span class="v stack">{#each CHAT_STEPS as s, i (s.label)}<span class:on={i === step} aria-hidden={i !== step}>{s.path}</span>{/each}</span></div>
+			<div class="lead-row"><span class="k">next action</span><span class="v stack">{#each CHAT_STEPS as s, i (s.label)}<span class:on={i === step} aria-hidden={i !== step}>{s.next}</span>{/each}</span></div>
+		{/snippet}
+		<aside class="lead-panel" aria-label="lead panel">
+			<h4>what the business sees</h4>
+			{@render leadRows()}
 		</aside>
+		<!-- phones: the same panel behind a native disclosure, closed by default, so the conversation comes first -->
+		<details class="lead-details">
+			<summary>what the business sees</summary>
+			<div class="lead-panel lead-panel--mobile">{@render leadRows()}</div>
+		</details>
 	</div>
 	<div class="demo-foot">
 		<div class="steps" role="group" aria-label="preview steps">
@@ -126,6 +136,10 @@
 	.lead-row { display: grid; gap: 4px; }
 	.lead-row .k { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dg-muted); font-weight: 500; }
 	.lead-row .v { font-weight: 500; }
+	.stack { display: grid; }
+	.stack > span { grid-area: 1 / 1; visibility: hidden; }
+	.stack > span.on { visibility: visible; }
+	.lead-details { display: none; }
 	.meter { height: 8px; background: var(--dg-bg); border: 1px solid var(--dg-border); position: relative; display: block; }
 	.meter i { position: absolute; inset: 0; right: auto; background: var(--dg-fill); transition: width 0.4s ease; }
 	/* stage chips are static status data: flat, no button look; the reached stages are the darker grey */
@@ -144,19 +158,42 @@
 	.demo-note { grid-column: 1 / -1; font-size: 12px; color: var(--muted); }
 	.demo-caption { margin-top: 12px; font-size: 14px; color: var(--muted); display: flex; gap: 8px 16px; flex-wrap: wrap; align-items: center; }
 	.demo-caption .textlink { min-height: 32px; }
+	/* touch sizes: the caption link grows to 44px where the hero stacks (the desktop hero is centred on its column and would shift) */
+	@media (max-width: 960px) { .demo-caption .textlink { min-height: 44px; } }
 	@media (max-width: 560px) {
-		.demo-body { grid-template-columns: minmax(0, 1fr); grid-template-rows: 320px 176px; height: 496px; }
+		/* one column: the conversation in a fixed 360px frame, the business panel
+		   below it behind a disclosure. The frame only changes height when the
+		   visitor opens or closes that disclosure, never with the step. */
+		.demo-body { grid-template-columns: minmax(0, 1fr); grid-template-rows: 360px auto; height: auto; }
 		.chat { border-right: 0; border-bottom: 1px solid var(--dg-border); }
-		.lead-panel { grid-template-columns: 1fr 1fr; gap: 10px 14px; padding: 14px 16px; }
-		.lead-panel h4 { grid-column: 1 / -1; }
+		.msg, .card-booked { font-size: 16px; max-width: 92%; }
+		.who { font-size: 13px; }
+		.tag, .state { font-size: 12px; }
+		.card-booked .title { font-size: 16px; }
+		.card-booked .line { font-size: 14px; }
+		.chat-input { font-size: 13px; }
+		.lead-panel:not(.lead-panel--mobile) { display: none; }
+		.lead-details { display: block; background: var(--dg-surface); }
+		.lead-details summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; padding: 0 16px; font-size: 14px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--dg-text); cursor: pointer; list-style: none; }
+		.lead-details summary::-webkit-details-marker { display: none; }
+		.lead-details summary::after { content: "+"; font-family: var(--font-head); font-size: 20px; color: var(--dg-on); }
+		.lead-details[open] summary::after { content: "\2212"; }
+		.lead-details summary:focus-visible { outline: 2px solid var(--accent-deep); outline-offset: -2px; }
+		.lead-panel--mobile { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 4px 16px 16px; font-size: 15px; overflow: visible; border-top: 1px solid var(--dg-border); }
+		.lead-panel--mobile .stages { gap: 6px; }
+		.lead-panel--mobile .stages span { flex: 1 1 auto; padding: 6px 8px; }
+		.lead-panel--mobile .k { font-size: 13px; }
+		.lead-panel--mobile .stages span { font-size: 12px; }
 		.demo-foot { grid-template-columns: 1fr; grid-template-rows: 44px 44px auto; }
+		.demo-note { font-size: 13px; }
 		.steps { width: 100%; }
-		.steps button { flex: 1; padding: 0 6px; }
+		.steps button { flex: 1; padding: 0 6px; font-size: 13px; white-space: normal; line-height: 1.15; }
 		.next { justify-self: stretch; }
+		.demo-caption { font-size: 15px; }
 	}
 	@media (max-width: 380px) {
 		/* the three labels may wrap to two lines inside the fixed 44px row instead of touching the button edge */
-		.steps button { font-size: 11px; padding: 0 4px; letter-spacing: 0; white-space: normal; line-height: 1.15; }
+		.steps button { padding: 0 4px; letter-spacing: 0; }
 		.steps { gap: 4px; }
 	}
 </style>

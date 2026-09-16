@@ -140,8 +140,13 @@
 	.ico.play::after { width: 0; height: 0; background: none; opacity: 1; left: 12px; top: 10px; border-left: 12px solid var(--accent-deep); border-top: 7px solid transparent; border-bottom: 7px solid transparent; }
 	.poster .quiet { font-size: 12px; max-width: 34ch; }
 	.poster .row { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; justify-content: center; margin-top: 8px; }
-	.close-embed { position: absolute; right: 8px; top: 8px; z-index: 2; min-height: 36px; padding: 0 12px; font-size: 12px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+	.close-embed { position: absolute; right: 8px; top: 8px; z-index: 2; min-height: 44px; padding: 0 14px; font-size: 13px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; background: var(--bg); color: var(--text); border: 1px solid var(--border); }
 	.close-embed:hover { background: var(--surface); }
 	figcaption { font-size: 13px; color: var(--muted); line-height: 1.5; }
+	@media (max-width: 640px) {
+		.placeholder, .poster { font-size: 15px; padding: 20px 16px; }
+		.poster .quiet { font-size: 13px; }
+		figcaption { font-size: 14px; }
+	}
 	@media (max-width: 480px) { .frame.free { padding: 12px; } }
 </style>

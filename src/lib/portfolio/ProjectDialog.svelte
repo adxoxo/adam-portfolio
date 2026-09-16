@@ -58,6 +58,8 @@
 				{project.title}
 				{#if project.tag}<span class="tag">{project.tag}</span>{/if}
 			</h2>
+			<!-- phones: the kind and year leave the sticky head (one short line there) and sit under the title -->
+			<p class="kind kind-line">{project.kind} / {project.year}</p>
 			<p class="summary">{project.summary}</p>
 
 			{#if project.flow}
@@ -112,10 +114,13 @@
 
 <style>
 	.sep { letter-spacing: 0.06em; }
+	.kind-line { display: none; margin-top: -10px; }
+	@media (max-width: 640px) { .sep { display: none; } .kind-line { display: inline-flex; } }
 	.flow-box { border: 1px solid var(--border); background: var(--surface); padding: 18px; }
 	@media (max-width: 480px) { .flow-box { padding: 12px; } }
 	.summary { font-size: 17px; line-height: 1.6; }
 	.svc { min-height: auto; font-size: 15px; }
+	@media (max-width: 640px), (pointer: coarse) { .svc { min-height: 44px; } }
 	.meta { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 14px 0; }
 	.meta dt { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; color: var(--muted); }
 	.meta dd { margin: 2px 0 0; font-size: 15px; font-weight: 500; }
@@ -141,6 +146,9 @@
 	.provenance { font-size: 13px; color: var(--muted); border-top: 1px solid var(--border); padding-top: 12px; }
 	@media (max-width: 640px) {
 		.meta { grid-template-columns: 1fr; gap: 10px; }
+		.meta dt, h3 { font-size: 13px; }
+		.meta dd, .svc, summary, .links { font-size: 16px; }
+		.provenance, .nav button { font-size: 14px; }
 		/* the primary button spans the row and may wrap: as a no-wrap flex item it
 		   was wider than the dialog at 320px (the shared .btn keeps nowrap for the
 		   inline buttons on the page) */

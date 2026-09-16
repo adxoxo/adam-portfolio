@@ -6,9 +6,10 @@ so they see the real server-rendered html, the real assets and the real Supabase
 ```sh
 npm run build
 npx wrangler dev --port 8788 --ip 127.0.0.1 --local     # the built worker, production runtime
-BASE_URL=http://127.0.0.1:8788 node tests/smoke.cjs      # overview, demo, dialogs, map, filters, hashes, 4 viewports
+BASE_URL=http://127.0.0.1:8788 node tests/smoke.cjs      # overview, demo, dialogs, index (map above 960px, list below), filters, hashes, 4 viewports
 BASE_URL=http://127.0.0.1:8788 node tests/headline.cjs   # the changing headline word, bounds, reduced motion, recording
 BASE_URL=http://127.0.0.1:8788 node tests/contact.cjs    # message + call request forms, /api/lead and /api/schedule intercepted
+BASE_URL=http://127.0.0.1:8788 node tests/mobile.cjs     # phones, tablet, short landscape, reduced viewport: list / map history, targets, text, dialogs, demo, menu
 node tests/layout-check.mjs                              # map layouts never overlap; database overlay precedence and url safety
 ```
 
@@ -125,3 +126,88 @@ client bundle have zero hits for the old names. Verified: `npm run check` 0 erro
 `npm run build` passes; `node tests/layout-check.mjs` passes; `tests/smoke.cjs` against a local
 `BASE_URL` at 1440, 768, 390 and 320 widths, all checks passed.
 
+
+### 2026-09-16, mobile usability
+
+The index is a list of project rows at 960px and below and the map above; a list / map
+control and the `#index/<service>/list|map` suffixes pin a presentation at any width; every
+visitor navigation pushes one history entry (`pushState`), canonicalisation uses
+`replaceState`, and nothing writes the url from an effect any more. The phone map is a native
+html tree of buttons (`ProjectMap.svelte`, 960px and below); the svg map, its pan / zoom and
+motion controls are unchanged above 960px. Dialogs: sticky head with the close control, full
+width with 8px insets on phones, `dvh` height where supported, `scroll-padding-top` for the
+sticky head, and `html { overflow: hidden }` while a modal is open (with `scrollbar-gutter:
+stable` for fine pointers). The contact dialog focuses its title first on screens 640px and
+narrower or with a coarse pointer; the name field otherwise. The demo puts the business panel
+behind a `<details>` disclosure at 560px and below and lays every step's values out in one
+grid cell, so the frame never changes with the step. Mobile text sizes: 16px body, messages,
+rows, tree labels and workflow stage labels; 13px or more for metadata; 44px targets.
+
+Environment: node 24.20, wrangler 4.129.0 local worker of the production build with the
+committed vars (Supabase overlay active), Playwright 1.63 headless chromium with touch
+emulation below 500px (`pointer: coarse`). WebKit cannot launch on this host (missing GTK,
+GStreamer, ICU libraries), so nothing here is evidence for Safari, the iOS keyboard, iOS
+rubber-band scroll behind a modal, or the safe-area insets (`env()` resolves to 0 without
+`viewport-fit=cover`; the tokens are in place). Headless chromium has no scrollbar and still
+reserves the `scrollbar-gutter`, so a dialog is 15px narrower in the desktop test contexts
+than in a real overlay-scrollbar browser; nothing depends on that width.
+
+- `npm run check`: 0 errors, 0 warnings. `npm run build`: passes. The Svelte MCP autofixer
+  was not permitted in the implementation session; svelte-check and the compiler (no a11y
+  warnings) are the lint evidence.
+- `tests/smoke.cjs`: 552 checks passed at 1440x1000, 768x1024, 390x844 and 320x700 plus the
+  reduced-motion context. Changed from the previous record: at 1440 the map is the default and
+  the sidebar filters it (hubs, pulses, pause, keyboard hub, zoom + fit, keyboard open, focus
+  return); at 768 and below the list is the default, the labelled select filters it (3 rows per
+  service, 15 for all, hash follows, the select keeps focus), the map is chosen through the
+  control (`#index/all/map`, 5 service buttons and 15 project buttons, all >= 44px, 16px,
+  `touch-action: auto`, no svg, no zoom controls, keyboard hub and project open, focus return),
+  and back to the list keeps the service (`#index/ai/list`); all 15 projects open from their
+  row or node with previous / next, every dialog fits, no private wording; the contact prefill
+  path (focus on the title on phones, in the name field at 768 and 1440); entry points from a
+  fresh load land on `#index/all`, `#index/ai`, `#index/devices`, `#index/apps`; `#index` and
+  `#index/nope` canonicalise to `#index/all`, `#index/all/nope` to `#index/all`, and
+  `#index/ai/map`, `#index/websites/list`, `#index/all/map` are kept and honoured at every
+  width; `#work`, `#about`, `#contact`, `#top` unchanged; mobile menu; no external requests; no
+  console errors. Everything else in the 2026-09-14 record is retained.
+- `tests/mobile.cjs`: 369 checks passed. 320x700, 360x800, 390x844, 430x932: no element
+  outside the viewport (descendant bounds, not only scrollWidth); the primary hero action ends
+  at 534px at 320x700 and 483px at 390x844; all five headline words on one line; body text
+  >= 16px, supporting text >= 12px, listed controls >= 44x44 with >= 8px between the jump
+  links; the service row's whole box is its target; demo details closed by default, messages
+  16px, frame and controls identical across all steps and the wrap with the details closed and
+  again with them open, opening / closing the disclosure is the only height change, nothing
+  clipped; index rows: 15, >= 44px, 16px title and summary, unclipped, named by the title,
+  >= 8px apart, first row within the first screen plus 200px, select per service (3 rows of one
+  service, hash, focus kept); the complete row -> case -> "build something similar" -> contact
+  -> intercepted post path with focus returning to the row; case dialog close control inside
+  the dialog at the top and the bottom, 16px content, 44px controls; the tree (44px, 16px, no
+  transform, `touch-action: auto`, touch instructions), a synthesized touch drag scrolls the
+  page 300px without moving a node in the document, a tree button opens its case and gets focus
+  back; the menu fits with three 44px actions and escape returns focus. History at 390:
+  overview -> index -> ai -> map -> map again (no entry) -> websites (`#index/websites/map`)
+  then Back x4 and Forward x3 restore each service, presentation and view, `history.length`
+  unchanged by Back / Forward, reload keeps `#index/ai/map`, an unknown suffix or service is
+  replaced (one browser entry, no loop), `#about` lands on the light overview. Resize: 1100 ->
+  800 -> 1100 keeps `#index/all`, swaps map / list / map with no history entry and a fitted
+  transform, an explicit map at 800 returns fitted at 1100, an explicit list survives both
+  directions. Dialogs at 320x700, 844x390, 390x420 and 430x932: dialog inside the viewport,
+  close control inside the box at the top, with the last field focused, after validation, at
+  the submit and at the bottom; the message field focused below the sticky head; empty submit
+  focuses the name field with its error in view and posts nothing; wheel, touch drag and space
+  on the backdrop leave `scrollY` unchanged; close restores the position and focuses the
+  opener; loom embed (stubbed) close control 44px, closing it focuses the load button. 768x1024
+  and 844x390: list default, count and control on one row, tree, menu fits, dialog close at top
+  and bottom, focus return. 640x450 (a 200% zoom equivalent): viewport meta allows zoom, no
+  overflow, dialog fits. Reduced motion at 390: static "systems", no animation or transition
+  over 0.01s on the tree, no pulses.
+- `tests/contact.cjs`: 90 checks passed at 1440 and 320; only the start-focus expectation
+  changed (title at 320, name field at 1440). Payloads, errors, retry, pending and focus
+  assertions unchanged.
+- `tests/headline.cjs`: 50 checks passed, unchanged.
+- `tests/layout-check.mjs`: passes, unchanged (the narrow svg layouts are still checked; the
+  browser no longer renders them below 960px).
+- The worker log shows zero `POST /api/lead` and zero `POST /api/schedule` across all runs.
+- Desktop screenshots against the 2026-09-16 baseline (pixel diff): the 1440 overview is
+  identical (0.00%); the 1440 index differs only in rows 377..423 (0.23%), the count and the
+  new list / map control on the heading row and the paragraph wrapping before it.

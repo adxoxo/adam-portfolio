@@ -2,10 +2,18 @@
 
 My personal portfolio and lead site. A light overview (headline with a changing first word, a
 scripted assistant demo, five services, two sourced case studies with workflow diagrams, about,
-contact) and a dark, pannable project index: fifteen projects in service clusters around me,
-each opening as a short case study. "Work with me" opens a contact dialog with two forms: send a
-message (`/api/lead`) or request a call (`/api/schedule`, a preferred time that I confirm by
-email; nothing is booked automatically).
+contact) and a dark project index: fifteen projects in service clusters around me, each opening
+as a short case study. "Work with me" opens a contact dialog with two forms: send a message
+(`/api/lead`) or request a call (`/api/schedule`, a preferred time that I confirm by email;
+nothing is booked automatically).
+
+The index has two presentations. Above 960px it is the pannable map by default; at 960px and
+below (phones, tablets) it is a list of readable project rows by default, with a labelled
+service select above them. A list / map control switches between the two at any width; on a
+phone the map is a native tree of buttons that scrolls with the page. The url carries the state:
+`#index/<service>` follows the viewport default, `#index/<service>/list` and
+`#index/<service>/map` pin a presentation at every width. Each visitor navigation (view,
+service, presentation) is one history entry, so Back and Forward restore what was on screen.
 
 Live at [portfolio.aquryu.space](https://portfolio.aquryu.space).
 

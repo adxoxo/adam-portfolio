@@ -128,4 +128,15 @@
 		.step + .step::after { content: "\2192"; left: -22px; top: 50%; transform: translateY(-50%); }
 		.alt-lane { grid-auto-columns: minmax(0, 1fr); max-width: 66%; }
 	}
+	/* phones: readable stage labels and supporting text, a little less air between the stages */
+	@media (max-width: 640px) {
+		.flow { font-size: 14px; gap: 12px; }
+		.flow-title, .alt-title, .rail li, .legend { font-size: 14px; }
+		.label { font-size: 16px; }
+		.who { font-size: 13px; }
+		.num { font-size: 13px; }
+		.lane { gap: 20px 0; }
+		.step + .step::after { top: -20px; height: 20px; }
+		.step { padding: 10px 12px 10px 38px; }
+	}
 </style>

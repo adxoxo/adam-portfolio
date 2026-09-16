@@ -27,7 +27,9 @@
 	--container: 1200px;
 	--gutter: 24px;
 	--pill-h: 56px;
-	--top-offset: 92px;
+	/* the notch / status bar inset (0 unless the viewport is set to cover it) */
+	--safe-top: env(safe-area-inset-top, 0px);
+	--top-offset: calc(92px + var(--safe-top));
 }
 /* dark map mode: the original palette from the previous site */
 .pf.dark {
@@ -45,13 +47,19 @@
 	--shadow: rgba(0, 0, 0, 0.5);
 	color-scheme: dark;
 }
-@media (max-width: 760px) { .pf { --section-gap: 64px; --gutter: 18px; --top-offset: 84px; } }
+@media (max-width: 760px) { .pf { --section-gap: 64px; --gutter: 18px; --top-offset: calc(84px + var(--safe-top)); } }
 
 /* ---------- document ---------- */
 html { -webkit-text-size-adjust: 100%; }
 body { margin: 0; }
 body:has(.pf) { background: #FAFBF7; overflow-x: hidden; scroll-behavior: smooth; }
 body:has(.pf.dark) { background: #10140d; }
+/* a native modal is open: the page behind it does not scroll (wheel, touch or
+   keyboard on the backdrop) and keeps its position. With a mouse the space of
+   the classic scrollbar stays reserved, so nothing shifts when the dialog
+   opens or closes; touch screens and overlay scrollbars have no gutter. */
+html:has(.pf dialog[open]) { overflow: hidden; }
+@media (pointer: fine) { html:has(.pf dialog[open]) { scrollbar-gutter: stable; } }
 @media (prefers-reduced-motion: reduce) {
 	body:has(.pf) { scroll-behavior: auto; }
 	.pf *, .pf *::before, .pf *::after { transition-duration: 0.001s !important; animation-duration: 0.001s !important; animation-iteration-count: 1 !important; }
@@ -107,7 +115,11 @@ body:has(.pf.dark) { background: #10140d; }
 .pf .brand:hover { color: var(--text); }
 
 /* ---------- dialogs (shared by project + contact) ---------- */
-.pf dialog { overflow: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); color: var(--text); padding: 0; width: min(760px, calc(100% - 32px)); max-height: min(90vh, 100% - 32px); margin: auto; box-shadow: 0 24px 60px var(--shadow); }
+/* the dialog is the one scroll container of the modal; its own scroll never
+   chains to the page. Height follows the dynamic viewport where supported, so
+   a phone's collapsing browser bar cannot hide the bottom of the dialog. */
+.pf dialog { overflow: auto; overscroll-behavior: contain; scroll-padding-top: 84px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); color: var(--text); padding: 0; width: min(760px, calc(100% - 32px)); max-height: min(90vh, 100% - 32px); margin: auto; box-shadow: 0 24px 60px var(--shadow); }
+@supports (height: 1dvh) { .pf dialog { max-height: min(90dvh, 100% - 32px); } }
 .pf dialog::backdrop { background: rgba(16, 20, 13, 0.55); }
 /* one explicit column with a zero minimum. The implicit `auto` track sized
    itself to the widest child's min-content contribution, and the media frame
@@ -115,17 +127,33 @@ body:has(.pf.dark) { background: #10140d; }
    the height) contributes its height transferred through the ratio: at 390px
    the track grew to 560px and the whole dialog scrolled sideways. With a zero
    track minimum every child shrinks to the dialog instead. */
-.pf .dlg { padding: 36px 40px 40px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; }
+.pf .dlg { --dlg-x: 40px; padding: 0 var(--dlg-x) 40px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; }
 .pf .dlg > * { min-width: 0; }
-.pf .dlg-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
-.pf .dlg-head .eyebrow { flex-wrap: wrap; }
+/* the head (eyebrow and close) stays at the top while the content scrolls
+   under it: it reaches the dialog edges through its negative margins and
+   carries the dialog background, so the close control is always reachable */
+.pf .dlg-head { position: sticky; top: 0; z-index: 2; background: var(--bg); margin: 0 calc(-1 * var(--dlg-x)); padding: 28px var(--dlg-x) 10px; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.pf .dlg-head .eyebrow { flex-wrap: wrap; min-height: 44px; }
 .pf .dlg h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); letter-spacing: -0.02em; }
 .pf .dlg h2:focus { outline: none; }
 .pf .dlg h2 .tag { display: block; font-family: var(--font-body); font-weight: 400; font-size: 17px; color: var(--muted); letter-spacing: 0; margin-top: 4px; line-height: 1.4; }
-.pf .close { width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); flex: none; transition: background-color 0.15s ease; }
+.pf .close { width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); flex: none; background: var(--bg); transition: background-color 0.15s ease; }
 .pf .close:hover { background: var(--surface); }
 .pf .close svg { width: 18px; height: 18px; }
-@media (max-width: 640px) { .pf .dlg { padding: 24px 20px 28px; gap: 18px; } }
+/* phones: nearly the whole screen, small insets, a compact sticky head */
+@media (max-width: 640px) {
+	.pf dialog { width: calc(100% - 16px); max-width: calc(100% - 16px); max-height: calc(100% - 16px); scroll-padding-top: 66px; }
+	@supports (height: 1dvh) { .pf dialog { max-height: calc(100dvh - 16px); } }
+	.pf .dlg { --dlg-x: 18px; padding-bottom: 28px; gap: 18px; }
+	.pf .dlg-head { padding-top: 12px; padding-bottom: 8px; }
+	.pf .dlg h2 .tag { font-size: 16px; }
+}
+/* short screens (a phone held sideways): the same compact head at any width */
+@media (max-height: 560px) {
+	.pf dialog { max-height: calc(100% - 16px); scroll-padding-top: 66px; }
+	@supports (height: 1dvh) { .pf dialog { max-height: calc(100dvh - 16px); } }
+	.pf .dlg-head { padding-top: 12px; padding-bottom: 8px; }
+}
 
 /* contact form */
 .pf .form { display: grid; gap: 16px; }
@@ -145,3 +173,10 @@ body:has(.pf.dark) { background: #10140d; }
 .pf .form-result.error:focus { outline-color: #a0463c; }
 .pf .form .actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
 @media (max-width: 560px) { .pf .form .two { grid-template-columns: 1fr; } }
+/* phones: labels, errors, notes and the result panel at readable sizes; the submit takes the row */
+@media (max-width: 640px) {
+	.pf .field label, .pf .field .err, .pf .form-note { font-size: 14px; }
+	.pf .form-result { font-size: 16px; }
+	.pf .small { font-size: 15px; }
+	.pf .form .actions .btn { width: 100%; white-space: normal; text-align: center; }
+}

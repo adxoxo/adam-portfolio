@@ -2,7 +2,7 @@
 	import { MediaQuery } from 'svelte/reactivity';
 	import { prefersReducedMotion } from 'svelte/motion';
 	import { layoutFor } from './mapLayout';
-	import type { Project, ServiceId } from './data';
+	import { SERVICES, projectsOf, type Project, type ServiceId } from './data';
 
 	let {
 		projects,
@@ -16,9 +16,12 @@
 		onopen: (id: string, opener: HTMLElement | SVGElement) => void;
 	} = $props();
 
-	// narrow screens get the vertical tree, everything else the radial map
-	const narrow = new MediaQuery('max-width: 640px');
-	const layout = $derived(layoutFor(service, narrow.current, projects));
+	// phones and tablets get a native html tree (real buttons, readable text,
+	// the page scrolls and pinch-zooms as usual); wider screens the pannable
+	// radial / focused svg map. Same services, project ids and callbacks.
+	const narrow = new MediaQuery('max-width: 960px');
+	const layout = $derived(layoutFor(service, false, projects));
+	const treeServices = $derived(service === 'all' ? SERVICES : SERVICES.filter((s) => s.id === service));
 
 	// pan / zoom, in viewBox units. One measurement per gesture start, never per frame.
 	let sc = $state(1);
@@ -108,6 +111,13 @@
 		io.observe(svg);
 		return () => io.disconnect();
 	});
+	// a pan or zoom made on the wide map is stale once the layout switches
+	// (the tree replaces the canvas and, on the way back, the radial map is
+	// laid out afresh), so the transform resets with the breakpoint
+	$effect(() => {
+		narrow.current;
+		fit();
+	});
 
 	function activate(e: KeyboardEvent, fn: () => void) {
 		if (e.key === 'Enter' || e.key === ' ') {
@@ -120,6 +130,35 @@
 	}
 </script>
 
+{#if narrow.current}
+	<!-- the tree: adam, then each service with its projects, drawn with css connectors.
+	     Plain buttons, 44px tall, 16px text; no pointer capture or transform, the
+	     document scrolls and the browser zooms. -->
+	<div class="tree" role="group" aria-label="project map">
+		<div class="tree-root" aria-hidden="true"><img src="/adam.jpg" alt="" width="32" height="32" decoding="async" />adam</div>
+		<ul class="tree-services">
+			{#each treeServices as s (s.id)}
+				{@const ps = projectsOf(s.id, projects)}
+				<li>
+					<button type="button" class="tree-hub" aria-pressed={service === s.id} aria-label="{s.short}, {ps.length} projects, show only this service" data-svc={s.id} onclick={() => hubClick(s.id)}>
+						<span class="hub-t">{s.short}</span><span class="hub-c">{ps.length}</span>
+					</button>
+					<ul class="tree-projects">
+						{#each ps as p (p.id)}
+							<li>
+								<button type="button" class="tree-project" class:featured={!!p.media} aria-label="{p.title}, open case study" data-project={p.id} onclick={(e) => onopen(p.id, e.currentTarget)}>{p.title}</button>
+							</li>
+						{/each}
+					</ul>
+				</li>
+			{/each}
+		</ul>
+	</div>
+	<p class="legend">
+		<span class="r">adam</span><span class="h">service, tap to focus</span><span class="p">project, tap to open</span>
+		<span class="plain">scroll the page as usual; pinch to zoom</span>
+	</p>
+{:else}
 <div class="map-wrap" class:grabbing>
 	<!-- the svg is a pannable canvas (drag, arrows, +/-); every node inside is its own role=button -->
 	<!-- svelte-ignore a11y_no_noninteractive_tabindex, a11y_no_noninteractive_element_interactions -->
@@ -213,6 +252,7 @@
 	<span class="plain hint">drag to pan &middot; ctrl + scroll to zoom</span>
 	{#if pulses}<span class="plain">{paused ? 'motion paused' : 'the moving dots show where work flows'}</span>{:else}<span class="plain">motion off, following your system setting</span>{/if}
 </p>
+{/if}
 
 <style>
 	.map-wrap { position: relative; border: 1px solid var(--border); background-color: var(--bg); background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px); background-size: 66px 66px; background-position: -1px -1px; overflow: hidden; }
@@ -261,10 +301,36 @@
 	.legend span.plain { margin-left: auto; }
 	.legend span.plain + span.plain { margin-left: 0; }
 	.legend span.plain::before { display: none; }
-	@media (max-width: 640px) {
-		.map { max-height: none; touch-action: pan-y; }
-		.ctrl { position: static; grid-auto-flow: column; justify-content: end; padding: 10px; border-top: 1px solid var(--border); }
+
+	/* ---------- the native tree (960px and below) ---------- */
+	.tree { --branch: var(--border-strong); border: 1px solid var(--border); background-color: var(--bg); background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px); background-size: 66px 66px; background-position: -1px -1px; padding: 18px 16px 22px; }
+	.tree-root { display: flex; width: max-content; align-items: center; gap: 10px; min-height: 44px; padding: 5px 20px 5px 6px; border-radius: 22px; background: var(--accent-deep); color: var(--on-accent); font-family: var(--font-head); font-weight: 700; font-size: 16px; }
+	.tree-root img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; object-position: 50% 22%; display: block; }
+	/* every list item draws its own trunk segment and branch, so the trunk ends at the last branch */
+	.tree-services, .tree-projects { display: grid; gap: 12px; }
+	.tree-services { margin: 14px 0 0 22px; padding-left: 22px; }
+	.tree-services > li, .tree-projects > li { position: relative; }
+	.tree-services > li::before, .tree-projects > li::before { content: ""; position: absolute; top: 22px; height: 1px; background: var(--branch); }
+	.tree-services > li::after, .tree-projects > li::after { content: ""; position: absolute; top: -12px; bottom: -12px; width: 1px; background: var(--branch); }
+	.tree-services > li::before { left: -22px; width: 18px; }
+	.tree-services > li::after { left: -23px; }
+	.tree-services > li:first-child::after { top: -14px; }
+	.tree-services > li:last-child::after { bottom: auto; height: 34px; }
+	.tree-hub { display: flex; width: max-content; max-width: 100%; align-items: center; gap: 14px; min-height: 44px; padding: 0 16px; border: 1px dashed var(--accent); background: var(--bg); color: var(--accent); font-family: var(--font-head); font-weight: 600; font-size: 16px; letter-spacing: 0.02em; transition: background-color 0.15s ease; }
+	.tree-hub .hub-c { font-family: var(--font-body); font-weight: 500; font-size: 13px; color: var(--muted); }
+	.tree-hub[aria-pressed="true"] { background: var(--accent-deep); border-style: solid; border-color: var(--accent-deep); color: var(--on-accent); }
+	.tree-hub[aria-pressed="true"] .hub-c { color: var(--on-accent); }
+	.tree-projects { margin: 12px 0 0 18px; padding-left: 20px; }
+	.tree-projects > li::before { left: -20px; width: 16px; }
+	.tree-projects > li::after { left: -21px; }
+	.tree-projects > li:first-child::after { top: -12px; }
+	.tree-projects > li:last-child::after { bottom: auto; height: 34px; }
+	.tree-project { display: block; width: 100%; max-width: 520px; text-align: left; min-height: 44px; padding: 10px 14px; border: 1px solid var(--border-strong); background: var(--surface-2); color: var(--text); font-size: 16px; line-height: 1.35; overflow-wrap: anywhere; transition: border-color 0.15s ease; }
+	.tree-project.featured { padding-left: 28px; position: relative; }
+	.tree-project.featured::before { content: ""; position: absolute; left: 12px; top: 50%; width: 6px; height: 6px; margin-top: -3px; background: var(--accent); }
+	.tree-project:hover { border-color: var(--accent); color: var(--accent); }
+	@media (max-width: 960px) {
+		.legend { gap: 8px 16px; font-size: 14px; }
 		.legend span.plain { margin-left: 0; width: 100%; }
-		.legend .hint { display: none; }
 	}
 </style>

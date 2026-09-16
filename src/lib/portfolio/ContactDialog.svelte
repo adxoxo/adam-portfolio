@@ -30,6 +30,7 @@
 	const NOTE_MAX = 2000;
 
 	let dlg = $state<HTMLDialogElement>();
+	let title = $state<HTMLHeadingElement>();
 	let nameInput = $state<HTMLInputElement>();
 	let emailInput = $state<HTMLInputElement>();
 	let msgInput = $state<HTMLTextAreaElement>();
@@ -70,10 +71,17 @@
 		return `${LINKS.mailto}&body=${encodeURIComponent(body)}`;
 	});
 
-	// open the native modal once mounted and put the cursor in the first field
+	// where focus starts: on a phone or with a touch pointer the title, so the
+	// visitor reads the form before the keyboard comes up; on a wide screen
+	// with a mouse the first field. Same choice after a form-mode change.
+	function focusStart() {
+		if (window.matchMedia('(max-width: 640px), (pointer: coarse)').matches) title?.focus();
+		else nameInput?.focus();
+	}
+	// open the native modal once mounted
 	$effect(() => {
 		dlg?.showModal();
-		tick().then(() => nameInput?.focus());
+		tick().then(focusStart);
 	});
 
 	async function switchMode(m: Mode) {
@@ -83,7 +91,7 @@
 		failure = '';
 		errors = {};
 		await tick();
-		nameInput?.focus();
+		focusStart();
 	}
 
 	function validate(): boolean {
@@ -153,14 +161,12 @@
 <dialog bind:this={dlg} aria-labelledby="cd-title" {onclose} onclick={(e) => e.target === dlg && dlg?.close()}>
 	<form class="dlg form" novalidate onsubmit={submit} aria-busy={sending} data-mode={mode}>
 		<div class="dlg-head">
-			<div>
-				<p class="eyebrow">work with me</p>
-				<h2 id="cd-title" class="title">{mode === 'call' ? 'request a call' : 'tell me about the work'}</h2>
-			</div>
+			<p class="eyebrow">work with me</p>
 			<button type="button" class="close" aria-label="close" onclick={() => dlg?.close()}>
 				<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 4l12 12M16 4L4 16" /></svg>
 			</button>
 		</div>
+		<h2 id="cd-title" class="title" tabindex="-1" bind:this={title}>{mode === 'call' ? 'request a call' : 'tell me about the work'}</h2>
 		<div class="modes" role="group" aria-label="how to get in touch">
 			<button type="button" aria-pressed={mode === 'message'} disabled={sending} onclick={() => switchMode('message')}>send a message</button>
 			<button type="button" aria-pressed={mode === 'call'} disabled={sending} onclick={() => switchMode('call')}>request a call</button>
@@ -251,7 +257,8 @@
 </dialog>
 
 <style>
-	.title { margin-top: 10px; }
+	/* the title follows the sticky head with the gap the head used to hold */
+	.title { margin-top: -12px; }
 	.form-result:focus { outline: 2px solid var(--accent-deep); outline-offset: 2px; }
 	.modes { display: inline-flex; border: 1px solid var(--border); background: var(--surface); justify-self: start; }
 	.modes button { min-height: 44px; padding: 0 16px; font-size: 13px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); transition: background-color 0.15s ease, color 0.15s ease; }
@@ -260,5 +267,6 @@
 	.modes button:focus-visible { outline-offset: -2px; }
 	.modes button:disabled { cursor: default; }
 	.field .short { min-height: 88px; }
+	@media (max-width: 640px) { .modes button { font-size: 14px; } }
 	@media (max-width: 400px) { .modes { display: flex; } .modes button { flex: 1; padding: 0 8px; } }
 </style>

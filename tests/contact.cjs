@@ -13,6 +13,8 @@ fs.mkdirSync(shots, { recursive: true });
 let failures = 0;
 const check = (ok, msg) => { console.log((ok ? '  ok   ' : '  FAIL ') + msg); if (!ok) failures++; };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+// where the dialog puts focus on open and after a form-mode change (ContactDialog.focusStart)
+const startFocus = (vp) => (vp.width <= 640 ? 'cd-title' : 'cf-name');
 
 // one dialog session: open from the contact section, fill, submit against a scripted /api/lead
 async function session(browser, vp, name, reply, body) {
@@ -37,7 +39,8 @@ async function session(browser, vp, name, reply, body) {
 	await page.waitForSelector('#contact');
 	await page.locator('#contact .btn', { hasText: 'send a message' }).click();
 	await page.waitForSelector('dialog[open] form');
-	check(await page.evaluate(() => document.activeElement?.id === 'cf-name'), `${name}: focus starts in the name field`);
+	// a phone starts on the title (the keyboard waits until the visitor picks a field), a wide screen in the name field
+	check(await page.evaluate(() => document.activeElement?.id) === startFocus(vp), `${name}: focus starts ${vp.width <= 640 ? 'on the title' : 'in the name field'}`);
 	if (body?.call) {
 		await page.locator('dialog[open] .modes button', { hasText: 'request a call' }).click();
 		await page.waitForSelector('#cf-date');
@@ -155,7 +158,7 @@ async function session(browser, vp, name, reply, body) {
 		// back to the message form from the success panel, name and email kept
 		await s.page.locator('dialog[open] .textlink', { hasText: 'send a message as well' }).click();
 		await s.page.waitForSelector('#cf-msg');
-		check((await s.page.locator('#cf-name').inputValue()) === 'test person' && (await s.page.evaluate(() => document.activeElement?.id === 'cf-name')), 'call success: returns to the message form with name and email kept');
+		check((await s.page.locator('#cf-name').inputValue()) === 'test person' && (await s.page.evaluate(() => document.activeElement?.id)) === startFocus(vp), 'call success: returns to the message form with name and email kept, focus at the start');
 		await s.page.keyboard.press('Escape');
 		await sleep(200);
 		check((await s.page.locator('dialog[open]').count()) === 0 && (await s.page.evaluate(() => document.activeElement?.textContent.trim() === 'send a message')), 'call: escape closes and focus returns to the opener');

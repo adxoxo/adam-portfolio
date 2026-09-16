@@ -83,7 +83,7 @@
 
 <style>
 	.pill {
-		position: fixed; top: 14px; left: 50%; transform: translateX(-50%); z-index: 70;
+		position: fixed; top: calc(14px + var(--safe-top)); left: 50%; transform: translateX(-50%); z-index: 70;
 		display: flex; align-items: center; gap: 10px;
 		max-width: calc(100vw - 24px);
 		background: var(--pill-bg); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
@@ -108,7 +108,10 @@
 	.cta:hover { opacity: 0.85; }
 	.menu-btn { display: none; width: 44px; height: 44px; border-radius: 50%; align-items: center; justify-content: center; border: 1px solid var(--border); flex: none; background: var(--surface); }
 	.menu-btn svg { width: 20px; height: 20px; }
-	.menu { position: absolute; top: calc(100% + 8px); left: 0; right: 0; background: var(--pill-bg); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border: 1px solid var(--border); border-radius: 22px; padding: 10px; display: grid; gap: 4px; box-shadow: 0 16px 40px -18px var(--shadow); }
+	/* the menu never grows past the screen below the pill: on a short landscape
+	   screen it scrolls inside, so every action stays reachable */
+	.menu { position: absolute; top: calc(100% + 8px); left: 0; right: 0; max-height: calc(100vh - var(--pill-h) - 14px - var(--safe-top) - 24px); overflow-y: auto; overscroll-behavior: contain; background: var(--pill-bg); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border: 1px solid var(--border); border-radius: 22px; padding: 10px; display: grid; gap: 4px; box-shadow: 0 16px 40px -18px var(--shadow); }
+	@supports (height: 1dvh) { .menu { max-height: calc(100dvh - var(--pill-h) - 14px - var(--safe-top) - 24px); } }
 	.menu button { min-height: 48px; text-align: left; padding: 0 14px; font-size: 16px; font-weight: 500; border-radius: 12px; }
 	.menu button:hover { background: var(--surface); }
 	.menu .btn { justify-content: center; margin-top: 6px; border-radius: 999px; text-align: center; }

@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { onMount, tick, untrack } from 'svelte';
-	import { replaceState } from '$app/navigation';
+	import { onMount, tick } from 'svelte';
+	import { MediaQuery } from 'svelte/reactivity';
+	import { pushState, replaceState } from '$app/navigation';
 	import type { PageData } from './$types';
 	import '$lib/portfolio/styles.css';
 	import PillNav from '$lib/portfolio/PillNav.svelte';
@@ -18,9 +19,16 @@
 	const projects = $derived(data.projects);
 
 	type View = 'overview' | 'index';
+	// how the index shows its projects: rows or the map. 'auto' follows the
+	// viewport (rows on phones and tablets, the map above 960px); 'list' and
+	// 'map' are an explicit choice, kept across service changes and resizes
+	type Presentation = 'auto' | 'list' | 'map';
 
 	let view = $state<View>('overview');
 	let service = $state<ServiceId | 'all'>('all');
+	let presentation = $state<Presentation>('auto');
+	const narrowIndex = new MediaQuery('max-width: 960px');
+	const shown = $derived<'list' | 'map'>(presentation === 'auto' ? (narrowIndex.current ? 'list' : 'map') : presentation);
 	let openProject = $state<Project | null>(null);
 	let contactOpen = $state(false);
 	let similarTo = $state<Project | null>(null);
@@ -41,55 +49,61 @@
 		setTimeout(() => (announcement = msg), 30);
 	}
 
-	/* ---------- hash routing: #overview, #about, #index/<service> ----------
+	/* ---------- hash routing: #overview, #about, #index/<service>[/list|/map] ----------
 	   The server always renders the light overview (the hash never reaches it);
 	   the browser reads the hash once after hydration and from then on the url
-	   follows the view. Older links with a trailing /map or /list, a bare
-	   #index, and the previous site's #top / #work anchors still work. */
+	   follows the view. A bare #index, an unknown service and the previous
+	   site's #top / #work anchors still work. Every visitor navigation (view,
+	   service, presentation) pushes one history entry; replaceState is only
+	   used to canonicalise an invalid or legacy hash, so Back and Forward walk
+	   the states the visitor actually saw. The hashchange handler reads the
+	   url into the state; nothing writes the url from an effect, so a popstate
+	   can never be overwritten with stale state. */
 	let routed = false; // true once the browser has read the initial hash
 	function readHash() {
 		const h = location.hash.replace(/^#/, '');
 		if (h.startsWith('index')) {
-			const [, svc = 'all'] = h.split('/');
+			const [, svc = 'all', pres = ''] = h.split('/');
 			service = svc === 'all' || isServiceId(svc) ? (svc as ServiceId | 'all') : 'all';
+			presentation = pres === 'list' || pres === 'map' ? pres : 'auto';
 			view = 'index';
 			return null;
 		}
 		view = 'overview';
 		return h && h !== 'overview' && h !== 'top' ? h : null;
 	}
-	function writeHash() {
-		const cur = location.hash.replace(/^#/, '');
-		if (view === 'index') {
-			const h = `index/${service}`;
-			if (cur !== h) replaceState('#' + h, {});
-		} else if (cur.startsWith('index')) {
-			// back on the overview: only a stale index hash is replaced, a section
-			// anchor such as #about or #work is left alone
-			replaceState('#overview', {});
-		}
+	function indexHash() {
+		return `index/${service}` + (presentation === 'auto' ? '' : `/${presentation}`);
 	}
-	$effect(() => {
-		// keep the url in sync whenever view / service change, after the initial
-		// read. untrack: replaceState reads SvelteKit's reactive page.url, and
-		// without it a popstate would re-run this effect before the hashchange
-		// handler has read the new hash, writing the old one back
-		view; service;
-		if (routed) untrack(writeHash);
-	});
+	// write the url for the current state: push for a visitor navigation,
+	// replace for canonicalisation. Nothing is written when the url already
+	// says the same, so a repeated selection adds no entry. A push before the
+	// initial read is skipped: the mount writes the canonical hash right after.
+	function writeHash(push: boolean) {
+		if (push && !routed) return;
+		const cur = location.hash.replace(/^#/, '');
+		let next: string | null = null;
+		if (view === 'index') next = indexHash();
+		// back on the overview: only a stale index hash is replaced, a section
+		// anchor such as #about or #work is left alone
+		else if (cur.startsWith('index')) next = 'overview';
+		if (next === null || next === cur) return;
+		if (push) pushState('#' + next, {});
+		else replaceState('#' + next, {});
+	}
 	function onHashChange() {
 		const scroll = readHash();
-		if (view === 'index') writeHash(); // canonicalise old /map and /list links even when nothing changed
+		if (view === 'index') writeHash(false); // canonicalise a bare #index or an unknown service, no new entry
 		if (scroll) jumpTo(scroll);
 	}
 	// initial route, once the page is in the browser. SvelteKit's router finishes
-	// initialising right after hydration, so the canonical hash (an old /map or
-	// /list link rewritten) is written on the next task, and only from then on
-	// does the url follow the view.
+	// initialising right after hydration, so the canonical hash (a bare #index
+	// rewritten) is written on the next task, and only from then on does the
+	// url follow the view.
 	onMount(() => {
 		const scroll = readHash();
 		const t = setTimeout(() => {
-			writeHash();
+			writeHash(false);
 			routed = true;
 		}, 0);
 		if (scroll) tick().then(() => jumpTo(scroll, true));
@@ -98,6 +112,7 @@
 
 	async function setView(v: View) {
 		view = v;
+		writeHash(true);
 		await tick();
 		window.scrollTo({ top: 0, behavior: 'auto' });
 		if (v === 'index') explorer?.focusTitle();
@@ -105,7 +120,10 @@
 		announce(v === 'index' ? 'project index' : 'overview');
 	}
 	async function jumpTo(id: string, instant = false) {
-		if (view !== 'overview') view = 'overview';
+		if (view !== 'overview') {
+			view = 'overview';
+			writeHash(true);
+		}
 		await tick();
 		const el = document.getElementById(id);
 		if (!el) return;
@@ -114,10 +132,19 @@
 	}
 	function selectService(svc: ServiceId | 'all') {
 		service = svc;
+		writeHash(true);
 		const n = svc === 'all' ? projects.length : projectsOf(svc, projects).length;
 		announce(`${svc === 'all' ? 'all services' : SERVICES.find((s) => s.id === svc)!.title}, ${n} projects`);
 	}
-	// from the overview: jump straight into one service (or all of them) on the map
+	// list or map, chosen by the visitor: kept until the url says otherwise.
+	// Choosing what is already shown changes nothing and adds no entry.
+	function selectPresentation(p: 'list' | 'map') {
+		if (p === shown) return;
+		presentation = p;
+		writeHash(true);
+		announce(p === 'list' ? 'projects as a list' : 'projects on the map');
+	}
+	// from the overview: jump straight into one service (or all of them) in the index
 	async function jumpToService(svc: ServiceId | 'all') {
 		service = svc;
 		await setView('index');
@@ -143,6 +170,7 @@
 		openProject = null;
 		service = svc;
 		view = 'index';
+		writeHash(true);
 		tick().then(() => {
 			window.scrollTo({ top: 0, behavior: 'auto' });
 			explorer?.focusTitle();
@@ -322,7 +350,7 @@
 				</div>
 			</section>
 		{:else}
-			<ProjectExplorer bind:this={explorer} {projects} {service} onservice={selectService} onopen={open} oncontact={contact} />
+			<ProjectExplorer bind:this={explorer} {projects} {service} presentation={shown} onservice={selectService} onpresentation={selectPresentation} onopen={open} oncontact={contact} />
 		{/if}
 	</main>
 
@@ -371,9 +399,17 @@
 		.hero .container { grid-template-columns: minmax(0, 1fr); gap: 44px; }
 		.hero h1 { max-width: 16ch; }
 	}
-	/* very narrow phones: the two hero buttons may wrap and take the full width instead of forcing a wider column */
-	@media (max-width: 360px) {
+	/* phones: a tighter headline and lede so the first action is on the first
+	   screen (320x700), stacked full-width actions, and 44px jump links */
+	@media (max-width: 640px) {
+		.hero { padding-top: 8px; }
+		.hero .container { gap: 36px; }
+		.hero h1 { font-size: clamp(2rem, 8.5vw, 2.6rem); margin: 14px 0 16px; }
+		.hero .lede { font-size: 18px; line-height: 1.55; margin-bottom: 20px; }
+		.hero .actions { flex-direction: column; align-items: stretch; }
 		.hero .actions .btn, .more .btn { white-space: normal; width: 100%; padding: 12px 18px; text-align: center; }
+		.quiet { margin-top: 18px; font-size: 15px; gap: 0 12px; align-items: center; }
+		.quiet button { min-height: 44px; padding: 0 2px; }
 	}
 
 	/* ---------- services rows ---------- */
@@ -398,6 +434,8 @@
 		.svc-row { grid-template-columns: 40px minmax(0, 1fr); gap: 8px 16px; padding: 22px 0; }
 		.svc-row .svc-body, .svc-row .count { grid-column: 2; }
 		.svc-row .count { padding-top: 0; }
+		.svc-row h3 { font-size: 20px; }
+		.svc-row .who, .svc-row .eg { font-size: 15px; }
 	}
 
 	/* ---------- case studies: text row, then the workflow at full width ---------- */
@@ -418,6 +456,7 @@
 		.cases { gap: 48px; }
 		.case { padding-top: 32px; gap: 22px; }
 	}
+	@media (max-width: 640px) { .case-text dt { font-size: 12px; } .shot-note { font-size: 13px; } }
 	@media (max-width: 480px) { .shot { padding: 14px; } }
 
 	/* ---------- about + process ---------- */
@@ -440,6 +479,7 @@
 	.process h3 { font-size: 18px; margin-bottom: 4px; }
 	.process p { font-size: 15px; color: var(--muted); }
 	@media (max-width: 880px) { .about .container { grid-template-columns: 1fr; gap: 40px; } }
+	@media (max-width: 640px) { .facts div { font-size: 16px; } .process p { font-size: 16px; } }
 	@media (max-width: 560px) { .about-me { grid-template-columns: 1fr; gap: 20px; } .portrait { width: 120px; height: 120px; } .facts div { grid-template-columns: 1fr; gap: 2px; } }
 
 	/* ---------- contact ---------- */
@@ -454,6 +494,14 @@
 	.ways .k { color: var(--muted); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; }
 	.ways a { font-weight: 500; min-height: 44px; display: inline-flex; align-items: center; overflow-wrap: anywhere; }
 	@media (max-width: 880px) { .contact .panel { grid-template-columns: 1fr; } .contact .panel > div { padding: 32px 24px; } .contact .panel > div + div { border-left: 0; border-top: 1px solid var(--border); } }
+	/* phones: the 96px label column would squeeze the email address, so label and value stack; the actions take the full width */
+	@media (max-width: 640px) {
+		.contact .panel > div { padding: 28px 18px; }
+		.contact .actions { flex-direction: column; align-items: stretch; }
+		.contact .actions .btn { white-space: normal; text-align: center; }
+		.ways li { grid-template-columns: minmax(0, 1fr); gap: 0; font-size: 16px; }
+		.ways a { min-height: 44px; }
+	}
 
 	/* ---------- footer ---------- */
 	.site-footer { border-top: 1px solid var(--border); padding: 36px 0; font-size: 14px; color: var(--muted); }
@@ -463,4 +511,6 @@
 	.site-footer a, .site-footer button { color: var(--muted); text-decoration: none; min-height: 44px; display: inline-flex; align-items: center; font-weight: 500; }
 	.site-footer a:hover, .site-footer button:hover { color: var(--accent-deep); }
 	.site-footer .right { margin-left: auto; }
+	/* phones: the short footer words ("about") still get a 44px wide target */
+	@media (max-width: 640px) { .site-footer a, .site-footer button { min-width: 44px; justify-content: center; } }
 </style>

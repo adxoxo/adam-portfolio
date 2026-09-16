@@ -177,64 +177,103 @@ async function run(browser, vp) {
 	await sleep(200);
 	check(await page.evaluate(() => document.activeElement?.closest('.case')?.querySelector('h3')?.textContent === 'automated booking sales flow'), 'escape returns focus to the booking case link');
 
-	// index view is the map, always: service filters swap clusters, count follows
+	// index view: the map above 960px, readable rows at 960px and below (the map
+	// stays one tap away). Service filters swap the set, count and hash follow.
+	const wide = vp.width > 960;
+	const shownSel = wide ? 'svg.map' : '.rows'; // the default presentation at this width
+	const nodeSel = wide ? 'svg.map .node.project' : '.rows .row'; // one control per project
 	await page.locator('.pill .switch button').nth(1).click();
 	await page.waitForSelector('#index-title');
-	await page.waitForSelector('svg.map');
+	await page.waitForSelector(shownSel);
 	await sleep(250);
 	check(await page.evaluate(() => document.activeElement?.id === 'index-title'), 'index title receives focus');
 	check(await page.evaluate(() => location.hash === '#index/all'), `hash is #index/all (${await page.evaluate(() => location.hash)})`);
 	check((await page.locator('.index-head .n').innerText()) === '15 projects', 'project count shown next to the heading');
-	const chipOrList = vp.width > 960 ? '.svc-list button' : '.svc-chips button';
-	for (const [svc, n] of [['websites', 3], ['ai', 3], ['automation', 3], ['apps', 3], ['devices', 3], ['all', 15]]) {
-		const idx = ['all', 'websites', 'ai', 'automation', 'apps', 'devices'].indexOf(svc);
-		await page.locator(chipOrList).nth(idx).click();
+	check((await page.locator('svg.map').count()) === (wide ? 1 : 0) && (await page.locator('.rows').count()) === (wide ? 0 : 1), `${wide ? 'the map' : 'the list'} is the default at ${vp.width}px and the other presentation is not rendered`);
+	check(await page.evaluate(() => document.querySelector('.pres button[aria-pressed="true"]')?.textContent.trim()) === (wide ? 'map' : 'list'), 'the list / map control shows the current presentation');
+	// the filter: the sidebar list on a wide screen, the labelled select below 960px
+	// (a visitor operates the select with it focused; selectOption alone does not focus it)
+	const filter = async (svc) => {
+		if (wide) await page.locator('.svc-list button').nth(['all', 'websites', 'ai', 'automation', 'apps', 'devices'].indexOf(svc)).click();
+		else { await page.focus('#svc-select'); await page.selectOption('#svc-select', svc); }
 		await sleep(150);
-		check((await page.locator('svg.map .node.project').count()) === n && (await page.locator('.index-head .n').innerText()) === `${n} projects`, `filter ${svc}: ${n} map nodes and count`);
+	};
+	const filterFocused = () => page.evaluate((w) => (w ? document.activeElement?.closest('.svc-list') !== null : document.activeElement?.id === 'svc-select'), wide);
+	for (const [svc, n] of [['websites', 3], ['ai', 3], ['automation', 3], ['apps', 3], ['devices', 3], ['all', 15]]) {
+		await filter(svc);
+		check((await page.locator(nodeSel).count()) === n && (await page.locator('.index-head .n').innerText()) === `${n} projects`, `filter ${svc}: ${n} ${wide ? 'map nodes' : 'rows'} and count`);
 		check(await page.evaluate((h) => location.hash === h, `#index/${svc}`), `filter ${svc}: hash is #index/${svc}`);
-		check(await page.evaluate(([sel, i]) => document.activeElement === document.querySelectorAll(sel)[i], [chipOrList, idx]), `filter ${svc}: the clicked control keeps focus`);
+		check(await filterFocused(), `filter ${svc}: the filter control keeps focus`);
 	}
-	check(await page.evaluate(() => document.querySelector('.pf').classList.contains('dark') && getComputedStyle(document.querySelector('.pf')).backgroundColor === 'rgb(16, 20, 13)'), 'map mode is dark');
-	check((await page.locator('svg.map .node.hub').count()) === 5 && (await page.locator('svg.map .pulse').count()) === 20, '5 hubs and 20 pulse paths');
-	// pulses run only while the map is on screen (on a phone the tree starts below the fold)
-	await page.locator('svg.map').scrollIntoViewIfNeeded();
-	await sleep(400);
-	check((await page.evaluate(() => getComputedStyle(document.querySelector('svg.map .pulse')).animationPlayState)) === 'running', 'pulses animate while the map is on screen');
-	await noOverflow(page, 'index map (all)');
-	await page.screenshot({ path: path.join(shots, `map-all-${vp.name}.png`), fullPage: vp.width < 700 });
-	await page.locator('.ctrl .motion').click(); await sleep(100);
-	check((await page.evaluate(() => getComputedStyle(document.querySelector('svg.map .pulse')).animationPlayState)) === 'paused', 'pause motion pauses the pulses');
-	await page.locator('.ctrl .motion').click(); await sleep(100);
-	const aiHub = page.locator('svg.map .node.hub[data-svc="ai"]');
-	await aiHub.focus();
-	await page.keyboard.press('Enter');
-	await sleep(650);
-	check(await page.evaluate(() => document.activeElement?.getAttribute('data-svc') === 'ai') && (await page.locator('svg.map .node.project').count()) === 3 && (await page.evaluate(() => location.hash === '#index/ai')), 'hub keyboard selection focuses the ai cluster and keeps focus');
-	await noOverflow(page, 'index map (ai)');
-	await page.screenshot({ path: path.join(shots, `map-ai-${vp.name}.png`), fullPage: vp.width < 700 });
-	await page.locator('.ctrl button[aria-label="zoom in"]').click();
-	const t1 = await page.evaluate(() => document.querySelector('svg.map .stage').getAttribute('transform'));
-	await page.locator('.ctrl button[aria-label="fit the map"]').click();
-	const t2 = await page.evaluate(() => document.querySelector('svg.map .stage').getAttribute('transform'));
-	check(t1 !== t2 && t2 === 'translate(0 0) scale(1)', 'zoom in then fit resets');
-	const node = page.locator('svg.map .node.project[data-project="grimoire"]');
-	await node.focus();
-	await page.keyboard.press('Enter');
-	await page.waitForSelector('dialog[open] #pd-title');
-	check((await page.locator('dialog[open] #pd-title').innerText()).includes('grimoire'), 'map node opens grimoire with the keyboard');
-	await page.keyboard.press('Escape');
-	await sleep(200);
-	check(await page.evaluate(() => document.activeElement?.getAttribute('data-project') === 'grimoire'), 'focus returns to the map node');
-	await page.locator(chipOrList).nth(0).click();
+	check(await page.evaluate(() => document.querySelector('.pf').classList.contains('dark') && getComputedStyle(document.querySelector('.pf')).backgroundColor === 'rgb(16, 20, 13)'), 'index mode is dark');
+	await noOverflow(page, `index ${wide ? 'map' : 'list'} (all)`);
+	await page.screenshot({ path: path.join(shots, `index-all-${vp.name}.png`), fullPage: vp.width < 700 });
+	if (wide) {
+		check((await page.locator('svg.map .node.hub').count()) === 5 && (await page.locator('svg.map .pulse').count()) === 20, '5 hubs and 20 pulse paths');
+		await page.locator('svg.map').scrollIntoViewIfNeeded();
+		await sleep(400);
+		check((await page.evaluate(() => getComputedStyle(document.querySelector('svg.map .pulse')).animationPlayState)) === 'running', 'pulses animate while the map is on screen');
+		await page.locator('.ctrl .motion').click(); await sleep(100);
+		check((await page.evaluate(() => getComputedStyle(document.querySelector('svg.map .pulse')).animationPlayState)) === 'paused', 'pause motion pauses the pulses');
+		await page.locator('.ctrl .motion').click(); await sleep(100);
+		const aiHub = page.locator('svg.map .node.hub[data-svc="ai"]');
+		await aiHub.focus();
+		await page.keyboard.press('Enter');
+		await sleep(650);
+		check(await page.evaluate(() => document.activeElement?.getAttribute('data-svc') === 'ai') && (await page.locator('svg.map .node.project').count()) === 3 && (await page.evaluate(() => location.hash === '#index/ai')), 'hub keyboard selection focuses the ai cluster and keeps focus');
+		await noOverflow(page, 'index map (ai)');
+		await page.screenshot({ path: path.join(shots, `map-ai-${vp.name}.png`) });
+		await page.locator('.ctrl button[aria-label="zoom in"]').click();
+		const t1 = await page.evaluate(() => document.querySelector('svg.map .stage').getAttribute('transform'));
+		await page.locator('.ctrl button[aria-label="fit the map"]').click();
+		const t2 = await page.evaluate(() => document.querySelector('svg.map .stage').getAttribute('transform'));
+		check(t1 !== t2 && t2 === 'translate(0 0) scale(1)', 'zoom in then fit resets');
+		const node = page.locator('svg.map .node.project[data-project="grimoire"]');
+		await node.focus();
+		await page.keyboard.press('Enter');
+		await page.waitForSelector('dialog[open] #pd-title');
+		check((await page.locator('dialog[open] #pd-title').innerText()).includes('grimoire'), 'map node opens grimoire with the keyboard');
+		await page.keyboard.press('Escape');
+		await sleep(200);
+		check(await page.evaluate(() => document.activeElement?.getAttribute('data-project') === 'grimoire'), 'focus returns to the map node');
+	} else {
+		// the optional map on a phone or tablet: a native tree of buttons, no svg, no zoom controls
+		await page.locator('.pres button', { hasText: 'map' }).click();
+		await page.waitForSelector('.tree');
+		await sleep(250);
+		check(await page.evaluate(() => location.hash === '#index/all/map' && document.activeElement?.textContent.trim() === 'map'), 'map chosen: hash is #index/all/map and the control keeps focus');
+		check((await page.locator('svg.map').count()) === 0 && (await page.locator('.tree .tree-hub').count()) === 5 && (await page.locator('.tree .tree-project').count()) === 15 && (await page.locator('.ctrl').count()) === 0, 'the tree has 5 service buttons and 15 project buttons, no svg and no zoom controls');
+		const treeGeom = await page.evaluate(() => [...document.querySelectorAll('.tree button')].map((b) => { const r = b.getBoundingClientRect(); return { h: r.height, fs: parseFloat(getComputedStyle(b).fontSize), touch: getComputedStyle(b).touchAction }; }));
+		check(treeGeom.every((g) => g.h >= 44 && g.fs >= 16 && g.touch === 'auto'), `every tree button is >= 44px tall, 16px text, native touch (${treeGeom.filter((g) => g.h < 44 || g.fs < 16).length} short)`);
+		await noOverflow(page, 'index tree (all)');
+		await page.screenshot({ path: path.join(shots, `tree-all-${vp.name}.png`), fullPage: true });
+		await page.locator('.tree .tree-hub[data-svc="ai"]').focus();
+		await page.keyboard.press('Enter');
+		await sleep(300);
+		check(await page.evaluate(() => document.activeElement?.getAttribute('data-svc') === 'ai') && (await page.locator('.tree .tree-project').count()) === 3 && (await page.evaluate(() => location.hash === '#index/ai/map')), 'service button keyboard selection focuses the ai cluster, keeps focus and the map');
+		await noOverflow(page, 'index tree (ai)');
+		const node = page.locator('.tree .tree-project[data-project="grimoire"]');
+		await node.focus();
+		await page.keyboard.press('Enter');
+		await page.waitForSelector('dialog[open] #pd-title');
+		check((await page.locator('dialog[open] #pd-title').innerText()).includes('grimoire'), 'tree button opens grimoire with the keyboard');
+		await page.keyboard.press('Escape');
+		await sleep(200);
+		check(await page.evaluate(() => document.activeElement?.getAttribute('data-project') === 'grimoire'), 'focus returns to the tree button');
+		await page.locator('.pres button', { hasText: 'list' }).click();
+		await page.waitForSelector('.rows');
+		check(await page.evaluate(() => location.hash === '#index/ai/list') && (await page.locator('.rows .row').count()) === 3, 'back to the list: #index/ai/list with 3 rows');
+	}
+	await filter('all');
 	await sleep(300);
 
-	// every project opens from its map node, previous / next walks the list
-	const ids = await page.locator('svg.map .node.project').evaluateAll((els) => els.map((e) => [e.getAttribute('data-project'), e.getAttribute('aria-label').replace(', open case study', '')]));
+	// every project opens from its control, previous / next walks the list
+	const ids = await page.locator(nodeSel).evaluateAll((els) => els.map((e) => [e.getAttribute('data-project'), (e.getAttribute('aria-label') || e.querySelector('.row-title').firstChild.textContent).replace(', open case study', '').trim()]));
 	let opened = 0;
 	const privateHits = [];
 	for (let i = 0; i < ids.length; i++) {
 		const [id, label] = ids[i];
-		await page.locator(`svg.map .node.project[data-project="${id}"]`).focus();
+		await page.locator(`${nodeSel}[data-project="${id}"]`).focus();
 		await page.keyboard.press('Enter');
 		await page.waitForSelector('dialog[open] #pd-title');
 		if ((await page.locator('dialog[open] #pd-title').innerText()).includes(label)) opened++;
@@ -250,17 +289,19 @@ async function run(browser, vp) {
 		await page.keyboard.press('Escape');
 		await sleep(120);
 	}
-	check(opened === 15, `all ${opened}/15 projects open from their map node with the right title`);
+	check(opened === 15, `all ${opened}/15 projects open from their ${wide ? 'map node' : 'row'} with the right title`);
 	check(privateHits.length === 0, `no internal workflow detail in any open dialog (${privateHits.join('; ') || 'all 15 clean'})`);
-	check(!(await page.evaluate(() => document.body.innerText.toLowerCase().includes('tq chatbot'))), 'no "tq chatbot" on the map');
+	check(!(await page.evaluate(() => document.body.innerText.toLowerCase().includes('tq chatbot'))), 'no "tq chatbot" in the index');
 
 	// "build something similar" -> contact prefilled; the intercepted submit carries the context
-	await page.locator('svg.map .node.project[data-project="invoice_automation"]').click();
+	await page.locator(`${nodeSel}[data-project="invoice_automation"]`).click();
 	await page.waitForSelector('dialog[open] .dlg-foot .btn');
 	await page.locator('dialog[open] .dlg-foot .btn').click();
 	await page.waitForSelector('dialog[open] form');
 	check((await page.locator('#cf-need').inputValue()) === 'automation' && (await page.locator('#cf-msg').inputValue()).includes('invoice automation'), 'contact prefilled with the service and the project');
-	check(await page.evaluate(() => document.activeElement?.id === 'cf-name'), 'focus lands in the name field');
+	// a phone (narrow or touch) starts on the title so the keyboard waits; a wide screen with a mouse in the name field
+	const phone = vp.width <= 640 || vp.width < 500;
+	check(await page.evaluate(() => document.activeElement?.id) === (phone ? 'cd-title' : 'cf-name'), `focus lands ${phone ? 'on the dialog title' : 'in the name field'}`);
 	await page.fill('#cf-name', 'smoke test');
 	await page.fill('#cf-email', 'smoke@example.com');
 	await page.locator('dialog[open] button[type="submit"]').click();
@@ -272,27 +313,33 @@ async function run(browser, vp) {
 	await page.keyboard.press('Escape');
 	await sleep(150);
 
-	// entry points and legacy hashes
+	// entry points and legacy hashes, from a fresh load (no presentation chosen)
+	await page.goto(url);
+	await page.waitForSelector('#hero-title');
+	await sleep(200);
 	const entries = [
 		['hero cta', async () => { await page.locator('.pill .switch button').nth(0).click(); await page.waitForSelector('#hero-title'); await page.locator('.hero .actions .btn--secondary').click(); }, '#index/all', 15],
 		['hero jump link (ai)', async () => { await page.locator('.pill .switch button').nth(0).click(); await page.waitForSelector('#hero-title'); await page.locator('.hero .quiet button', { hasText: 'ai assistants' }).click(); }, '#index/ai', 3],
 		['service row (devices)', async () => { await page.locator('.pill .switch button').nth(0).click(); await page.waitForSelector('#hero-title'); await page.locator('.svc-row h3 button', { hasText: 'connected devices' }).click(); }, '#index/devices', 3],
 		['browse all', async () => { await page.locator('.pill .switch button').nth(0).click(); await page.waitForSelector('#hero-title'); await page.locator('.more .btn').click(); }, '#index/all', 15],
-		['dialog service link (apps)', async () => { await page.locator('svg.map .node.project[data-project="vault"]').click(); await page.waitForSelector('dialog[open] .svc'); await page.locator('dialog[open] .svc').click(); }, '#index/apps', 3]
+		['dialog service link (apps)', async () => { await page.locator(`${nodeSel}[data-project="vault"]`).click(); await page.waitForSelector('dialog[open] .svc'); await page.locator('dialog[open] .svc').click(); }, '#index/apps', 3]
 	];
 	for (const [name, act, hash, n] of entries) {
 		await act();
-		await page.waitForSelector('svg.map');
+		await page.waitForSelector(shownSel);
 		await sleep(300);
 		const ok = await page.evaluate((h) => location.hash === h && document.querySelector('.pf').classList.contains('dark'), hash);
-		check(ok && (await page.locator('svg.map .node.project').count()) === n, `${name} opens the dark map (${hash}, ${n} nodes)`);
+		check(ok && (await page.locator(nodeSel).count()) === n, `${name} opens the dark index (${hash}, ${n} ${wide ? 'nodes' : 'rows'})`);
 	}
-	for (const [hash, svc, n] of [['#index', 'all', 15], ['#index/ai', 'ai', 3], ['#index/ai/map', 'ai', 3], ['#index/websites/list', 'websites', 3], ['#index/all/map', 'all', 15]]) {
+	// a bare #index and an unknown service canonicalise; an explicit /list or /map is kept and honoured at every width
+	for (const [hash, want, pres, n] of [['#index', '#index/all', null, 15], ['#index/ai', '#index/ai', null, 3], ['#index/nope', '#index/all', null, 15], ['#index/ai/map', '#index/ai/map', 'map', 3], ['#index/websites/list', '#index/websites/list', 'list', 3], ['#index/all/map', '#index/all/map', 'map', 15], ['#index/all/nope', '#index/all', null, 15]]) {
 		await page.goto(url + hash);
-		await page.waitForSelector('svg.map');
+		const sel = pres === 'map' ? (wide ? 'svg.map' : '.tree') : pres === 'list' ? '.rows' : shownSel;
+		await page.waitForSelector(sel);
 		await sleep(300);
 		const cur = await page.evaluate(() => ({ h: location.hash, dark: document.querySelector('.pf').classList.contains('dark') }));
-		check(cur.h === `#index/${svc}` && cur.dark && (await page.locator('svg.map .node.project').count()) === n, `${hash} opens the map as #index/${svc} with ${n} nodes`);
+		const count = await page.locator(pres === 'map' ? (wide ? 'svg.map .node.project' : '.tree .tree-project') : pres === 'list' ? '.rows .row' : nodeSel).count();
+		check(cur.h === want && cur.dark && count === n, `${hash} opens as ${want} showing ${pres || (wide ? 'the map' : 'the list')} with ${n} projects (${cur.h}, ${count})`);
 	}
 	for (const [hash, id] of [['#work', 'work'], ['#about', 'about'], ['#contact', 'contact']]) {
 		await page.goto(url + hash);
