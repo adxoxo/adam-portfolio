@@ -17,6 +17,12 @@ const VIEWPORTS = [
 	{ name: 'narrow', width: 320, height: 700 }
 ];
 
+// The contact dialog loads calendly's widget script. The tests serve a stub in
+// its place, so the dialog mounts a local frame and no request leaves the
+// origin; nothing is ever booked from a test run.
+const CALENDLY_SCRIPT = 'https://assets.calendly.com/assets/external/widget.js';
+const CALENDLY_STUB = 'window.Calendly = { initInlineWidget(o) { const f = document.createElement("iframe"); f.title = "calendly stub"; f.src = "about:blank"; o.parentElement.appendChild(f); } };';
+
 // The two client workflows (booking, enquiry) are public only at the level of
 // customer-visible stages. None of the internal detail that was redacted may come
 // back: case-sorting categories and branch conditions, what the photos must show,
@@ -61,11 +67,9 @@ async function run(browser, vp) {
 	page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
 	page.on('pageerror', (e) => errors.push(String(e)));
 	const external = [];
-	page.on('request', (r) => { if (!r.url().startsWith(origin)) external.push(r.url()); });
-	// the contact form is always intercepted: nothing may reach the real /api/lead
-	const leadPosts = [];
-	await page.route('**/api/lead', (route) => { leadPosts.push(route.request().postDataJSON()); route.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' }); });
-	await page.route('**/api/schedule', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' }));
+	page.on('request', (r) => { if (!r.url().startsWith(origin) && r.url() !== CALENDLY_SCRIPT) external.push(r.url()); });
+	let calendlyLoads = 0;
+	await page.route(CALENDLY_SCRIPT, (route) => { calendlyLoads++; route.fulfill({ status: 200, contentType: 'application/javascript', body: CALENDLY_STUB }); });
 
 	const res = await page.goto(url);
 	check(res.status() === 200, `home responds 200 (${res.status()})`);
@@ -99,62 +103,19 @@ async function run(browser, vp) {
 	// approved hero copy; the visible first word rotates (tests/headline.cjs), the accessible name stays the sentence
 	check((await page.getByRole('heading', { level: 1, name: 'systems built around how your business works.', exact: true }).count()) === 1, 'hero h1 accessible name is "systems built around how your business works."');
 	check(await page.evaluate(() => { const w = [...document.querySelectorAll('.rotor .word')].find((e) => parseFloat(getComputedStyle(e).opacity) > 0.95); return w && ['systems', 'websites', 'automations', 'marketing', 'workflows'].includes(w.textContent); }), 'hero shows one of the five approved words');
-	check((await page.locator('.hero .lede').innerText()).trim() === 'i build custom software, connect your tools, and use ai to automate complex workflows, from customer conversations to everyday operations.', 'hero subheadline is the approved one');
+	check((await page.locator('.hero .lede').innerText()).trim() === 'tell me what your business needs. i will find the simplest practical way to build it.', 'hero subheadline is the approved one');
 	check((await page.title()) === 'adam, systems built around how your business works', 'document title');
 	check((await page.locator('link[rel="canonical"]').getAttribute('href')) === 'https://portfolio.aquryu.space/', 'canonical link present');
 	check((await page.locator('link[rel="icon"]').count()) === 1, 'favicon link present');
-
-	// chat demo: stable footprint across the three steps and the wrap back
-	const docBox = async (sel) => page.evaluate((s) => { const r = document.querySelector(s).getBoundingClientRect(); return { x: r.x + scrollX, y: r.y + scrollY, width: r.width, height: r.height }; }, sel);
-	const h0 = await docBox('.demo'), s0 = await docBox('.steps'), c0 = await docBox('.hero .actions .btn');
-	const stepBtns = page.locator('.steps button');
-	for (const i of [1, 2, 0, 1, 2]) {
-		await stepBtns.nth(i).click();
-		await sleep(450);
-		const b = await docBox('.demo'), s = await docBox('.steps'), c = await docBox('.hero .actions .btn');
-		check(Math.abs(b.height - h0.height) <= 1 && Math.abs(b.width - h0.width) <= 1, `demo frame stable at step ${i + 1} (${b.width.toFixed(0)}x${b.height.toFixed(1)})`);
-		check(Math.abs(s.y - s0.y) <= 1 && Math.abs(c.y - c0.y) <= 1, `step controls and hero cta did not move at step ${i + 1}`);
-		check(await page.evaluate((n) => document.querySelectorAll('.steps button')[n].getAttribute('aria-pressed') === 'true', i), `step ${i + 1} is pressed`);
-		check(await page.evaluate(() => getComputedStyle(document.querySelector('.chat-log')).overflowY === 'auto'), `conversation scrolls inside the frame at step ${i + 1}`);
-	}
-	await page.locator('.demo-foot .next').click(); await sleep(450);
-	check(Math.abs((await docBox('.demo')).height - h0.height) <= 1, 'demo height stable after "next step" wrap');
-	const composer = await page.evaluate(() => { const c = document.querySelector('.chat-input'); return { hidden: c.getAttribute('aria-hidden') === 'true', interactive: !!c.querySelector('button, input, textarea, a'), cursor: getComputedStyle(c).cursor }; });
-	check(composer.hidden && !composer.interactive && composer.cursor === 'default', `demo composer is not a live control (${JSON.stringify(composer)})`);
-	check((await page.locator('.demo-bar .tag').textContent()).trim() === 'interactive demo', 'demo is labelled "interactive demo"');
-	check((await page.locator('#hero-title .rotor').count()) === 1 && (await page.locator('.hero button[aria-pressed]:not(.steps button)').count()) === 0 && !(await page.evaluate(() => /pause the headline|resume the headline/i.test(document.body.innerText))), 'no manual headline pause control');
+	// the focused overview: no demo, no services rows, no portrait; the sections in the approved order
+	check((await page.locator('.demo, .svc-row, .about .portrait').count()) === 0, 'no demo, service rows or about portrait on the overview');
+	check((await page.locator('main section[id]').evaluateAll((els) => els.map((e) => e.id).join(' '))) === 'work process about contact', 'sections in order: work, process, about, contact');
+	check((await page.locator('#hero-title .rotor').count()) === 1 && (await page.locator('.hero button[aria-pressed]').count()) === 0 && !(await page.evaluate(() => /pause the headline|resume the headline/i.test(document.body.innerText))), 'no manual headline pause control');
 	await page.screenshot({ path: path.join(shots, `overview-${vp.name}.png`) });
 
 	// aq rename: no user-facing "tq chatbot"; no preview wording
 	check(!(await page.evaluate(() => document.body.innerText.toLowerCase().includes('tq chatbot'))), 'no "tq chatbot" on the overview');
 	check(!(await page.evaluate(() => /design preview|drafted for this design preview|preview only|does not send/i.test(document.body.innerText))), 'no preview wording on the overview');
-
-	// case study from the hero caption: media (loom click-to-load), technical details, escape + focus return
-	await page.locator('.demo-caption .textlink').click();
-	await page.waitForSelector('dialog[open] #pd-title');
-	check((await page.locator('dialog[open] #pd-title').innerText()).includes('aq chatbot'), 'aq chatbot dialog opens from the hero caption');
-	check(await page.evaluate(() => document.activeElement?.id === 'pd-title'), 'focus moves to the dialog title');
-	check((await page.locator('dialog[open] iframe').count()) === 0 && (await page.locator('dialog[open] .media[data-kind="embed"] button.btn').count()) === 1, 'loom embed offers a load button and no iframe before activation');
-	// the media frame grows with its content: the click-to-load poster and its button are never cut off, at any width
-	const posterFit = await page.evaluate(() => {
-		const f = document.querySelector('dialog[open] .media .frame').getBoundingClientRect();
-		const b = document.querySelector('dialog[open] .media[data-kind="embed"] button.btn').getBoundingClientRect();
-		return { fits: b.top >= f.top - 1 && b.bottom <= f.bottom + 1 && b.left >= f.left - 1 && b.right <= f.right + 1, frame: `${Math.round(f.width)}x${Math.round(f.height)}` };
-	});
-	check(posterFit.fits, `loom poster and its load button sit inside the media frame (${posterFit.frame})`);
-	// the media frame is taller than 16:10 on a phone; it must not widen the dialog (it did, to 560px at 390px)
-	await dialogFits(page, 'aq dialog before technical details');
-	await page.locator('dialog[open] details summary').click();
-	check((await page.locator('dialog[open] details[open]').count()) === 1, 'technical details expand');
-	await dialogFits(page, 'aq dialog after technical details');
-	// innerText carries the CSS text-transform, so compare case-insensitively
-	check((await page.locator('dialog[open] details h3').allInnerTexts()).map((t) => t.trim().toLowerCase()).join('|') === 'stack|source', 'technical details show only the stack and the source, no write-up or wiring path');
-	check((await page.locator('dialog[open] .links a', { hasText: 'source on github' }).count()) === 1, 'github link from the database overlay');
-	await page.screenshot({ path: path.join(shots, `dialog-aq-${vp.name}.png`) });
-	await page.keyboard.press('Escape');
-	await sleep(200);
-	check((await page.locator('dialog[open]').count()) === 0, 'escape closes the dialog');
-	check(await page.evaluate(() => document.activeElement?.classList.contains('textlink')), 'focus returns to the opener');
 
 	// selected work: two sourced case studies with workflow diagrams and the provenance line
 	const caseTitles = await page.locator('.case h3').allInnerTexts();
@@ -267,6 +228,34 @@ async function run(browser, vp) {
 	await filter('all');
 	await sleep(300);
 
+	// the aq chatbot case from its index control: media (loom click-to-load), technical details, escape + focus return
+	await page.locator(`${nodeSel}[data-project="aq_chatbot"]`).focus();
+	await page.keyboard.press('Enter');
+	await page.waitForSelector('dialog[open] #pd-title');
+	check((await page.locator('dialog[open] #pd-title').innerText()).includes('aq chatbot'), 'aq chatbot dialog opens from its index control');
+	check(await page.evaluate(() => document.activeElement?.id === 'pd-title'), 'focus moves to the dialog title');
+	check((await page.locator('dialog[open] iframe').count()) === 0 && (await page.locator('dialog[open] .media[data-kind="embed"] button.btn').count()) === 1, 'loom embed offers a load button and no iframe before activation');
+	// the media frame grows with its content: the click-to-load poster and its button are never cut off, at any width
+	const posterFit = await page.evaluate(() => {
+		const f = document.querySelector('dialog[open] .media .frame').getBoundingClientRect();
+		const b = document.querySelector('dialog[open] .media[data-kind="embed"] button.btn').getBoundingClientRect();
+		return { fits: b.top >= f.top - 1 && b.bottom <= f.bottom + 1 && b.left >= f.left - 1 && b.right <= f.right + 1, frame: `${Math.round(f.width)}x${Math.round(f.height)}` };
+	});
+	check(posterFit.fits, `loom poster and its load button sit inside the media frame (${posterFit.frame})`);
+	// the media frame is taller than 16:10 on a phone; it must not widen the dialog (it did, to 560px at 390px)
+	await dialogFits(page, 'aq dialog before technical details');
+	await page.locator('dialog[open] details summary').click();
+	check((await page.locator('dialog[open] details[open]').count()) === 1, 'technical details expand');
+	await dialogFits(page, 'aq dialog after technical details');
+	// innerText carries the CSS text-transform, so compare case-insensitively
+	check((await page.locator('dialog[open] details h3').allInnerTexts()).map((t) => t.trim().toLowerCase()).join('|') === 'stack|source', 'technical details show only the stack and the source, no write-up or wiring path');
+	check((await page.locator('dialog[open] .links a', { hasText: 'source on github' }).count()) === 1, 'github link from the database overlay');
+	await page.screenshot({ path: path.join(shots, `dialog-aq-${vp.name}.png`) });
+	await page.keyboard.press('Escape');
+	await sleep(200);
+	check((await page.locator('dialog[open]').count()) === 0, 'escape closes the dialog');
+	check(await page.evaluate(() => document.activeElement?.getAttribute('data-project') === 'aq_chatbot'), 'focus returns to the opener');
+
 	// every project opens from its control, previous / next walks the list
 	const ids = await page.locator(nodeSel).evaluateAll((els) => els.map((e) => [e.getAttribute('data-project'), (e.getAttribute('aria-label') || e.querySelector('.row-title').firstChild.textContent).replace(', open case study', '').trim()]));
 	let opened = 0;
@@ -293,25 +282,22 @@ async function run(browser, vp) {
 	check(privateHits.length === 0, `no internal workflow detail in any open dialog (${privateHits.join('; ') || 'all 15 clean'})`);
 	check(!(await page.evaluate(() => document.body.innerText.toLowerCase().includes('tq chatbot'))), 'no "tq chatbot" in the index');
 
-	// "build something similar" -> contact prefilled; the intercepted submit carries the context
+	// "build something similar" -> the contact dialog: the calendly scheduler (stubbed) with the project as context
 	await page.locator(`${nodeSel}[data-project="invoice_automation"]`).click();
 	await page.waitForSelector('dialog[open] .dlg-foot .btn');
 	await page.locator('dialog[open] .dlg-foot .btn').click();
-	await page.waitForSelector('dialog[open] form');
-	check((await page.locator('#cf-need').inputValue()) === 'automation' && (await page.locator('#cf-msg').inputValue()).includes('invoice automation'), 'contact prefilled with the service and the project');
-	// a phone (narrow or touch) starts on the title so the keyboard waits; a wide screen with a mouse in the name field
-	const phone = vp.width <= 640 || vp.width < 500;
-	check(await page.evaluate(() => document.activeElement?.id) === (phone ? 'cd-title' : 'cf-name'), `focus lands ${phone ? 'on the dialog title' : 'in the name field'}`);
-	await page.fill('#cf-name', 'smoke test');
-	await page.fill('#cf-email', 'smoke@example.com');
-	await page.locator('dialog[open] button[type="submit"]').click();
-	await page.waitForSelector('dialog[open] .form-result');
-	const sent = leadPosts[leadPosts.length - 1];
-	check(leadPosts.length === 1 && sent.name === 'smoke test' && sent.email === 'smoke@example.com' && /need: business automation/.test(sent.message) && /similar to: invoice automation \(invoice_automation\)/.test(sent.message), `one intercepted post with the context lines (${JSON.stringify(sent)})`);
-	check((await page.locator('dialog[open] .form-result').innerText()).startsWith('received.') && (await page.evaluate(() => document.activeElement?.classList.contains('form-result'))), 'success panel shown and focused');
-	await page.screenshot({ path: path.join(shots, `contact-sent-${vp.name}.png`) });
+	await page.waitForSelector('dialog[open] .scheduler');
+	await sleep(300);
+	check((await page.locator('dialog[open] #cd-title').innerText()).trim() === 'book a 30 minute call' && (await page.locator('dialog[open] .small').first().innerText()).includes('"invoice automation"'), 'contact dialog is the scheduler, with the project as context');
+	check(await page.evaluate(() => document.activeElement?.id === 'cd-title'), 'focus lands on the dialog title');
+	check(calendlyLoads === 1 && (await page.locator('dialog[open] .calendly iframe').count()) === 1, 'the scheduler script was loaded once (stubbed) and mounted its frame');
+	check((await page.locator('dialog[open] form, dialog[open] input, dialog[open] textarea, dialog[open] select').count()) === 0, 'no form fields in the contact dialog');
+	check(await page.evaluate(() => { const a = document.querySelector('dialog[open] .actions .textlink'); const h = a ? decodeURIComponent(a.getAttribute('href')) : ''; return h.startsWith('mailto:') && h.includes('invoice automation'); }), 'the email fallback carries the project');
+	await dialogFits(page, 'contact dialog');
+	await page.screenshot({ path: path.join(shots, `contact-${vp.name}.png`) });
 	await page.keyboard.press('Escape');
 	await sleep(150);
+	check(await page.evaluate(() => document.activeElement?.getAttribute('data-project') === 'invoice_automation'), 'escape returns focus to the original opener');
 
 	// entry points and legacy hashes, from a fresh load (no presentation chosen)
 	await page.goto(url);
@@ -319,9 +305,9 @@ async function run(browser, vp) {
 	await sleep(200);
 	const entries = [
 		['hero cta', async () => { await page.locator('.pill .switch button').nth(0).click(); await page.waitForSelector('#hero-title'); await page.locator('.hero .actions .btn--secondary').click(); }, '#index/all', 15],
-		['hero jump link (ai)', async () => { await page.locator('.pill .switch button').nth(0).click(); await page.waitForSelector('#hero-title'); await page.locator('.hero .quiet button', { hasText: 'ai assistants' }).click(); }, '#index/ai', 3],
-		['service row (devices)', async () => { await page.locator('.pill .switch button').nth(0).click(); await page.waitForSelector('#hero-title'); await page.locator('.svc-row h3 button', { hasText: 'connected devices' }).click(); }, '#index/devices', 3],
 		['browse all', async () => { await page.locator('.pill .switch button').nth(0).click(); await page.waitForSelector('#hero-title'); await page.locator('.more .btn').click(); }, '#index/all', 15],
+		['about portfolio link', async () => { await page.locator('.pill .switch button').nth(0).click(); await page.waitForSelector('#hero-title'); await page.locator('.facts a[href="#index/all"]').click(); }, '#index/all', 15],
+		['contact portfolio link', async () => { await page.locator('.pill .switch button').nth(0).click(); await page.waitForSelector('#hero-title'); await page.locator('.ways a[href="#index/all"]').click(); }, '#index/all', 15],
 		['dialog service link (apps)', async () => { await page.locator(`${nodeSel}[data-project="vault"]`).click(); await page.waitForSelector('dialog[open] .svc'); await page.locator('dialog[open] .svc').click(); }, '#index/apps', 3]
 	];
 	for (const [name, act, hash, n] of entries) {
@@ -341,7 +327,7 @@ async function run(browser, vp) {
 		const count = await page.locator(pres === 'map' ? (wide ? 'svg.map .node.project' : '.tree .tree-project') : pres === 'list' ? '.rows .row' : nodeSel).count();
 		check(cur.h === want && cur.dark && count === n, `${hash} opens as ${want} showing ${pres || (wide ? 'the map' : 'the list')} with ${n} projects (${cur.h}, ${count})`);
 	}
-	for (const [hash, id] of [['#work', 'work'], ['#about', 'about'], ['#contact', 'contact']]) {
+	for (const [hash, id] of [['#work', 'work'], ['#process', 'process'], ['#about', 'about'], ['#contact', 'contact']]) {
 		await page.goto(url + hash);
 		await page.waitForSelector('#hero-title');
 		// the scroll is smooth when the hash changes inside the document, so poll for the section
@@ -364,12 +350,11 @@ async function run(browser, vp) {
 		check((await page.locator('#pill-menu').count()) === 0, 'escape closes the mobile menu');
 	}
 
-	// about portrait, footer without the preview label
-	const aboutPic = await page.evaluate(() => { const i = document.querySelector('.about .portrait'); if (!i) return false; i.loading = 'eager'; return i.complete && i.naturalWidth > 0; });
-	check(aboutPic, 'about portrait loaded');
+	// footer: the section links, no preview label
+	check((await page.locator('.site-footer button').allInnerTexts()).map((t) => t.trim()).join('|') === 'overview|work|process|about|contact|project index', 'footer lists overview, work, process, about, contact, project index');
 	check(!(await page.evaluate(() => /design preview/i.test(document.querySelector('.site-footer').innerText))), 'footer has no preview label');
 
-	check(external.length === 0, `no requests outside ${origin} (${external.slice(0, 3).join(', ') || 'none'})`);
+	check(external.length === 0, `no requests outside ${origin} except the stubbed calendly script (${external.slice(0, 3).join(', ') || 'none'})`);
 	check(errors.length === 0, `no console errors (${errors.slice(0, 3).join(' | ') || 'none'})`);
 	await ctx.close();
 }

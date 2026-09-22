@@ -6,21 +6,69 @@ so they see the real server-rendered html, the real assets and the real Supabase
 ```sh
 npm run build
 npx wrangler dev --port 8788 --ip 127.0.0.1 --local     # the built worker, production runtime
-BASE_URL=http://127.0.0.1:8788 node tests/smoke.cjs      # overview, demo, dialogs, index (map above 960px, list below), filters, hashes, 4 viewports
+BASE_URL=http://127.0.0.1:8788 node tests/smoke.cjs      # overview sections, case studies, dialogs, scheduler dialog, index (map above 960px, list below), filters, hashes, 4 viewports
 BASE_URL=http://127.0.0.1:8788 node tests/headline.cjs   # the changing headline word, bounds, reduced motion, recording
-BASE_URL=http://127.0.0.1:8788 node tests/contact.cjs    # message + call request forms, /api/lead and /api/schedule intercepted
-BASE_URL=http://127.0.0.1:8788 node tests/mobile.cjs     # phones, tablet, short landscape, reduced viewport: list / map history, targets, text, dialogs, demo, menu
+BASE_URL=http://127.0.0.1:8788 node tests/mobile.cjs     # phones, tablet, short landscape, reduced viewport: list / map history, targets, text, dialogs, menu
 node tests/layout-check.mjs                              # map layouts never overlap; database overlay precedence and url safety
 ```
 
 Playwright is not a dependency of this project. The scripts `require('playwright')`; point
 `PLAYWRIGHT_DIR` at an installed copy (any 1.4x+ with chromium) if it is not resolvable.
 `SHOTS_DIR` sets where screenshots and the headline recording go (default: the os temp dir).
-`/api/lead` and `/api/schedule` are always intercepted by the tests, so a test run never
-stores a lead, sends a call request or triggers an n8n webhook. `npm run preview` works as the server too, but it uses process.env instead of
-the wrangler vars, so the Supabase overlay is only exercised under `wrangler dev`.
+The calendly widget script (`assets.calendly.com/assets/external/widget.js`) is always served
+as a stub by `smoke.cjs` and `mobile.cjs`: the contact dialog mounts a local `about:blank`
+frame, nothing is booked and no request leaves the origin. `npm run preview` works as the
+server too, but it uses process.env instead of the wrangler vars, so the Supabase overlay is
+only exercised under `wrangler dev`.
+
+`tests/contact.cjs` is the suite for the former message and call-request forms (`/api/lead`,
+`/api/schedule`). Those forms and routes were removed with the calendly dialog, so the suite
+cannot pass any more and is not part of the run; it stays in the repo until a calendly-specific
+suite replaces it. The scheduler dialog is covered by the contact checks in `smoke.cjs` and
+`mobile.cjs`.
 
 ## Verification record
+
+### 2026-09-22, focused overview
+
+The overview now follows the approved 2026-09-18 mock-up: the hero is the headline plus one
+lede with "tell me what you need" (opens the scheduler dialog) and "see the project index";
+the demo, the services rows, the jump links, the about portrait and the "experience" line are
+gone; the two case studies carry the "agency project" label and keep "read the case study"
+(the project dialog) and their full workflow diagrams; the process is its own section
+(`#process`, three columns above 880px); the about facts link into the index; the contact
+section is labelled "enquiry", offers "book a call" (the scheduler dialog) and "email
+directly", and its ways list links into the index; the footer lists overview, work, process,
+about, contact, project index.
+
+Suites updated to this contract: `smoke.cjs` (hero lede, no demo / services / portrait,
+section order, aq chatbot opened from its index control, the scheduler dialog after "build
+something similar" with the project as context and the mailto fallback, the about and
+contact index links as entry points, `#process`, the footer links, the stubbed calendly
+script), `mobile.cjs` (text and target lists without the demo and services, stacked process
+steps, the scheduler dialog on the phone path and on short viewports, aq chatbot from its
+index row), `headline.cjs` (no demo bounds). `layout-check.mjs` is unchanged.
+
+Final verification on the built local worker, with the Calendly script stubbed:
+
+- `npm run check`: 0 errors, 0 warnings. `npm run build`: passed with the Cloudflare adapter.
+- `node tests/layout-check.mjs`: passed all overlay checks and the 12 map-layout checks.
+- `tests/smoke.cjs`: passed at 1440x1000, 768x1024, 390x844 and 320x700, plus the
+  reduced-motion context. Verified: the focused overview, all 15 project dialogs, index filters
+  and history, the Calendly stub, focus return, no overflow, no unexpected external requests,
+  no console errors.
+- `tests/headline.cjs`: passed at 1440, 768, 390 and 320. Verified: the exact word cycle, fixed
+  bounds, layout stability, off-screen and hidden-document pause, remount, reduced motion.
+- `tests/mobile.cjs`: passed at 320x700, 360x800, 390x844, 430x932, 768x1024, 844x390, 390x420
+  and 640x450 (the 200% zoom equivalent). Verified: target sizes, text sizes, responsive
+  layout, history, breakpoint changes, dialog scroll and focus, Calendly and email fallbacks
+  each reachable and tappable, background scroll lock, reduced motion, no overflow, no console
+  errors.
+- The Calendly script was stubbed. No booking occurred. No request left the local origin
+  except the intercepted script URL.
+- `tests/contact.cjs` is obsolete for the removed forms and was not run.
+- Not verified: WebKit, Safari, physical iOS, and the live Calendly network flow.
+- No deployment, push or commit occurred.
 
 ### 2026-09-14, design v2 port
 

@@ -1,8 +1,9 @@
 // Focused mobile checks against a running server: the list / map presentation
 // and its history, touch targets and text sizes, the hero on a small screen,
-// the demo disclosure, dialogs on short and reduced viewports, the menu, and
-// the scroll lock. Same environment as tests/smoke.cjs; /api/lead and
-// /api/schedule are intercepted in every context before navigation.
+// dialogs on short and reduced viewports, the menu, and the scroll lock. Same
+// environment as tests/smoke.cjs; the calendly widget script is stubbed in
+// every context before navigation, so nothing is booked and nothing leaves
+// the origin.
 //   BASE_URL=http://127.0.0.1:8788 node tests/mobile.cjs
 const path = require('path');
 const fs = require('fs');
@@ -24,7 +25,12 @@ async function waitHash(page, want, ms = 3000) {
 	return false;
 }
 
-// a fresh context: touch emulation below 500px, both api routes intercepted,
+// the calendly widget script is served as a stub: the contact dialog mounts a
+// local frame and no request leaves the origin
+const CALENDLY_SCRIPT = 'https://assets.calendly.com/assets/external/widget.js';
+const CALENDLY_STUB = 'window.Calendly = { initInlineWidget(o) { const f = document.createElement("iframe"); f.title = "calendly stub"; f.src = "about:blank"; o.parentElement.appendChild(f); } };';
+
+// a fresh context: touch emulation below 500px, the calendly script stubbed,
 // console errors and requests outside the origin collected
 async function open(browser, vp, extra = {}) {
 	const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, hasTouch: vp.width < 500, ...extra });
@@ -33,12 +39,9 @@ async function open(browser, vp, extra = {}) {
 	page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
 	page.on('pageerror', (e) => errors.push(String(e)));
 	const external = [];
-	page.on('request', (r) => { if (!r.url().startsWith(origin)) external.push(r.url()); });
-	const leadPosts = [];
-	const schedulePosts = [];
-	await page.route('**/api/lead', (route) => { leadPosts.push(route.request().postDataJSON()); route.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' }); });
-	await page.route('**/api/schedule', (route) => { schedulePosts.push(route.request().postDataJSON()); route.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' }); });
-	return { ctx, page, errors, external, leadPosts, schedulePosts };
+	page.on('request', (r) => { if (!r.url().startsWith(origin) && r.url() !== CALENDLY_SCRIPT) external.push(r.url()); });
+	await page.route(CALENDLY_SCRIPT, (route) => route.fulfill({ status: 200, contentType: 'application/javascript', body: CALENDLY_STUB }));
+	return { ctx, page, errors, external };
 }
 async function load(page, h = '') {
 	await page.goto(url + h);
@@ -96,7 +99,7 @@ async function textAtLeast(page, sels, min, label) {
 
 async function phone(browser, vp) {
 	console.log(`\n== ${vp.name} ${vp.width}x${vp.height}`);
-	const { ctx, page, errors, external, leadPosts } = await open(browser, vp);
+	const { ctx, page, errors, external } = await open(browser, vp);
 	await load(page);
 
 	// overview: the hero's primary action on the first screen, readable text, 44px controls
@@ -118,38 +121,11 @@ async function phone(browser, vp) {
 	check(cta.docTop >= 0 && cta.docTop + cta.height <= vp.height, `primary hero action inside the first screen (ends at ${Math.round(cta.docTop + cta.height)} of ${vp.height})`);
 	const words = await page.evaluate(() => [...document.querySelectorAll('.rotor .word')].map((w) => ({ t: w.textContent, lines: w.getClientRects().length, right: w.getBoundingClientRect().right })));
 	check(words.length === 5 && words.every((w) => w.lines === 1 && w.right <= vp.width), `all five headline words fit on one line (${words.map((w) => w.t).join(', ')})`);
-	await textAtLeast(page, ['.hero .lede', '.svc-row .desc', '.case-text dd', '.bio p', '.facts dd', '.process p', '.ways li', '#contact .lede'], 16, 'overview body text');
-	await textAtLeast(page, ['.svc-row .who', '.svc-row .eg', '.quiet', '.shot-note', '.facts dt', '.ways .k', '.site-footer'], 12, 'overview supporting text');
-	// the service row's button covers the whole row through its ::before, so the row is the target
-	await targets(page, ['.quiet button', '.hero .actions .btn', '.demo-caption .textlink', '.svc-row', '.case .textlink', '.more .btn', '#contact .btn', '.ways a', '.links a', '.site-footer a', '.site-footer button', '.pill a', '.pill button'], 'overview controls');
-	check(await page.evaluate(() => { const r = document.querySelector('.svc-row'); const b = r.getBoundingClientRect(); const el = document.elementFromPoint(b.left + b.width * 0.8, b.top + b.height * 0.8); return el?.closest('h3 button') !== null || el?.closest('.svc-row h3') !== null; }), 'a tap on the far side of a service row hits its button');
-	const quietGap = await page.evaluate(() => { const b = [...document.querySelectorAll('.quiet button')]; let min = 99; for (let i = 1; i < b.length; i++) { const a = b[i - 1].getBoundingClientRect(), c = b[i].getBoundingClientRect(); if (Math.abs(a.top - c.top) < 2) min = Math.min(min, c.left - a.right); } return min; });
-	check(quietGap >= 8, `jump links on one line are at least 8px apart (${quietGap}px)`);
-
-	// demo: readable, stable across steps with the business details closed and open
-	const demoBox = () => page.evaluate(() => { const r = document.querySelector('.demo').getBoundingClientRect(); const s = document.querySelector('.steps').getBoundingClientRect(); return [Math.round(r.x + scrollX), Math.round(r.y + scrollY), Math.round(r.width), Math.round(r.height), Math.round(s.y + scrollY)].join(','); });
-	check(await page.evaluate(() => getComputedStyle(document.querySelector('.lead-details')).display !== 'none' && !document.querySelector('.lead-details').open && getComputedStyle(document.querySelector('aside.lead-panel')).display === 'none'), 'business details start closed behind the disclosure');
-	await textAtLeast(page, ['.chat-log .msg', '.card-booked'], 16, 'demo messages');
-	await targets(page, ['.steps button', '.demo-foot .next', '.lead-details summary'], 'demo controls');
-	const d0 = await demoBox();
-	let stable = true;
-	for (const i of [1, 2, 0, 1, 2]) { await page.locator('.steps button').nth(i).click(); await sleep(400); if ((await demoBox()) !== d0) stable = false; }
-	await page.locator('.demo-foot .next').click(); await sleep(400);
-	if ((await demoBox()) !== d0) stable = false;
-	check(stable, `demo frame and controls identical across every step with the details closed (${d0})`);
-	await page.locator('.lead-details summary').click(); await sleep(300);
-	const d1 = await demoBox();
-	check(d1 !== d0 && (await page.evaluate(() => document.querySelector('.lead-details').open)), 'opening the disclosure is the only thing that changes the frame');
-	const rows = await page.evaluate(() => [...document.querySelectorAll('.lead-panel--mobile .lead-row')].map((r) => r.textContent.replace(/\s+/g, ' ').trim()));
-	check(rows.length === 4 && rows.every((t) => t.length > 0), `all four business rows are readable when open (${rows.map((r) => r.slice(0, 18)).join(' | ')})`);
-	let stableOpen = true;
-	for (const i of [1, 2, 0, 2]) { await page.locator('.steps button').nth(i).click(); await sleep(400); if ((await demoBox()) !== d1) stableOpen = false; }
-	check(stableOpen, `demo frame and controls identical across every step with the details open (${d1})`);
-	const clipped = await page.evaluate(() => [...document.querySelectorAll('.lead-panel--mobile, .lead-panel--mobile *')].some((el) => el.scrollHeight > el.clientHeight + 1 && getComputedStyle(el).overflowY !== 'visible'));
-	check(!clipped, 'open business details are not clipped');
-	await page.locator('.lead-details summary').click(); await sleep(300);
-	check((await demoBox()) === d0, 'closing the disclosure restores the frame');
-	await fits(page, 'overview after the demo');
+	await textAtLeast(page, ['.hero .lede', '.case-text dd', '.bio p', '.facts dd', '.process p', '.ways li', '#contact .lede'], 16, 'overview body text');
+	await textAtLeast(page, ['.quiet', '.more .note', '.shot-note', '.facts dt', '.ways .k', '.site-footer'], 12, 'overview supporting text');
+	await targets(page, ['.hero .actions .btn', '.case .textlink', '.more .btn', '.facts a', '#contact .btn', '.ways a', '.links a', '.site-footer a', '.site-footer button', '.pill a', '.pill button'], 'overview controls');
+	// the process steps stack on a phone, one under the other
+	check(await page.evaluate(() => { const xs = new Set([...document.querySelectorAll('.process li')].map((li) => Math.round(li.getBoundingClientRect().left))); return xs.size === 1 && document.querySelectorAll('.process li').length === 3; }), 'the three process steps stack in one column');
 	await page.screenshot({ path: path.join(shots, `mobile-overview-${vp.name}.png`) });
 
 	// index: rows by default, the select filters, every row is one readable button
@@ -175,7 +151,7 @@ async function phone(browser, vp) {
 	await page.focus('#svc-select'); await page.selectOption('#svc-select', 'all');
 	await sleep(150);
 
-	// the complete phone path: row -> case study -> build something similar -> contact prefilled -> intercepted post
+	// the complete phone path: row -> case study -> build something similar -> the scheduler with the project as context
 	await page.locator('.rows .row[data-project="grece"]').click();
 	await page.waitForSelector('dialog[open] #pd-title');
 	await sleep(250);
@@ -194,20 +170,13 @@ async function phone(browser, vp) {
 	await page.locator('.rows .row[data-project="grece"]').click();
 	await page.waitForSelector('dialog[open] .dlg-foot .btn');
 	await page.locator('dialog[open] .dlg-foot .btn').click();
-	await page.waitForSelector('dialog[open] form');
-	await sleep(250);
-	check((await page.locator('#cf-need').inputValue()) === 'devices' && (await page.locator('#cf-msg').inputValue()).includes('grece hydroponics') && (await page.evaluate(() => document.activeElement?.id === 'cd-title')), 'contact prefilled with the service and the project, focus on the title');
+	await page.waitForSelector('dialog[open] .scheduler');
+	await sleep(300);
+	check((await page.locator('dialog[open] #cd-title').innerText()).trim() === 'book a 30 minute call' && (await page.locator('dialog[open] .small').first().innerText()).includes('"grece hydroponics"') && (await page.evaluate(() => document.activeElement?.id === 'cd-title')), 'the contact dialog is the scheduler with the project as context, focus on the title');
+	check((await page.locator('dialog[open] .calendly iframe').count()) === 1 && (await page.locator('dialog[open] input, dialog[open] textarea, dialog[open] select').count()) === 0, 'the (stubbed) scheduler frame is mounted, no form fields');
 	await dialogFits(page, 'contact dialog');
-	await textAtLeast(page, ['dialog[open] input', 'dialog[open] select', 'dialog[open] textarea'], 16, 'form inputs');
-	await textAtLeast(page, ['dialog[open] label', 'dialog[open] .form-note', 'dialog[open] .small'], 14, 'form labels and notes');
-	await targets(page, ['dialog[open] .close', 'dialog[open] .modes button', 'dialog[open] button[type="submit"]', 'dialog[open] .actions .textlink'], 'contact controls');
-	await page.fill('#cf-name', 'mobile test');
-	await page.fill('#cf-email', 'mobile@example.com');
-	await page.locator('dialog[open] button[type="submit"]').click();
-	await page.waitForSelector('dialog[open] .form-result');
-	const sent = leadPosts[leadPosts.length - 1];
-	check(leadPosts.length === 1 && sent.name === 'mobile test' && /need: connected devices/.test(sent.message) && /similar to: grece hydroponics \(grece\)/.test(sent.message), `one intercepted post with the context lines (${JSON.stringify(sent)})`);
-	check(await page.evaluate(() => document.activeElement?.classList.contains('form-result')), 'success panel takes focus');
+	await textAtLeast(page, ['dialog[open] .small', 'dialog[open] .actions .textlink'], 14, 'contact dialog text');
+	await targets(page, ['dialog[open] .close', 'dialog[open] .actions .btn', 'dialog[open] .actions .textlink'], 'contact controls');
 	await page.keyboard.press('Escape');
 	await sleep(200);
 	check(await page.evaluate(() => document.activeElement?.getAttribute('data-project') === 'grece'), 'after the contact dialog, focus returns to the original row');
@@ -373,38 +342,37 @@ async function resize(browser) {
 }
 
 // dialogs on short and reduced viewports: close control reachable at the top and the
-// bottom, fields and errors reachable, submit reachable, background locked
+// bottom, the scheduler and its fallbacks reachable, background locked
 async function dialogs(browser, vp) {
 	console.log(`\n== dialogs at ${vp.name} ${vp.width}x${vp.height}`);
-	const { ctx, page, errors, leadPosts } = await open(browser, vp);
+	const { ctx, page, errors } = await open(browser, vp);
 	await load(page);
 	await page.evaluate(() => scrollTo(0, 260));
 	await sleep(150);
 	const y0 = await page.evaluate(() => scrollY);
 	await page.locator('.hero .actions .btn').first().click();
-	await page.waitForSelector('dialog[open] form');
-	await sleep(250);
+	await page.waitForSelector('dialog[open] .scheduler');
+	await sleep(300);
 	await dialogFits(page, 'contact');
 	await closeVisible(page, 'contact at the top');
 	const dlg = () => page.evaluate(() => { const d = document.querySelector('dialog[open]'); return { top: d.getBoundingClientRect().top, bottom: d.getBoundingClientRect().bottom, sh: d.scrollHeight, ch: d.clientHeight }; });
 	const inDialog = (sel) => page.evaluate((s) => { const d = document.querySelector('dialog[open]').getBoundingClientRect(); const r = document.querySelector(s).getBoundingClientRect(); return r.top >= d.top - 1 && r.bottom <= d.bottom + 1 && r.height > 0; }, sel);
-	// the last field: bring it into view (as a tap does) and focus it; it sits inside the dialog and below the sticky head
-	await page.evaluate(() => document.getElementById('cf-msg').scrollIntoView({ block: 'nearest' }));
-	await page.focus('#cf-msg');
-	await sleep(200);
 	const belowHead = (sel) => page.evaluate((s) => { const h = document.querySelector('dialog[open] .dlg-head').getBoundingClientRect(); const r = document.querySelector(s).getBoundingClientRect(); return r.top >= h.bottom - 1; }, sel);
-	check((await page.evaluate(() => document.activeElement?.id === 'cf-msg')) && (await inDialog('#cf-msg')) && (await belowHead('#cf-msg')), 'the message field is focused, inside the visible dialog and not under the sticky head');
-	await closeVisible(page, 'contact with the last field focused');
-	// validation: the first invalid field is focused and its error visible
-	await page.locator('dialog[open] button[type="submit"]').click();
-	await sleep(250);
-	check((await page.evaluate(() => document.activeElement?.id === 'cf-name')) && (await inDialog('#cf-name')) && (await inDialog('#cf-name-err')), 'empty submit: focus and the error message inside the visible dialog');
-	check(leadPosts.length === 0, 'nothing was posted');
-	// the submit action: reachable by scroll inside the dialog
-	await page.evaluate(() => document.querySelector('dialog[open] button[type="submit"]').scrollIntoView({ block: 'nearest' }));
-	await sleep(150);
-	check(await inDialog('dialog[open] button[type="submit"]'), 'submit action reachable inside the visible dialog');
-	await closeVisible(page, 'contact scrolled to the submit');
+	check((await page.evaluate(() => document.activeElement?.id === 'cd-title')) && (await inDialog('#cd-title')) && (await belowHead('#cd-title')), 'the title is focused, inside the visible dialog and not under the sticky head');
+	check((await page.locator('dialog[open] .calendly iframe').count()) === 1, 'the (stubbed) scheduler frame is mounted');
+	// the fallbacks below the scheduler: each one reachable by scroll inside the
+	// dialog. Below 640px the button takes the full width and the email link wraps
+	// under it, so the two need not share one screen: each is scrolled to in turn,
+	// must then sit inside the visible dialog box, take a tap at its centre (so it
+	// is not under the sticky head) and leave the close control in reach
+	const usable = (sel) => page.evaluate((s) => { const el = document.querySelector(s); const d = document.querySelector('dialog[open]').getBoundingClientRect(); const r = el.getBoundingClientRect(); const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return { inside: r.height > 0 && r.top >= d.top - 1 && r.bottom <= d.bottom + 1, hit: hit === el || el.contains(hit), at: `${Math.round(r.top)}..${Math.round(r.bottom)} of ${Math.round(d.top)}..${Math.round(d.bottom)}` }; }, sel);
+	for (const [sel, name] of [['dialog[open] .actions .btn', 'the calendly link'], ['dialog[open] .actions .textlink', 'the email fallback']]) {
+		await page.evaluate((s) => document.querySelector(s).scrollIntoView({ block: 'nearest' }), sel);
+		await sleep(150);
+		const u = await usable(sel);
+		check(u.inside && u.hit, `${name} scrolls into the visible dialog and takes a tap at its centre (${u.at})`);
+		await closeVisible(page, `contact scrolled to ${name}`);
+	}
 	await page.evaluate(() => { const d = document.querySelector('dialog[open]'); d.scrollTop = d.scrollHeight; });
 	await sleep(150);
 	await closeVisible(page, 'contact at the bottom');
@@ -419,10 +387,13 @@ async function dialogs(browser, vp) {
 	check((await page.evaluate(() => scrollY)) === y0, `the page behind the dialog did not scroll (${y0})`);
 	await page.keyboard.press('Escape');
 	await sleep(200);
-	check((await page.evaluate(() => scrollY)) === y0 && (await page.evaluate(() => document.activeElement?.textContent.trim() === 'work with me')), 'after close: page position kept, focus back on the opener');
-	// the case dialog with the loom poster: the embed close control (iframe stubbed) is 44px and the close stays in view
+	check((await page.evaluate(() => scrollY)) === y0 && (await page.evaluate(() => document.activeElement?.textContent.trim() === 'tell me what you need')), 'after close: page position kept, focus back on the opener');
+	// the case dialog with the loom poster, from its index row: the embed close control (iframe stubbed) is 44px and the close stays in view
 	await page.route('https://www.loom.com/**', (route) => route.fulfill({ status: 200, contentType: 'text/html', body: '<!doctype html><title>stub</title>' }));
-	await page.locator('.demo-caption .textlink').click();
+	await page.locator('.pill .switch button').nth(1).click();
+	await page.waitForSelector('.rows');
+	await sleep(200);
+	await page.locator('.rows .row[data-project="aq_chatbot"]').click();
 	await page.waitForSelector('dialog[open] #pd-title');
 	await sleep(250);
 	await dialogFits(page, 'case');

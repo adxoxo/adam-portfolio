@@ -230,10 +230,10 @@ export const PROJECTS: Project[] = [
 ];
 
 // the two selected-work case studies on the overview, in this order. Copy is a
-// shorter telling of the same project entries above.
+// shorter telling of the same project entries above. `kind` is the public
+// label above the title; both are agency projects and say only that.
 export interface CaseStudy {
 	id: string;
-	kindLabel: string;
 	kind: string;
 	title: string;
 	problem: string;
@@ -243,13 +243,13 @@ export interface CaseStudy {
 }
 export const CASES: CaseStudy[] = [
 	{
-		id: 'booking_invoice', kindLabel: 'business automation', kind: 'client automation, 2026', title: 'automated booking sales flow', flow: 'booking',
+		id: 'booking_invoice', kind: 'agency project', title: 'automated booking sales flow', flow: 'booking',
 		problem: 'after every closing call the team sent the offer, chased the signature, sent a payment link, wrote the invoice and confirmed the date by hand.',
 		solution: 'one guided wizard, in german or english: the customer books the workshop date, enters the company details, signs the offer and pays. the confirmed payment creates the invoice, emails it with the booking confirmation, and updates the crm and the calendar.',
 		see: 'the customer finishes alone. the invoice appears only after the money is confirmed, and every step can be resumed, with reminders.'
 	},
 	{
-		id: 'whatsapp_offer', kindLabel: 'business automation', kind: 'client automation, 2026', title: 'sales flow automation', flow: 'enquiry',
+		id: 'whatsapp_offer', kind: 'agency project', title: 'sales flow automation', flow: 'enquiry',
 		problem: 'a solar and battery installer handled every enquiry by hand: chase the details, judge the photos, write the offer, remember to follow up.',
 		solution: 'the enquiry gets a whatsapp message and a form. rules sort the case, a person approves the photos, and eligible cases receive a branded proposal by whatsapp, then a request for installation dates. a case that needs a technician receives a booking link instead.',
 		see: 'proposals go out without anyone writing them, a person still checks every photo before a price is sent, and follow-ups, escalation and the board keep themselves current.'

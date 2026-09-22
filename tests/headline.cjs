@@ -15,7 +15,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // the word whose opacity is (nearly) 1; '' during a fade
 const visibleWord = (page) => page.evaluate(() => { const w = [...document.querySelectorAll('.rotor .word')].find((e) => parseFloat(getComputedStyle(e).opacity) > 0.95); return w ? w.textContent : ''; });
-const boxes = (page) => page.evaluate(() => Object.fromEntries(['#hero-title', '.hero .lede', '.hero .actions .btn', '.demo', '.rotor'].map((s) => { const el = document.querySelector(s); const r = el ? el.getBoundingClientRect() : { x: 0, y: 0, width: 0, height: 0 }; return [s, [Math.round(r.x + scrollX), Math.round(r.y + scrollY), Math.round(r.width), Math.round(r.height)]]; })));
+const boxes = (page) => page.evaluate(() => Object.fromEntries(['#hero-title', '.hero .lede', '.hero .actions .btn', '.hero .quiet', '.rotor'].map((s) => { const el = document.querySelector(s); const r = el ? el.getBoundingClientRect() : { x: 0, y: 0, width: 0, height: 0 }; return [s, [Math.round(r.x + scrollX), Math.round(r.y + scrollY), Math.round(r.width), Math.round(r.height)]]; })));
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
 async function cycle(page, vp) {
@@ -31,7 +31,7 @@ async function cycle(page, vp) {
 		await sleep(90);
 	}
 	check(seen.slice(0, 6).join(' > ') === 'systems > websites > automations > marketing > workflows > systems', `${vp}: full cycle in order (${seen.join(' > ')})`);
-	check(!moved, `${vp}: headline, lede, cta, demo frame and word box never moved during the cycle`);
+	check(!moved, `${vp}: headline, lede, cta, side note and word box never moved during the cycle`);
 	return b0;
 }
 
@@ -57,18 +57,11 @@ async function cycle(page, vp) {
 		// incoming words wait 8px below the baseline (fade in upwards), outgoing words drop 8px
 		const dirs = await page.evaluate(() => { const ws = [...document.querySelectorAll('.rotor .word')]; return { idle: ws.filter((e) => !e.classList.contains('current')).map((e) => getComputedStyle(e).transform), current: getComputedStyle(ws.find((e) => e.classList.contains('current'))).transform }; });
 		check(dirs.idle.every((t) => t === 'matrix(1, 0, 0, 1, 0, 8)') && dirs.current === 'matrix(1, 0, 0, 1, 0, 0)', `${vp.w}: waiting words sit at +8px, the current word at 0 (${dirs.idle[0]} / ${dirs.current})`);
-		// no horizontal document overflow, and the demo frame keeps its bounds across the three steps
+		// no horizontal document overflow
 		const ov = await page.evaluate(() => ({ sw: document.documentElement.scrollWidth, iw: innerWidth }));
 		check(ov.sw <= ov.iw, `${vp.w}: no horizontal document overflow (${ov.sw} <= ${ov.iw})`);
-		const demoBox = () => page.evaluate(() => { const r = document.querySelector('.demo').getBoundingClientRect(); return [Math.round(r.x + scrollX), Math.round(r.y + scrollY), Math.round(r.width), Math.round(r.height)]; });
-		const d0 = await demoBox();
-		let demoStable = true;
-		for (const i of [1, 2, 0]) { await page.locator('.steps button').nth(i).click(); await sleep(400); if (!same(await demoBox(), d0)) demoStable = false; }
-		check(demoStable, `${vp.w}: demo frame bounds identical across greeting / qualify / call booked (${d0.join(', ')})`);
-		await page.evaluate(() => window.scrollTo(0, 0));
-		await sleep(200);
 		if (vp.w === 1440 || vp.w === 390) {
-			// fresh load so the sample starts on "systems" (the earlier demo clicks already used up the first hold)
+			// fresh load so the sample starts on "systems" (the checks above already used up the first hold)
 			await page.goto(url);
 			await page.waitForSelector('.rotor');
 			const b0 = await cycle(page, `${vp.w}`);
