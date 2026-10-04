@@ -25,6 +25,25 @@
 		"binding": "ASSETS",
 		"directory": "./dist"
 	},
+	// Edge-backed limits protect real write paths across Worker isolates.
+	// Namespace IDs are unique within this Cloudflare account.
+	"ratelimits": [
+		{
+			"name": "LOGIN_RATE_LIMITER",
+			"namespace_id": "611001",
+			"simple": { "limit": 5, "period": 60 }
+		},
+		{
+			"name": "PUBLIC_WRITE_RATE_LIMITER",
+			"namespace_id": "611002",
+			"simple": { "limit": 5, "period": 60 }
+		},
+		{
+			"name": "ADMIN_WRITE_RATE_LIMITER",
+			"namespace_id": "611003",
+			"simple": { "limit": 30, "period": 60 }
+		}
+	],
 	"build": {
 		"command": "npm run build"
 	},

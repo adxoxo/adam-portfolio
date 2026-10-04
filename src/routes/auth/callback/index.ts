@@ -1,5 +1,6 @@
 import type { RequestHandler } from '@qwik.dev/router';
-import { createServerSupabase } from '~/lib/server/supabase';
+import { getOwnerEmail, getVerifiedOwner } from '~/lib/server/owner';
+import { createServerSupabase, forgetVerifiedUser } from '~/lib/server/supabase';
 
 const toAdmin = (msg?: string) => (msg ? '/admin?error=' + encodeURIComponent(msg) : '/admin');
 
@@ -27,6 +28,17 @@ export const onGet: RequestHandler = async (event) => {
 	} catch (e) {
 		// a thrown fault (e.g. network) should surface too, not 500 silently
 		failure = e instanceof Error ? e.message : 'auth exchange failed';
+	}
+	if (!failure) {
+		if (!getOwnerEmail(event)) {
+			failure = 'owner login is not configured';
+		} else if (!(await getVerifiedOwner(event))) {
+			failure = 'unauthorized';
+		}
+		if (failure) {
+			await supabase.auth.signOut().catch(() => undefined);
+			forgetVerifiedUser(event);
+		}
 	}
 	// The session cookies set by the exchange ride on this redirect response.
 	throw event.redirect(303, toAdmin(failure ?? undefined));

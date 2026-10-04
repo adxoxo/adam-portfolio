@@ -1,7 +1,8 @@
 import type { RequestHandler } from '@qwik.dev/router';
 import { z } from 'zod';
-import { CONTACT_MAILTO, createRateLimiter, emailField, postWebhook } from '~/lib/server/contact';
+import { CONTACT_MAILTO, emailField, postWebhook } from '~/lib/server/contact';
 import { readEnv } from '~/lib/server/env';
+import { checkRateLimit } from '~/lib/server/security';
 import { createPublicSupabase } from '~/lib/server/supabase';
 
 const leadSchema = z.object({
@@ -10,14 +11,19 @@ const leadSchema = z.object({
 	message: z.string().trim().min(1).max(4000)
 });
 
-const limited = createRateLimiter();
-
 // POST {name, email, message}. 200 {ok:true} only after a durable record
 // (Supabase `leads` insert) or a 2xx webhook answer. Nothing configured: 503
 // with an email fallback. Configured but every target failed: 502.
-export const onPost: RequestHandler = async ({ request, clientConn, json, env }) => {
+export const onPost: RequestHandler = async (event) => {
+	const { request, clientConn, json, env } = event;
 	const ip = clientConn.ip ?? '';
-	if (limited(ip)) throw json(429, { ok: false, error: 'rate_limited' });
+	const rate = await checkRateLimit(
+		event,
+		'PUBLIC_WRITE_RATE_LIMITER',
+		`lead:${ip || "unknown-client"}`
+	);
+	if (rate === 'limited') throw json(429, { ok: false, error: 'rate_limited' });
+	if (rate === 'unavailable') throw json(503, { ok: false, error: 'rate_limit_unavailable' });
 
 	const body = await request.json().catch(() => null);
 	const parsed = leadSchema.safeParse(body);

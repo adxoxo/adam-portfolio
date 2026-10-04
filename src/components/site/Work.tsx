@@ -1,11 +1,16 @@
-import { component$, useContext } from '@qwik.dev/core';
+import { $, component$, sync$, useContext } from '@qwik.dev/core';
 import { CLUSTER_LABEL } from '~/lib/data/projects';
 import { KIND_LABEL, type ViewProject } from '~/lib/data/presentation';
+import { projectPath, slugForId } from '~/lib/seo';
 import { SiteStateCtx } from './state';
 import { openProject } from './runtime/dialogs';
 import { LeadPreview, PosterFrame, hoverPreview } from './Preview';
 
 const SALES = new Set(['whatsapp_offer', 'booking_invoice']);
+
+const preventPlainProjectClick = sync$((event: MouseEvent) => {
+	if (event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) event.preventDefault();
+});
 
 const Meta = component$<{ p: ViewProject }>(({ p }) => (
 	<div class="meta-row">
@@ -29,6 +34,7 @@ const Meta = component$<{ p: ViewProject }>(({ p }) => (
 const WorkCard = component$<{ p: ViewProject; size: 'half' | 'wide' | 'small'; flip?: boolean }>(({ p, size, flip }) => {
 	const state = useContext(SiteStateCtx);
 	const id = `work-${p.id}`;
+	const slug = slugForId(p.id);
 	const cls = size === 'wide' ? `wcard wcard--wide${flip ? ' flip' : ''}` : size === 'small' ? 'wcard wcard--small' : 'wcard';
 	return (
 		<article class={cls} onPointerEnter$={(e, el) => hoverPreview(e, el, true)} onPointerLeave$={(e, el) => hoverPreview(e, el, false)}>
@@ -36,9 +42,24 @@ const WorkCard = component$<{ p: ViewProject; size: 'half' | 'wide' | 'small'; f
 			<div class="wbody">
 				<Meta p={p} />
 				<h3>
-					<button type="button" id={id} class="card-link" onClick$={() => openProject(state, p.id, id)}>
-						{p.title}
-					</button>
+					{slug ? (
+						<a
+							id={id}
+							class="card-link"
+							href={projectPath(slug)}
+							onClick$={[
+								preventPlainProjectClick,
+								$((event: MouseEvent) => {
+									if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+									return openProject(state, p.id, id);
+								})
+							]}
+						>
+							{p.title}
+						</a>
+					) : (
+						<button type="button" id={id} class="card-link" onClick$={() => openProject(state, p.id, id)}>{p.title}</button>
+					)}
 				</h3>
 				<p class="sum">{p.systemDetail?.summary && size === 'small' ? p.systemDetail.summary : p.summary}</p>
 				<span class="go" aria-hidden="true">
@@ -55,6 +76,7 @@ export const Work = component$<{ highlights: ViewProject[] }>(({ highlights }) =
 	const main = rest.filter((p) => !SALES.has(p.id));
 	const sales = rest.filter((p) => SALES.has(p.id));
 	const points = (lead?.features ?? []).slice(0, 3);
+	const leadSlug = lead ? slugForId(lead.id) : null;
 	return (
 		<section class="section work" id="work" aria-labelledby="work-h">
 			<div class="wrap">
@@ -82,9 +104,26 @@ export const Work = component$<{ highlights: ViewProject[] }>(({ highlights }) =
 							)}
 							{lead.note && <p class="caption">{lead.note}</p>}
 							<div class="cta-row">
-								<button type="button" id={`work-${lead.id}`} class="btn" onClick$={() => openProject(state, lead.id, `work-${lead.id}`)}>
-									watch the {lead.title.replace(/^aquryu /, '')} demo
-								</button>
+								{leadSlug ? (
+									<a
+										id={`work-${lead.id}`}
+										class="btn"
+										href={projectPath(leadSlug)}
+										onClick$={[
+											preventPlainProjectClick,
+											$((event: MouseEvent) => {
+												if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+												return openProject(state, lead.id, `work-${lead.id}`);
+											})
+										]}
+									>
+										watch the {lead.title.replace(/^aquryu /, '')} demo
+									</a>
+								) : (
+									<button type="button" id={`work-${lead.id}`} class="btn" onClick$={() => openProject(state, lead.id, `work-${lead.id}`)}>
+										watch the {lead.title.replace(/^aquryu /, '')} demo
+									</button>
+								)}
 							</div>
 						</div>
 					</article>

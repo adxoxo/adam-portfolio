@@ -74,10 +74,14 @@ export default component$(() => (
 
 export const head: DocumentHead = {
 	links: [{ rel: 'canonical', href: `${SITE_URL}/accessibility` }],
-	title: 'accessibility, adam',
+	title: 'Accessibility | Adam Gemenez',
 	meta: [
 		{ name: 'description', content: 'how adam’s portfolio works with a keyboard, touch, screen readers, captions and reduced motion, and how to report a problem.' },
-		{ property: 'og:title', content: 'accessibility, adam' },
-		{ property: 'og:url', content: `${SITE_URL}/accessibility` }
+		{ property: 'og:type', content: 'website' },
+		{ property: 'og:site_name', content: 'Adam Gemenez portfolio' },
+		{ property: 'og:title', content: 'Accessibility | Adam Gemenez' },
+		{ property: 'og:description', content: 'How Adam’s portfolio supports keyboard, touch, screen readers, captions and reduced motion, plus known limits.' },
+		{ property: 'og:url', content: `${SITE_URL}/accessibility` },
+		{ name: 'twitter:card', content: 'summary' }
 	]
 };

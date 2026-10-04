@@ -6,13 +6,14 @@
  * https://next.qwik.dev/docs/deployments/cloudflare-workers/
  */
 import { createQwikRouter } from '@qwik.dev/router/middleware/cloudflare-pages';
+import { applySecurityHeaders } from './lib/server/security';
 import render from './entry.ssr';
 
 declare const FixedLengthStream: {
 	new (length: number): { readable: ReadableStream<Uint8Array>; writable: WritableStream<Uint8Array> };
 };
 
-const router = createQwikRouter({ render });
+const router = createQwikRouter({ render, checkOrigin: true });
 
 /**
  * The adapter streams every route body through its own TransformStream, so
@@ -22,19 +23,22 @@ const router = createQwikRouter({ render });
  */
 const fetch: typeof router = async (request, env, ctx) => {
 	const response = await router(request, env, ctx);
-	const length = Number(response.headers.get('content-length') ?? NaN);
+	const secured = new Response(response.body, response);
+	const url = new URL(request.url);
+	applySecurityHeaders(secured.headers, url);
+	const length = Number(secured.headers.get('content-length') ?? NaN);
 	if (
 		request.method === 'HEAD' ||
-		!new URL(request.url).pathname.startsWith('/demos/') ||
-		!response.body ||
+		!url.pathname.startsWith('/demos/') ||
+		!secured.body ||
 		!Number.isSafeInteger(length) ||
 		typeof FixedLengthStream !== 'function'
 	) {
-		return response;
+		return secured;
 	}
 	const { readable, writable } = new FixedLengthStream(length);
-	ctx.waitUntil(response.body.pipeTo(writable).catch(() => {}));
-	return new Response(readable, response);
+	ctx.waitUntil(secured.body.pipeTo(writable).catch(() => {}));
+	return new Response(readable, secured);
 };
 
 export { fetch };

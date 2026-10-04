@@ -13,6 +13,7 @@ import { Footer } from '~/components/site/Footer';
 import { CircuitMap } from '~/components/site/map/CircuitMap';
 import { ProjectDialog } from '~/components/site/ProjectDialog';
 import { ContactDialog } from '~/components/site/ContactDialog';
+import { buildHomeJsonLd, serializeJsonLd } from '~/lib/seo';
 
 // Server only: reads the public CMS rows (or the 21-row snapshot) and applies
 // the presentation policy. No client, key or cookie leaves this function.
@@ -64,22 +65,26 @@ export default component$(() => {
 });
 
 const DESCRIPTION =
-	'adam, ai engineer and full-stack developer. i build systems that make things lighter: ai tools, web apps, automations and embedded devices, each shown with a short video.';
+	'AI engineer and full-stack developer Adam Gemenez builds AI tools, web apps, automations and embedded systems, with source-backed case studies.';
 
 export const head: DocumentHead = {
 	links: [{ rel: 'canonical', href: `${SITE_URL}/` }],
-	title: 'adam, systems that make things lighter',
+	title: 'Adam Gemenez | AI engineer and full-stack developer',
 	meta: [
 		{ name: 'description', content: DESCRIPTION },
 		{ property: 'og:type', content: 'website' },
-		{ property: 'og:site_name', content: 'adam' },
-		{ property: 'og:title', content: 'adam, systems that make things lighter' },
+		{ property: 'og:site_name', content: 'Adam Gemenez portfolio' },
+		{ property: 'og:title', content: 'Adam Gemenez | AI engineer and full-stack developer' },
 		{ property: 'og:description', content: DESCRIPTION },
 		{ property: 'og:url', content: `${SITE_URL}/` },
 		{ property: 'og:image', content: `${SITE_URL}/brand/og-1200x630.png` },
 		{ property: 'og:image:width', content: '1200' },
 		{ property: 'og:image:height', content: '630' },
 		{ property: 'og:image:alt', content: 'the green dragon mark beside the words systems that make things lighter' },
-		{ name: 'twitter:card', content: 'summary_large_image' }
-	]
+		{ name: 'twitter:card', content: 'summary_large_image' },
+		{ name: 'twitter:title', content: 'Adam Gemenez | AI engineer and full-stack developer' },
+		{ name: 'twitter:description', content: DESCRIPTION },
+		{ name: 'twitter:image', content: `${SITE_URL}/brand/og-1200x630.png` }
+	],
+	scripts: [{ type: 'application/ld+json', script: serializeJsonLd(buildHomeJsonLd()) }]
 };

@@ -15,19 +15,6 @@ export const emailField = z
 	.regex(/^[^@\s]+@[^@\s]+\.[^@\s]+$/, 'invalid email')
 	.max(200);
 
-/** Tiny per-isolate IP bucket: 5 requests / 10 min. Good enough as a first
- *  guard; a KV-backed limiter can replace it later without touching callers. */
-export function createRateLimiter(windowMs = 10 * 60 * 1000, max = 5) {
-	const hits = new Map<string, number[]>();
-	return (ip: string): boolean => {
-		const now = Date.now();
-		const recent = (hits.get(ip) ?? []).filter((t) => now - t < windowMs);
-		recent.push(now);
-		hits.set(ip, recent);
-		return recent.length > max;
-	};
-}
-
 /** POST JSON to a configured webhook. True only for a 2xx answer. Logs the
  *  failure kind (status or error class), never the payload. */
 export async function postWebhook(tag: string, url: string, body: unknown): Promise<boolean> {

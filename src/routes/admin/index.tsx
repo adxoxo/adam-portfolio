@@ -1,12 +1,13 @@
 import { component$, useSignal, useStyles$, useTask$ } from '@qwik.dev/core';
-import { Form, routeAction$, routeLoader$, type DocumentHead } from '@qwik.dev/router';
+import { Form, routeAction$, routeLoader$, type DocumentHead, type RequestEventBase } from '@qwik.dev/router';
 import { buildProjectPatch, loomThumb, type AdminForm } from '~/lib/server/admin';
 import { supabaseConfigured } from '~/lib/server/env';
 import {
 	createServerSupabase,
-	forgetVerifiedUser,
-	getVerifiedUser
+	forgetVerifiedUser
 } from '~/lib/server/supabase';
+import { getOwnerEmail, getVerifiedOwner, isOwnerEmail } from '~/lib/server/owner';
+import { checkRateLimit } from '~/lib/server/security';
 import { runRepoSync } from '~/lib/server/sync';
 import styles from './admin.css?inline';
 
@@ -31,7 +32,7 @@ export const useAdminData = routeLoader$(async (event) => {
 	if (!supabaseConfigured(event) || !supabase) {
 		return { configured: false, user: null, projects: [] as Row[], loginError, loadError: null };
 	}
-	const user = await getVerifiedUser(event);
+	const user = await getVerifiedOwner(event);
 	if (!user) return { configured: true, user: null, projects: [] as Row[], loginError, loadError: null };
 
 	const { data, error } = await supabase
@@ -50,11 +51,15 @@ export const useAdminData = routeLoader$(async (event) => {
 // (owner-only HTML) instead of lazily re-fetching the loader on first use.
 { serializationStrategy: 'always' });
 
-/** Every project mutation re-validates the session with getUser(). RLS on the
- *  projects table stays the database-side guard. */
-async function requireOwner(event: Parameters<typeof getVerifiedUser>[0]) {
-	if (!createServerSupabase(event)) return null;
-	return getVerifiedUser(event);
+async function authorizeOwnerWrite(event: RequestEventBase) {
+	const user = await getVerifiedOwner(event);
+	if (!user) return { ok: false as const, status: 401 as const, message: 'unauthorized' };
+	const rate = await checkRateLimit(event, 'ADMIN_WRITE_RATE_LIMITER', user.id);
+	if (rate === 'limited') return { ok: false as const, status: 429 as const, message: 'rate limited' };
+	if (rate === 'unavailable') {
+		return { ok: false as const, status: 503 as const, message: 'rate limit unavailable' };
+	}
+	return { ok: true as const, user };
 }
 
 export const useLogin = routeAction$(async (data, event) => {
@@ -62,9 +67,14 @@ export const useLogin = routeAction$(async (data, event) => {
 	if (!supabase) return event.fail(400, { message: 'supabase not configured' });
 	const email = String(data.email ?? '').trim();
 	if (!email) return event.fail(400, { message: 'email required' });
+	if (!getOwnerEmail(event)) return event.fail(503, { message: 'owner login is not configured' });
+	if (!isOwnerEmail(event, email)) return event.fail(403, { message: 'unauthorized' });
+	const rate = await checkRateLimit(event, 'LOGIN_RATE_LIMITER', email.toLowerCase());
+	if (rate === 'limited') return event.fail(429, { message: 'rate limited' });
+	if (rate === 'unavailable') return event.fail(503, { message: 'rate limit unavailable' });
 	const { error } = await supabase.auth.signInWithOtp({
 		email,
-		options: { emailRedirectTo: `${event.url.origin}/auth/callback` }
+		options: { emailRedirectTo: `${event.url.origin}/auth/callback`, shouldCreateUser: false }
 	});
 	if (error) return event.fail(400, { message: error.message });
 	return { sent: true };
@@ -81,8 +91,8 @@ export const useLogout = routeAction$(
 
 export const useSave = routeAction$(
 	async (data, event) => {
-		const user = await requireOwner(event);
-		if (!user) return event.fail(401, { message: 'unauthorized' });
+		const auth = await authorizeOwnerWrite(event);
+		if (!auth.ok) return event.fail(auth.status, { message: auth.message });
 		const supabase = createServerSupabase(event)!;
 		const f = data as AdminForm;
 		const id = String(f.id ?? '');
@@ -116,8 +126,8 @@ export const useSave = routeAction$(
 
 export const useSetStatus = routeAction$(
 	async (data, event) => {
-		const user = await requireOwner(event);
-		if (!user) return event.fail(401, { message: 'unauthorized' });
+		const auth = await authorizeOwnerWrite(event);
+		if (!auth.ok) return event.fail(auth.status, { message: auth.message });
 		const id = String(data.id ?? '');
 		const status = String(data.status ?? 'hidden');
 		const { error } = await createServerSupabase(event)!
@@ -132,8 +142,8 @@ export const useSetStatus = routeAction$(
 
 export const useCreateDraft = routeAction$(
 	async (_data, event) => {
-		const user = await requireOwner(event);
-		if (!user) return event.fail(401, { message: 'unauthorized' });
+		const auth = await authorizeOwnerWrite(event);
+		if (!auth.ok) return event.fail(auth.status, { message: auth.message });
 		const id = `draft_${Date.now()}`;
 		const { error } = await createServerSupabase(event)!
 			.from('projects')
@@ -146,8 +156,6 @@ export const useCreateDraft = routeAction$(
 
 export const useSync = routeAction$(
 	async (_data, event) => {
-		const user = await requireOwner(event);
-		if (!user) return event.fail(401, { message: 'unauthorized' });
 		const result = await runRepoSync(event);
 		if (!result.ok) return event.fail(result.status, { message: `sync failed: ${result.error}` });
 		return result.mode === 'supabase'
@@ -238,7 +246,7 @@ export default component$(() => {
 						supabase is not configured, so this is running on seed data. locally: run the built worker
 						with wrangler (it reads PUBLIC_SUPABASE_URL and PUBLIC_SUPABASE_ANON_KEY from
 						wrangler.jsonc). on cloudflare (workers): they ship committed in wrangler.jsonc, so just
-						redeploy. run supabase-schema.sql once either way.
+						redeploy. run supabase-schema.sql, invite the owner, then run supabase-owner-hardening.sql.
 					</p>
 				) : !d.user ? (
 					<Form action={login} class="login">

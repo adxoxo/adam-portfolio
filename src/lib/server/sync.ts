@@ -2,28 +2,32 @@
 // hidden drafts. The public site reads Supabase, never GitHub, so visitors
 // trigger no GitHub calls. Shared by POST /api/sync-repos and the admin
 // "sync from github" action (the admin calls this directly; no self-fetch).
+// Both paths require the explicit owner before any GitHub or database call.
 import type { RequestEventBase } from '@qwik.dev/router';
 import { fetchRepos, normalizeRepo, type RepoDraft } from './github';
 import { readEnv } from './env';
-import { createAdminSupabase, getVerifiedUser } from './supabase';
+import { getVerifiedOwner } from './owner';
+import { checkRateLimit } from './security';
+import { createAdminSupabase } from './supabase';
 
 export type SyncResult =
 	| { ok: true; mode: 'dry-run'; count: number; drafts: RepoDraft[] }
 	| { ok: true; mode: 'supabase'; added: number; total: number }
-	| { ok: false; status: 401 | 502; error: string };
+	| { ok: false; status: 401 | 429 | 502 | 503; error: string };
 
-type SyncEvent = Pick<RequestEventBase, 'env' | 'cookie' | 'headers' | 'url' | 'sharedMap'>;
+type SyncEvent = Pick<
+	RequestEventBase,
+	'env' | 'cookie' | 'headers' | 'platform' | 'url' | 'sharedMap'
+>;
 
 export async function runRepoSync(event: SyncEvent): Promise<SyncResult> {
 	const user = readEnv(event, 'PUBLIC_GITHUB_USER') || 'adxoxo';
+	const owner = await getVerifiedOwner(event);
+	if (!owner) return { ok: false, status: 401, error: 'unauthorized' };
+	const rate = await checkRateLimit(event, 'ADMIN_WRITE_RATE_LIMITER', owner.id);
+	if (rate === 'limited') return { ok: false, status: 429, error: 'rate_limited' };
+	if (rate === 'unavailable') return { ok: false, status: 503, error: 'rate_limit_unavailable' };
 	const admin = createAdminSupabase(event);
-
-	// When a store is configured, only the signed-in owner may sync. The check
-	// runs before any GitHub or database call.
-	if (admin) {
-		const authed = await getVerifiedUser(event);
-		if (!authed) return { ok: false, status: 401, error: 'unauthorized' };
-	}
 
 	let drafts: RepoDraft[];
 	try {

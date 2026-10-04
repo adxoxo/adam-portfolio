@@ -246,7 +246,7 @@ img, video { display: block; max-width: 100%; }
 .wcard p.sum { color: var(--muted); font-size: 15px; max-width: 62ch; }
 .wcard .go { font-size: 14px; color: var(--accent-deep); font-weight: 500; text-decoration: underline; text-underline-offset: 4px; }
 .wcard--wide .wbody { display: flex; flex-direction: column; gap: 12px; }
-.card-link { background: none; border: 0; padding: 0; font: inherit; color: inherit; text-align: left; letter-spacing: inherit; text-transform: inherit; cursor: pointer; }
+.card-link { background: none; border: 0; padding: 0; font: inherit; color: inherit; text-align: left; letter-spacing: inherit; text-transform: inherit; text-decoration: none; cursor: pointer; }
 .card-link::after { content: ''; position: absolute; inset: 0; z-index: 1; }
 .card-link:focus-visible { outline: none; }
 .wcard:has(.card-link:focus-visible), .pcard:has(.card-link:focus-visible) { outline: 2px solid var(--accent); outline-offset: 4px; }
@@ -350,6 +350,23 @@ img, video { display: block; max-width: 100%; }
 .policy a { color: var(--accent-deep); text-underline-offset: 3px; }
 .policy .back { margin-top: 28px; }
 
+/* Public case studies reuse the dialog content as a calm, full-width page. */
+.case-preview { max-width: 940px; margin: 110px auto 72px; padding: 0 var(--gutter); }
+.case-crumb { display: flex; align-items: center; gap: 12px; min-height: 44px; margin-bottom: 20px; color: var(--muted); font-size: 13px; }
+.case-crumb a { display: inline-flex; align-items: center; min-height: 44px; color: var(--accent-deep); text-underline-offset: 3px; }
+.case-preview .pd-inner { border: 1px solid var(--border); }
+.case-preview .pd-head { position: static; padding: 26px 28px; background: var(--bg); }
+.case-preview .pd-head h1 { font-size: clamp(28px, 4vw, 42px); }
+.case-transcript { margin-top: 28px; padding: 16px 20px; border: 1px solid var(--border); font-size: 14px; }
+.case-transcript summary { display: flex; align-items: center; min-height: 44px; cursor: pointer; color: var(--accent-deep); font-weight: 500; }
+.case-transcript ol { padding-left: 20px; }
+.case-transcript li { margin: 12px 0; padding-left: 4px; }
+@media (max-width: 559px) {
+	.case-preview { margin-top: 94px; padding: 0 12px; }
+	.case-crumb { padding: 0 8px; }
+	.case-preview .pd-head, .case-preview .pd-body { padding: 20px; }
+}
+
 /* ---------- dialogs ---------- */
 dialog { border: 0; padding: 0; color: var(--ink); background: transparent; max-width: none; max-height: none; }
 dialog::backdrop { background: rgba(16, 19, 12, 0.62); }
@@ -419,6 +436,7 @@ dialog::backdrop { background: rgba(16, 19, 12, 0.62); }
 .vp-time { font-size: 13px; font-variant-numeric: tabular-nums; color: var(--d-muted); white-space: nowrap; padding: 0 4px; }
 .vp-seek { flex: 1 1 auto; min-width: 60px; height: 44px; accent-color: var(--d-accent); background: transparent; cursor: pointer; margin: 0 4px; }
 @media (max-width: 420px) { .vp-time .dur { display: none; } }
+@media (max-width: 340px) { .vp-bar { gap: 2px; padding-inline: 6px; } }
 .vp:fullscreen { display: flex; flex-direction: column; justify-content: center; background: #000; }
 .vp:fullscreen .vp-stage { flex: 1 1 auto; aspect-ratio: auto !important; }
 .loom-consent { padding: 22px; display: flex; flex-direction: column; gap: 12px; align-items: flex-start; color: var(--d-ink); }

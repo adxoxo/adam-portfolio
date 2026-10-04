@@ -1,12 +1,17 @@
-import { component$, useContext, useSignal } from '@qwik.dev/core';
+import { $, component$, sync$, useContext, useSignal } from '@qwik.dev/core';
 import { CLUSTER_LABEL, type Cluster } from '~/lib/data/projects';
 import { KIND_LABEL, type ViewProject } from '~/lib/data/presentation';
+import { projectPath, slugForId } from '~/lib/seo';
 import { SiteStateCtx } from './state';
 import { openProject } from './runtime/dialogs';
 import { animateTo } from './runtime/switch';
 import { PosterFrame } from './Preview';
 
 const ORDER: Cluster[] = ['ai', 'fullstack', 'automation', 'embedded'];
+
+const preventPlainProjectClick = sync$((event: MouseEvent) => {
+	if (event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) event.preventDefault();
+});
 
 function matches(p: ViewProject, cluster: string, q: string) {
 	if (cluster !== 'all' && p.cluster !== cluster) return false;
@@ -57,6 +62,7 @@ export const AllProjects = component$<{ projects: ViewProject[] }>(({ projects }
 					<ul class="pgrid">
 						{shown.map((p) => {
 							const id = `all-${p.id}`;
+							const slug = slugForId(p.id);
 							return (
 								<li key={p.id}>
 									<article class="pcard">
@@ -74,9 +80,22 @@ export const AllProjects = component$<{ projects: ViewProject[] }>(({ projects }
 												)}
 											</div>
 											<h3>
-												<button type="button" id={id} class="card-link" onClick$={() => openProject(state, p.id, id)}>
-													{p.title}
-												</button>
+												{slug ? (
+													<a
+														id={id}
+														class="card-link"
+														href={projectPath(slug)}
+														onClick$={[
+															preventPlainProjectClick,
+															$((event: MouseEvent) => {
+																if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+																return openProject(state, p.id, id);
+															})
+														]}
+													>{p.title}</a>
+												) : (
+													<button type="button" id={id} class="card-link" onClick$={() => openProject(state, p.id, id)}>{p.title}</button>
+												)}
 											</h3>
 											<p>{p.summary}</p>
 											{(p.selected || p.labels.length > 0) && (

@@ -1,6 +1,6 @@
 -- adyu portfolio schema. Run in a new Supabase project (SQL editor).
--- Then: Authentication > Providers > disable new signups, and invite your own
--- email so `authenticated` == you. See ARCHITECTURE.md / BUILD-PLAN.md.
+-- Then disable new signups, invite the confirmed owner, and run
+-- supabase-owner-hardening.sql. Authentication alone does not grant owner access.
 
 -- ----------------------------------------------------------------------------
 -- projects: the single source of truth. status drives placement everywhere.
@@ -81,7 +81,7 @@ create trigger projects_updated_at before update on projects
 -- ----------------------------------------------------------------------------
 -- Row Level Security
 --   public (anon): read visible projects + settings, insert leads.
---   authenticated (you): full control of projects + settings; read leads.
+--   confirmed owner UUID: full control + lead reads after owner hardening.
 -- ----------------------------------------------------------------------------
 alter table projects      enable row level security;
 alter table site_settings enable row level security;
@@ -92,20 +92,18 @@ drop policy if exists projects_public_read on projects;
 create policy projects_public_read on projects
   for select using (status <> 'hidden');
 
--- projects: the owner (any authenticated user, and signups are disabled) does everything
+-- Remove obsolete broad access. Preserve explicit UUID policies on reruns.
+-- Run supabase-owner-hardening.sql after setup to grant the confirmed owner.
 drop policy if exists projects_owner_all on projects;
-create policy projects_owner_all on projects
-  for all to authenticated using (true) with check (true);
 
 -- settings: public read, owner write
 drop policy if exists settings_public_read on site_settings;
 create policy settings_public_read on site_settings for select using (true);
 drop policy if exists settings_owner_all on site_settings;
-create policy settings_owner_all on site_settings
-  for all to authenticated using (true) with check (true);
+-- Explicit owner access comes from supabase-owner-hardening.sql.
 
 -- leads: anyone can insert, only the owner can read
 drop policy if exists leads_public_insert on leads;
 create policy leads_public_insert on leads for insert with check (true);
 drop policy if exists leads_owner_read on leads;
-create policy leads_owner_read on leads for select to authenticated using (true);
+-- Explicit owner access comes from supabase-owner-hardening.sql.

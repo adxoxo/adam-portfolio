@@ -110,10 +110,14 @@ export default component$(() => (
 
 export const head: DocumentHead = {
 	links: [{ rel: 'canonical', href: `${SITE_URL}/privacy` }],
-	title: 'privacy, adam',
+	title: 'Privacy | Adam Gemenez',
 	meta: [
 		{ name: 'description', content: 'what happens to data when you visit adam’s portfolio: cloudflare hosting, request logs and web analytics, no cookies on public pages.' },
-		{ property: 'og:title', content: 'privacy, adam' },
-		{ property: 'og:url', content: `${SITE_URL}/privacy` }
+		{ property: 'og:type', content: 'website' },
+		{ property: 'og:site_name', content: 'Adam Gemenez portfolio' },
+		{ property: 'og:title', content: 'Privacy | Adam Gemenez' },
+		{ property: 'og:description', content: 'What happens to data when you visit Adam’s portfolio, including hosting, request logs, analytics and public-page storage.' },
+		{ property: 'og:url', content: `${SITE_URL}/privacy` },
+		{ name: 'twitter:card', content: 'summary' }
 	]
 };
