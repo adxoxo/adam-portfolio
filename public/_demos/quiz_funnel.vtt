@@ -1,0 +1,38 @@
+WEBVTT
+
+1
+00:00:00.400 --> 00:00:02.700
+bilingual quiz funnel. Animated system walkthrough of the documented flow. Animated from the documented flow. Sample values only, no client data.
+
+2
+00:00:02.750 --> 00:00:04.650
+A visitor answers twenty questions, in either language
+
+3
+00:00:04.700 --> 00:00:07.350
+Serverless functions hold the only key and store the lead
+
+4
+00:00:07.400 --> 00:00:09.550
+Fixed rules score the answers into one of five profiles
+
+5
+00:00:09.600 --> 00:00:11.200
+A model is consulted only when two profiles tie
+
+6
+00:00:11.250 --> 00:00:13.750
+The report is built from the profile, Brevo confirms the opt-in
+
+7
+00:00:13.800 --> 00:00:16.150
+Then the report reaches the visitor by email
+
+8
+00:00:16.300 --> 00:00:20.400
+The profile is decided by rules, so every result can be explained
+
+9
+00:00:20.550 --> 00:00:23.100
+bilingual quiz funnel. System walkthrough of the documented architecture. No product footage.
+

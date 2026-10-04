@@ -1,0 +1,58 @@
+WEBVTT
+
+1
+00:00:00.400 --> 00:00:02.650
+grimoire. App demo with synthetic data. Retired in September 2026. Shown from its last commit with synthetic notes and a stand-in embedding provider.
+
+2
+00:00:02.650 --> 00:00:04.800
+One local graph of notes, sessions and projects
+
+3
+00:00:04.850 --> 00:00:07.900
+All nodes: documents, memories and projects in one constellation
+
+4
+00:00:07.950 --> 00:00:11.000
+Pick a project: only its one-hop neighbourhood stays in focus
+
+5
+00:00:11.000 --> 00:00:13.100
+The project hub keeps living context and open tasks together
+
+6
+00:00:13.150 --> 00:00:15.300
+Chronicles and linked tomes come from the same graph
+
+7
+00:00:15.350 --> 00:00:17.400
+Today: tasks sit on an Eisenhower board
+
+8
+00:00:17.450 --> 00:00:21.250
+Drag a task into Do now, tick a ritual, the streak updates
+
+9
+00:00:21.300 --> 00:00:23.550
+Flow: generate today from tasks, rituals and anchors
+
+10
+00:00:23.600 --> 00:00:26.250
+Plans change at 11:10: pin a 2 pm client call
+
+11
+00:00:26.300 --> 00:00:29.350
+Reflow from now: started blocks lock, the rest moves
+
+12
+00:00:29.350 --> 00:00:31.750
+Coding agents reach the same store through one MCP gateway
+
+13
+00:00:31.800 --> 00:00:33.950
+Each tool call writes an OpenTelemetry span to the console
+
+14
+00:00:34.100 --> 00:00:36.650
+grimoire. Real Grimoire UI running locally. Synthetic data; Ollama replaced by the built-in fake provider.
+

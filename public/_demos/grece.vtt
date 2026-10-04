@@ -1,0 +1,38 @@
+WEBVTT
+
+1
+00:00:00.400 --> 00:00:02.650
+grece hydroponics. Animated system walkthrough of the documented flow. Drawn from the repository code, last updated in 2024. Sample readings, no hardware footage.
+
+2
+00:00:02.650 --> 00:00:04.750
+pH and EC circuits on I2C, read by an Arduino Uno
+
+3
+00:00:04.800 --> 00:00:06.550
+The Uno prints one serial line per read cycle
+
+4
+00:00:06.600 --> 00:00:08.150
+A BLE tag adds temperature and humidity at the Raspberry Pi
+
+5
+00:00:08.200 --> 00:00:11.250
+The Pi posts JSON to a Django REST API that stores every reading
+
+6
+00:00:11.300 --> 00:00:15.350
+The real API, running locally: post one sample reading
+
+7
+00:00:15.400 --> 00:00:17.050
+201 Created: the reading is stored
+
+8
+00:00:17.100 --> 00:00:19.900
+Every reading stays in the log, ready for tuning
+
+9
+00:00:20.050 --> 00:00:22.600
+grece hydroponics. Walkthrough of the code plus its real API running locally. Readings are samples.
+

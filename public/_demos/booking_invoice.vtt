@@ -1,0 +1,54 @@
+WEBVTT
+
+1
+00:00:00.400 --> 00:00:02.650
+booking-to-invoice flow. App demo with simulated integrations. Real wizard code, de-branded, with synthetic data. Calendar, signature, payment, invoice and email are simulated.
+
+2
+00:00:02.650 --> 00:00:03.850
+One booking link: German or English on the same URL
+
+3
+00:00:03.900 --> 00:00:06.650
+The customer picks the workshop format
+
+4
+00:00:06.700 --> 00:00:08.750
+Pick a free day: availability here is a simulated fixture
+
+5
+00:00:08.800 --> 00:00:11.300
+Then a start time and an email address
+
+6
+00:00:11.350 --> 00:00:15.250
+Company details feed the offer and the invoice
+
+7
+00:00:15.300 --> 00:00:16.600
+The offer arrives pre-filled: net, VAT and total
+
+8
+00:00:16.600 --> 00:00:17.950
+Sign the offer: the signing window is a local stub here
+
+9
+00:00:18.000 --> 00:00:20.650
+Pay by SEPA or card: no payment provider is called
+
+10
+00:00:20.700 --> 00:00:22.400
+Done: in this demo no invoice, email or calendar event exists
+
+11
+00:00:22.450 --> 00:00:25.550
+The documented production chain: signature, payment, invoice, CRM
+
+12
+00:00:25.600 --> 00:00:28.250
+Then the confirmation email and scheduled reminders
+
+13
+00:00:28.400 --> 00:00:30.950
+booking-to-invoice flow. Wizard UI on fixtures. No calendar, payment, signature, invoice, CRM or email service was called.
+

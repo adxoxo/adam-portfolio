@@ -1,0 +1,38 @@
+WEBVTT
+
+1
+00:00:00.400 --> 00:00:02.700
+self-serve video product. Animated system walkthrough of the documented flow. Animated from the documented flow. Status on record: live in test mode. Sample values only.
+
+2
+00:00:02.750 --> 00:00:04.200
+The customer buys from the app
+
+3
+00:00:04.250 --> 00:00:05.500
+Stripe hosts the checkout
+
+4
+00:00:05.550 --> 00:00:07.950
+The paid webhook creates the account and the purchase record
+
+5
+00:00:08.000 --> 00:00:09.200
+Products and users meet in a join table
+
+6
+00:00:09.250 --> 00:00:11.350
+Brevo sends the access email
+
+7
+00:00:11.400 --> 00:00:14.650
+Playback goes through HMAC signed URLs, never a public file
+
+8
+00:00:14.800 --> 00:00:18.700
+Status on record: live in test mode
+
+9
+00:00:18.850 --> 00:00:21.400
+self-serve video product. System walkthrough of the documented architecture. No product footage, no real payments.
+

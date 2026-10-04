@@ -1,0 +1,50 @@
+WEBVTT
+
+1
+00:00:00.400 --> 00:00:02.650
+whatsapp-to-offer automation. Animated system walkthrough of the documented flow. Animated from the documented flow, plus the real photo-review screen on synthetic photos. Messages and documents are simulated.
+
+2
+00:00:02.650 --> 00:00:04.300
+A web lead lands in the automation service
+
+3
+00:00:04.350 --> 00:00:06.000
+An automated WhatsApp intro carries the form link, and the team gets a task card
+
+4
+00:00:06.050 --> 00:00:08.000
+The customer sends photos and job details, the model qualifies them
+
+5
+00:00:08.050 --> 00:00:09.850
+Then a person reviews the photos
+
+6
+00:00:09.900 --> 00:00:12.600
+The reviewer swipes right to approve each photo
+
+7
+00:00:12.650 --> 00:00:15.000
+Or taps yes: four photos, four decisions
+
+8
+00:00:15.050 --> 00:00:16.550
+All approved: the offer path. In this demo nothing is sent
+
+9
+00:00:16.600 --> 00:00:18.100
+Otherwise the case routes to a technician call
+
+10
+00:00:18.150 --> 00:00:20.100
+Approved: an offer document goes out by WhatsApp
+
+11
+00:00:20.150 --> 00:00:23.350
+Otherwise the customer gets a link to book a technician call
+
+12
+00:00:23.500 --> 00:00:26.050
+whatsapp-to-offer automation. Walkthrough of the documented flow. Review screen on a local stub; no message, form, task, offer or link was sent.
+

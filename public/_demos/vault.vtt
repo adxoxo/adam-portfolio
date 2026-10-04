@@ -1,0 +1,42 @@
+WEBVTT
+
+1
+00:00:00.400 --> 00:00:02.700
+aquryu vault. App demo with synthetic data. Synthetic wallets. The USD rate in this demo is a manual sample value.
+
+2
+00:00:02.750 --> 00:00:05.300
+Vault opens on quick log, total balance first
+
+3
+00:00:05.350 --> 00:00:08.250
+Tap Food: the log sheet opens with the wallet already set
+
+4
+00:00:08.400 --> 00:00:11.500
+Type the amount on the keypad: 2, 8, 5
+
+5
+00:00:11.550 --> 00:00:14.150
+Confirm: logged ₱285, Food, GCash
+
+6
+00:00:14.350 --> 00:00:16.900
+The total and the GCash wallet update from that one log
+
+7
+00:00:17.000 --> 00:00:20.050
+Dashboard: income, spending and net position for the week
+
+8
+00:00:20.300 --> 00:00:23.400
+Plan: the weekly budget that income and costs allow
+
+9
+00:00:23.500 --> 00:00:26.150
+Goals show how many weeks they take at this rate
+
+10
+00:00:26.400 --> 00:00:28.950
+aquryu vault. Real Vault UI running locally. Synthetic data, fixed clock, voice and AI routes blocked.
+

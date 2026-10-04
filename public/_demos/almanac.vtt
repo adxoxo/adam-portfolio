@@ -1,0 +1,42 @@
+WEBVTT
+
+1
+00:00:00.400 --> 00:00:02.650
+almanac. App demo with synthetic data. Real app on an in-browser data fixture. Synthetic tasks and habits, fixed clock.
+
+2
+00:00:02.650 --> 00:00:04.050
+Today: habits, a fasting window and tasks in one view
+
+3
+00:00:04.100 --> 00:00:06.050
+Tick a habit and its streak moves
+
+4
+00:00:06.100 --> 00:00:08.050
+Urgency is computed from deadline and importance
+
+5
+00:00:08.100 --> 00:00:10.100
+Generate lays tasks around fixed anchors
+
+6
+00:00:10.150 --> 00:00:12.000
+Mark one block done, lock another
+
+7
+00:00:12.050 --> 00:00:13.950
+11:05: the morning slipped
+
+8
+00:00:14.000 --> 00:00:17.200
+Reflow rebuilds the rest of the day; done and locked blocks stay
+
+9
+00:00:17.350 --> 00:00:21.550
+Back on Today: now and next come from the new plan
+
+10
+00:00:21.700 --> 00:00:24.250
+almanac. Real app running locally. Supabase answered by a fixture; production never contacted.
+

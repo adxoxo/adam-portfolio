@@ -1,0 +1,34 @@
+WEBVTT
+
+1
+00:00:00.400 --> 00:00:02.700
+invoice automation. Animated system walkthrough of the documented flow. Animated from the project summary. Sample job and amounts, no client data.
+
+2
+00:00:02.750 --> 00:00:04.350
+A detailing job is marked done
+
+3
+00:00:04.400 --> 00:00:06.300
+An n8n workflow builds the invoice right away
+
+4
+00:00:06.350 --> 00:00:07.800
+The invoice goes to the customer by email
+
+5
+00:00:07.850 --> 00:00:10.400
+A follow-up is scheduled and sends itself
+
+6
+00:00:10.450 --> 00:00:12.450
+No paperwork after hours
+
+7
+00:00:12.600 --> 00:00:16.300
+Invoices and reminders go out without the owner
+
+8
+00:00:16.450 --> 00:00:19.000
+invoice automation. System walkthrough of the documented flow. No workflow export or client data shown.
+

@@ -1,0 +1,34 @@
+WEBVTT
+
+1
+00:00:00.400 --> 00:00:02.700
+video-first landing page. Animated system walkthrough of the documented flow. Animated from the documented flow. Sample values only, no client data.
+
+2
+00:00:02.750 --> 00:00:04.350
+A visitor arrives from a paid campaign
+
+3
+00:00:04.400 --> 00:00:05.750
+One URL carries both languages
+
+4
+00:00:05.800 --> 00:00:07.250
+The form submit goes to serverless functions
+
+5
+00:00:07.300 --> 00:00:10.550
+The lead lands in the same CRM table the quiz funnel uses
+
+6
+00:00:10.600 --> 00:00:13.750
+Brevo sends the opt-in, a webhook carries the campaign keyword to chat
+
+7
+00:00:14.000 --> 00:00:17.900
+Both funnels land in one place
+
+8
+00:00:18.050 --> 00:00:20.600
+video-first landing page. System walkthrough of the documented architecture. No product footage.
+

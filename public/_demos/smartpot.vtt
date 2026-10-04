@@ -1,0 +1,38 @@
+WEBVTT
+
+1
+00:00:00.400 --> 00:00:02.650
+smart pot. Animated system walkthrough of the documented flow. Drawn from the 2023 repository code. Sample readings, no hardware footage. The repo has no app screen.
+
+2
+00:00:02.650 --> 00:00:04.750
+Three sensor boards, each on its own NodeMCU
+
+3
+00:00:04.800 --> 00:00:06.200
+Temperature and humidity go to the API as JSON over Wi-Fi
+
+4
+00:00:06.250 --> 00:00:07.600
+Soil moisture is mapped to a percentage on the board, then posted
+
+5
+00:00:07.650 --> 00:00:08.800
+The light sensor only prints to serial: no upload code in the repo
+
+6
+00:00:08.850 --> 00:00:11.450
+The API stores each reading and returns a running average
+
+7
+00:00:11.500 --> 00:00:14.800
+The real API, running locally with sample readings
+
+8
+00:00:14.850 --> 00:00:18.100
+Soil moisture rows from the second board, same pattern
+
+9
+00:00:18.250 --> 00:00:20.800
+smart pot. Walkthrough of the code plus its real API running locally. Readings are samples.
+

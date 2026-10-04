@@ -7,6 +7,11 @@ node_modules
 .wrangler
 /.svelte-kit
 /build
+# Qwik build output (client assets + Worker, SSR modules, tsc cache)
+/dist
+/server
+/tmp
+tsconfig.tsbuildinfo
 
 # OS
 .DS_Store
@@ -17,6 +22,8 @@ Thumbs.db
 .env.*
 !.env.example
 !.env.test
+# wrangler local secrets
+.dev.vars*
 
 # Vite
 vite.config.js.timestamp-*

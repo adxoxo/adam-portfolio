@@ -1,0 +1,38 @@
+WEBVTT
+
+1
+00:00:00.400 --> 00:00:02.650
+standup dashboard. App demo with synthetic data. Fictional users served from a local cache. No GitHub request was made.
+
+2
+00:00:02.650 --> 00:00:04.350
+Type a GitHub username and load the dashboard
+
+3
+00:00:04.400 --> 00:00:06.150
+PRs, issues and activity fill in on one screen
+
+4
+00:00:06.200 --> 00:00:09.050
+A streak and per-repo numbers from stored history
+
+5
+00:00:09.100 --> 00:00:11.850
+Per-repo health with day-over-day deltas
+
+6
+00:00:11.900 --> 00:00:14.500
+Deltas come from stored snapshots, not in-memory guesses
+
+7
+00:00:14.550 --> 00:00:16.050
+Switch to a second user
+
+8
+00:00:16.100 --> 00:00:19.350
+One section hits a rate limit, every other section still renders
+
+9
+00:00:19.500 --> 00:00:22.050
+standup dashboard. Real app running locally on synthetic cache rows. No GitHub calls.
+

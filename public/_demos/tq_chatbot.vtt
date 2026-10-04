@@ -1,0 +1,54 @@
+WEBVTT
+
+1
+00:00:00.400 --> 00:00:02.650
+tq chatbot. App demo with synthetic data. No AI keys in this demo: built-in mock replies and rule scoring. Synthetic tenants and leads.
+
+2
+00:00:02.650 --> 00:00:03.700
+A visitor opens the chat widget on a client site
+
+3
+00:00:03.750 --> 00:00:05.450
+Turn 1: "hey, i run a digital marketing agency"
+
+4
+00:00:05.500 --> 00:00:07.800
+Turn 2: stated ad spend and a clear pain
+
+5
+00:00:07.850 --> 00:00:11.150
+Hot lead: the bot stops asking and offers a call
+
+6
+00:00:11.200 --> 00:00:12.600
+Behind the scenes: the same chat in the admin test console
+
+7
+00:00:12.650 --> 00:00:14.900
+Turn 1 scores 1.5, the state moves to qualifying
+
+8
+00:00:14.950 --> 00:00:17.000
+Turn 2 scores 10.5, past the hot threshold of 10: closing
+
+9
+00:00:17.050 --> 00:00:19.800
+No AI key here: built-in mock replies and rule scoring
+
+10
+00:00:19.850 --> 00:00:22.200
+Hot, warm and cold leads land in one table
+
+11
+00:00:22.250 --> 00:00:24.200
+Each client is one row in the tenants table
+
+12
+00:00:24.250 --> 00:00:27.050
+Its own personality, signal weights and thresholds
+
+13
+00:00:27.200 --> 00:00:29.750
+tq chatbot. Real app running locally from a sandbox copy. No AI calls, no webhooks, the call link is never opened.
+

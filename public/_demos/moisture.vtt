@@ -1,0 +1,54 @@
+WEBVTT
+
+1
+00:00:00.400 --> 00:00:02.650
+moisture sensor. App demo with a simulated device. The real desktop app, driven by a simulated device that speaks the firmware protocol. Synthetic readings.
+
+2
+00:00:02.650 --> 00:00:04.200
+A probe in the rice changes an oscillator frequency
+
+3
+00:00:04.250 --> 00:00:05.300
+The ESP32 turns frequency into moisture, plus temperature and humidity
+
+4
+00:00:05.350 --> 00:00:06.800
+Readings stream over USB serial as moisture, temperature, humidity
+
+5
+00:00:06.850 --> 00:00:08.850
+The desktop app stores them for analysis and export
+
+6
+00:00:08.900 --> 00:00:10.650
+The app finds the device on USB serial (a simulated device here)
+
+7
+00:00:10.700 --> 00:00:12.950
+Start Collection: the device runs its measurement loops
+
+8
+00:00:13.000 --> 00:00:15.950
+Five loops of 37.5 seconds each, sped up here
+
+9
+00:00:16.000 --> 00:00:17.100
+Collection complete, every reading saved to SQLite
+
+10
+00:00:17.150 --> 00:00:18.550
+Show Graph opens the analysis window
+
+11
+00:00:18.600 --> 00:00:20.450
+Average, median and mode, with a status: optimal at 12 to 14 percent
+
+12
+00:00:20.500 --> 00:00:22.950
+The chart plots the last five readings, synthetic here
+
+13
+00:00:23.100 --> 00:00:25.650
+moisture sensor. Real host app on a simulated device. No hardware footage; readings are synthetic.
+

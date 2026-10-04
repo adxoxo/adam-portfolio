@@ -1,7 +1,7 @@
 // Fetch + normalize public repos for the archive sync. Mirrors GitDashboard:
 // the browser never calls GitHub; this runs server-side and the result is
 // cached in Supabase, so visitors read the cache and trigger zero GitHub calls.
-import type { Cluster } from '$lib/data/projects';
+import type { Cluster } from '../data/projects';
 
 export interface GhRepo {
 	name: string;
@@ -35,7 +35,7 @@ export async function fetchRepos(user: string, token?: string): Promise<GhRepo[]
 	if (token) headers.Authorization = `Bearer ${token}`;
 	const res = await fetch(
 		`https://api.github.com/users/${encodeURIComponent(user)}/repos?per_page=100&sort=pushed`,
-		{ headers }
+		{ headers, signal: AbortSignal.timeout(10000) }
 	);
 	if (!res.ok) throw new Error(`github responded ${res.status}`);
 	return (await res.json()) as GhRepo[];

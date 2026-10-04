@@ -1,0 +1,6 @@
+_worker.js
+_routes.json
+q-manifest.json
+*.map
+__qa-video.html
+_demos/rangetest.*

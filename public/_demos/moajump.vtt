@@ -1,0 +1,42 @@
+WEBVTT
+
+1
+00:00:00.400 --> 00:00:02.650
+moa jump. App demo of real gameplay. Real game build recorded frame by frame. The leaderboard uses the built-in mock scores.
+
+2
+00:00:02.650 --> 00:00:04.850
+Title screen, then pick a hero
+
+3
+00:00:04.900 --> 00:00:07.650
+Reach 8,000 to win
+
+4
+00:00:07.800 --> 00:00:10.100
+Auto-jump: steer left and right to climb
+
+5
+00:00:10.150 --> 00:00:12.050
+The score rises and the progress bar fills
+
+6
+00:00:12.100 --> 00:00:15.000
+A new world: The Chaos, with moving platforms and chasers
+
+7
+00:00:15.400 --> 00:00:18.400
+One missed platform and the run ends
+
+8
+00:00:18.470 --> 00:00:21.000
+Game over: the score counts up
+
+9
+00:00:21.050 --> 00:00:23.900
+The leaderboard shows built-in mock scores, no server needed
+
+10
+00:00:24.050 --> 00:00:26.600
+moa jump. Real gameplay from the unmodified build, recorded locally. No server, no CDN.
+

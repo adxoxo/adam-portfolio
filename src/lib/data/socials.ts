@@ -1,5 +1,5 @@
 // Social links shown in the hero. Monochrome brand glyphs (simple-icons paths);
-// email is a drawn envelope (see Socials.svelte). Only real links, no placeholders.
+// email uses an envelope glyph. Only real links, no placeholders.
 export interface Social {
 	name: string;
 	url: string;
