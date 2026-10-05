@@ -1,5 +1,6 @@
-import { $, component$, sync$, useSignal, useStore } from '@qwik.dev/core';
+import { $, component$, sync$, untrack, useSignal, useStore } from '@qwik.dev/core';
 import type { Demo } from '~/lib/data/demos';
+import { NARRATED_DEMOS } from '~/lib/data/presentation';
 import { Icon } from './icons';
 
 const fmt = (s: number) => {
@@ -54,10 +55,16 @@ const toggleFull = sync$((_: Event, el: Element) => {
 /**
  * Local demo video with its own controls. Nothing plays until the visitor
  * presses play, and sound starts only from that press. Captions come from the
- * native WebVTT track and start visible, because the videos have no narration.
+ * native WebVTT track and start visible, because most videos have no narration.
+ * A narrated demo speaks the description instead, so it has no caption track and
+ * no cc button; its readable transcript stays on the case-study page.
  */
 export const VideoPlayer = component$<{ demo: Demo; title: string }>(({ demo, title }) => {
 	const video = useSignal<HTMLVideoElement>();
+	const narrated = NARRATED_DEMOS.has(demo.id);
+	// A plain value, not a prop signal: the first re-render after resuming a server-rendered
+	// player would otherwise set src again, which reloads the video and stops the first play.
+	const src = untrack(() => demo.url);
 	const st = useStore({
 		started: false,
 		playing: false,
@@ -89,7 +96,7 @@ export const VideoPlayer = component$<{ demo: Demo; title: string }>(({ demo, ti
 			<div class="vp-stage" style={{ aspectRatio: `${demo.width} / ${demo.height}` }}>
 				<video
 					ref={video}
-					src={demo.url}
+					src={src}
 					poster={demo.poster}
 					preload="metadata"
 					playsInline
@@ -114,7 +121,7 @@ export const VideoPlayer = component$<{ demo: Demo; title: string }>(({ demo, ti
 					onError$={() => (st.error = true)}
 					onClick$={togglePlay}
 				>
-					<track kind="captions" src={demo.captions} srclang="en" label="english" default />
+					{!narrated && <track kind="captions" src={demo.captions} srclang="en" label="english" default />}
 				</video>
 				{!st.started && !st.error && (
 					<button type="button" class="vp-big" onClick$={playWithSound}>
@@ -155,9 +162,11 @@ export const VideoPlayer = component$<{ demo: Demo; title: string }>(({ demo, ti
 				<button type="button" class="vp-btn" aria-label={st.muted ? 'turn sound on' : 'mute'} aria-pressed={st.muted} onClick$={toggleMute}>
 					<Icon name={st.muted ? 'muted' : 'sound'} />
 				</button>
-				<button type="button" class="vp-btn" aria-label="captions" aria-pressed={st.captions} onClick$={() => setCaptions(!st.captions)}>
-					<span class="cc" aria-hidden="true">cc</span>
-				</button>
+				{!narrated && (
+					<button type="button" class="vp-btn" aria-label="captions" aria-pressed={st.captions} onClick$={() => setCaptions(!st.captions)}>
+						<span class="cc" aria-hidden="true">cc</span>
+					</button>
+				)}
 				<button type="button" class="vp-btn" aria-label={st.full ? 'exit full screen' : 'full screen'} onClick$={toggleFull}>
 					<Icon name="full" />
 				</button>

@@ -3,7 +3,7 @@ import type { DocumentHead } from '@qwik.dev/router';
 import { PageShell } from '~/components/site/PageShell';
 import { EMAIL, MAILTO, SITE_URL } from '~/components/site/state';
 
-const UPDATED = '4 october 2026';
+const UPDATED = '5 october 2026';
 
 export default component$(() => (
 	<PageShell>
@@ -37,8 +37,9 @@ export default component$(() => (
 			<h2 id="ac-video">video and sound</h2>
 			<ul>
 				<li>nothing plays sound on its own. sound starts only when you press play with sound or the play button.</li>
-				<li>the player has play and pause, a seek bar, mute, captions and full screen buttons, all with text labels for screen readers.</li>
-				<li>every video has a caption track that describes the steps on screen. captions start switched on and the cc button turns them off.</li>
+				<li>the player has play and pause, a seek bar, mute and full screen buttons, plus a captions button on videos with captions, all with text labels for screen readers.</li>
+				<li>the six selected work videos have spoken narration and no caption track. the steps still appear as text inside the picture, and the case study page of each one has a readable transcript.</li>
+				<li>every other video has a caption track that describes the steps on screen. captions start switched on and the cc button turns them off.</li>
 				<li>the preview in selected work is silent, pauses when it leaves the screen and has its own pause button.</li>
 				<li>if a video fails to load, the player offers a retry button and a download link.</li>
 			</ul>
@@ -55,7 +56,8 @@ export default component$(() => (
 		<section aria-labelledby="ac-limits">
 			<h2 id="ac-limits">known limits</h2>
 			<ul>
-				<li>the videos have sound effects but no spoken narration. the captions carry the description instead.</li>
+				<li>the narration in the six selected work videos is a synthetic voice, made locally with the open kokoro speech model. it is shorter than the transcript, which keeps every detail.</li>
+				<li>the other videos have sound effects but no spoken narration. the captions carry the description instead.</li>
 				<li>the map is a visual layout. the same projects, with the same details, are in the all projects list on the main page.</li>
 				<li>calendly, github and the social sites have their own accessibility, which i cannot change.</li>
 				<li>the site uses the wcag 2.2 aa success criteria as its target. it has not had an independent audit.</li>

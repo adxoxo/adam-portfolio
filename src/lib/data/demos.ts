@@ -92,7 +92,7 @@ export const DEMOS: Record<string, Demo> = {
 		"durationSeconds": 26.1,
 		"width": 1280,
 		"height": 720,
-		"bytes": 3112946,
+		"bytes": 3111733,
 		"kind": "system-walkthrough",
 		"caption": "Walkthrough of the documented flow plus the real photo-review screen. Messages, documents and links are simulated."
 	},
@@ -105,7 +105,7 @@ export const DEMOS: Record<string, Demo> = {
 		"durationSeconds": 31,
 		"width": 1280,
 		"height": 720,
-		"bytes": 4568006,
+		"bytes": 4561774,
 		"kind": "app-demo",
 		"caption": "Real wizard UI, de-branded, with synthetic data. Calendar, signature, payment, invoice and email are simulated."
 	},
@@ -118,7 +118,7 @@ export const DEMOS: Record<string, Demo> = {
 		"durationSeconds": 29.8,
 		"width": 1280,
 		"height": 720,
-		"bytes": 4812652,
+		"bytes": 4799589,
 		"kind": "app-demo",
 		"caption": "Real app in no-key mode: built-in mock replies and rule scoring, synthetic tenants and leads."
 	},
@@ -131,7 +131,7 @@ export const DEMOS: Record<string, Demo> = {
 		"durationSeconds": 36.7,
 		"width": 1280,
 		"height": 720,
-		"bytes": 5882235,
+		"bytes": 5876913,
 		"kind": "app-demo",
 		"caption": "Past project. Real dashboard with synthetic notes and a stand-in embedding provider."
 	},
@@ -144,7 +144,7 @@ export const DEMOS: Record<string, Demo> = {
 		"durationSeconds": 29,
 		"width": 1280,
 		"height": 720,
-		"bytes": 4708918,
+		"bytes": 4703599,
 		"kind": "app-demo",
 		"caption": "Real Vault UI on a synthetic fixture. The exchange rate shown in demos is a manual sample value."
 	},
@@ -157,7 +157,7 @@ export const DEMOS: Record<string, Demo> = {
 		"durationSeconds": 32.4,
 		"width": 1280,
 		"height": 720,
-		"bytes": 3480448,
+		"bytes": 3471323,
 		"kind": "app-demo",
 		"caption": "Real app with a synthetic herd on a local server."
 	},

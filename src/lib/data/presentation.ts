@@ -23,6 +23,18 @@ export const HIGHLIGHT_ORDER = [
  *  the full collection and on the map. */
 export const NEVER_HIGHLIGHT = new Set(['standup']);
 
+/** Demo MP4s with spoken narration (local voiceover build of 2026-10-05). Their player
+ *  has no caption track and no cc button; the case-study transcript stays. The legacy
+ *  2026-10-04 media integration tool copies the un-narrated MP4s back: do not rerun it. */
+export const NARRATED_DEMOS: ReadonlySet<string> = new Set([
+	'vault',
+	'grimoire',
+	'tq_chatbot',
+	'goatedtracking',
+	'whatsapp_offer',
+	'booking_invoice'
+]);
+
 /** Client work done through an agency. The agency and the client are never named. */
 const AGENCY = new Set([
 	'quiz_funnel',
