@@ -53,10 +53,10 @@ const toggleFull = sync$((_: Event, el: Element) => {
 });
 
 /**
- * Local demo video with its own controls. Nothing plays until the visitor
+ * Local project video with its own controls. Nothing plays until the visitor
  * presses play, and sound starts only from that press. Captions come from the
  * native WebVTT track and start visible, because most videos have no narration.
- * A narrated demo speaks the description instead, so it has no caption track and
+ * A narrated video speaks the description instead, so it has no caption track and
  * no cc button; its readable transcript stays on the case-study page.
  */
 export const VideoPlayer = component$<{ demo: Demo; title: string }>(({ demo, title }) => {
@@ -102,7 +102,7 @@ export const VideoPlayer = component$<{ demo: Demo; title: string }>(({ demo, ti
 					playsInline
 					width={demo.width}
 					height={demo.height}
-					aria-label={`${title} demo video`}
+					aria-label={`${title} project video`}
 					onPlay$={() => {
 						st.started = true;
 						st.playing = true;

@@ -2,49 +2,45 @@ WEBVTT
 
 1
 00:00:00.400 --> 00:00:02.650
-this site. Local pre-release build with public project data. The redesigned site running locally before release.
+this site. Local build of this site with its public project data. The final site running locally, with 31 projects on the map.
 
 2
-00:00:02.650 --> 00:00:04.950
-The light key: an editorial read with the dragon behind the hero
+00:00:02.650 --> 00:00:04.850
+The white view: the full name, the tagline and the first actions
 
 3
-00:00:05.000 --> 00:00:06.900
+00:00:04.900 --> 00:00:06.700
 The first action leads to the work
 
 4
-00:00:06.900 --> 00:00:08.250
-Selected work opens with real demos
+00:00:06.700 --> 00:00:09.800
+Three project previews open the same project dialog
 
 5
-00:00:08.300 --> 00:00:10.050
-Each highlight carries its own short video
+00:00:09.900 --> 00:00:12.350
+Each project plays its own video, with captions and controls
 
 6
-00:00:10.100 --> 00:00:12.100
-A project opens in a dialog: captions, controls, sound on request
+00:00:12.350 --> 00:00:13.800
+One switch turns the page into a map of every project
 
 7
-00:00:12.150 --> 00:00:13.900
-Drag the header control: a partial drag gives a partial reveal
+00:00:13.850 --> 00:00:15.750
+The dark view: 31 projects in four clusters
 
 8
-00:00:13.950 --> 00:00:16.100
-The dark key: a map of every project
-
-9
-00:00:16.150 --> 00:00:18.150
+00:00:15.800 --> 00:00:17.400
 Clusters wired on straight and right-angle paths
 
-10
-00:00:18.200 --> 00:00:19.850
+9
+00:00:17.400 --> 00:00:19.050
 The same page on a phone
 
-11
-00:00:19.900 --> 00:00:22.200
+10
+00:00:19.100 --> 00:00:21.400
 The map stacks its clusters for a narrow screen
 
-12
-00:00:22.350 --> 00:00:24.900
-this site. Local pre-release build with public project data, captured read-only. Nothing was submitted or sent.
+11
+00:00:21.550 --> 00:00:24.100
+this site. Local build with public project data, captured read-only. Nothing was submitted or sent.
 

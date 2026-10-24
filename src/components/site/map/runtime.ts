@@ -124,7 +124,7 @@ function setup(view: HTMLElement, state: SiteState, close: () => void): View {
 	let pinch = 0;
 	port.addEventListener('pointerdown', (e) => {
 		if (e.pointerType === 'mouse') {
-			if (e.button !== 0 || (e.target as HTMLElement).closest('button')) return;
+			if (e.button !== 0 || (e.target as HTMLElement).closest('button, a')) return;
 			drag = { x: e.clientX, y: e.clientY, sl: port.scrollLeft, st: port.scrollTop, moved: false };
 			return;
 		}

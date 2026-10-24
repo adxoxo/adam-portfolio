@@ -2,7 +2,7 @@ WEBVTT
 
 1
 00:00:00.400 --> 00:00:02.650
-grimoire. App demo with synthetic data. Retired in September 2026. Shown from its last commit with synthetic notes and a stand-in embedding provider.
+grimoire. Application walkthrough on example records. Shown from its last commit with example notes and a stand-in embedding provider.
 
 2
 00:00:02.650 --> 00:00:04.800
@@ -54,5 +54,5 @@ Each tool call writes an OpenTelemetry span to the console
 
 14
 00:00:34.100 --> 00:00:36.650
-grimoire. Real Grimoire UI running locally. Synthetic data; Ollama replaced by the built-in fake provider.
+grimoire. Real Grimoire UI running locally. Example records; Ollama replaced by the built-in stand-in provider.
 

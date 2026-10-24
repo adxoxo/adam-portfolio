@@ -61,7 +61,7 @@ export default component$(() => (
 			<h2 id="pv-media">videos, images and fonts</h2>
 			<p>
 				every project video, poster, caption file, image and font is served from this site&apos;s own address. the pages do not load youtube, loom, google
-				fonts or another media host. the videos use demo data or public project data, never real customer records.
+				fonts or another media host. the videos use example records or public project data, never real customer records.
 			</p>
 			<p>
 				one exception exists for the future: if a project only has an older loom walkthrough, its dialog asks before it loads anything from loom.com.
@@ -110,14 +110,18 @@ export default component$(() => (
 
 export const head: DocumentHead = {
 	links: [{ rel: 'canonical', href: `${SITE_URL}/privacy` }],
-	title: 'Privacy | Adam Gemenez',
+	title: 'Privacy | Adam Scott Gemenez',
 	meta: [
 		{ name: 'description', content: 'what happens to data when you visit adam’s portfolio: cloudflare hosting, request logs and web analytics, no cookies on public pages.' },
 		{ property: 'og:type', content: 'website' },
-		{ property: 'og:site_name', content: 'Adam Gemenez portfolio' },
-		{ property: 'og:title', content: 'Privacy | Adam Gemenez' },
+		{ property: 'og:site_name', content: 'Adam Scott Gemenez portfolio' },
+		{ property: 'og:title', content: 'Privacy | Adam Scott Gemenez' },
 		{ property: 'og:description', content: 'What happens to data when you visit Adam’s portfolio, including hosting, request logs, analytics and public-page storage.' },
 		{ property: 'og:url', content: `${SITE_URL}/privacy` },
-		{ name: 'twitter:card', content: 'summary' }
+		{ property: 'og:image', content: `${SITE_URL}/brand/og-1200x630.png` },
+		{ property: 'og:image:width', content: '1200' },
+		{ property: 'og:image:height', content: '630' },
+		{ property: 'og:image:alt', content: 'the green dragon mark beside the words systems that make things lighter' },
+		{ name: 'twitter:card', content: 'summary_large_image' }
 	]
 };

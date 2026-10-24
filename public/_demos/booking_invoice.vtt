@@ -2,7 +2,7 @@ WEBVTT
 
 1
 00:00:00.400 --> 00:00:02.650
-booking-to-invoice flow. App demo with simulated integrations. Real wizard code, de-branded, with synthetic data. Calendar, signature, payment, invoice and email are simulated.
+booking-to-invoice flow. Application walkthrough with simulated integrations. Real wizard code, de-branded, with example records. Calendar, signature, payment, invoice and email are simulated.
 
 2
 00:00:02.650 --> 00:00:03.850
@@ -38,7 +38,7 @@ Pay by SEPA or card: no payment provider is called
 
 10
 00:00:20.700 --> 00:00:22.400
-Done: in this demo no invoice, email or calendar event exists
+Done: in this walkthrough no invoice, email or calendar event exists
 
 11
 00:00:22.450 --> 00:00:25.550

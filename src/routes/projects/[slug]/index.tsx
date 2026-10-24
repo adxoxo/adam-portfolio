@@ -48,7 +48,7 @@ export default component$(() => {
 				</nav>
 				<ProjectContent project={project} standalone />
 				<details class="case-transcript">
-					<summary>read the demo transcript</summary>
+					<summary>read the transcript</summary>
 					<ol>{seo.transcript.map((cue, index) => <li key={`${index}-${cue}`}>{cue}</li>)}</ol>
 				</details>
 			</main>
@@ -68,14 +68,14 @@ export const head: DocumentHead = ({ resolveValue }) => {
 			{ name: 'description', content: seo.metaDescription },
 			{ name: 'robots', content: 'index, follow' },
 			{ property: 'og:type', content: 'article' },
-			{ property: 'og:site_name', content: 'Adam Gemenez portfolio' },
+			{ property: 'og:site_name', content: 'Adam Scott Gemenez portfolio' },
 			{ property: 'og:title', content: seo.canonicalTitle },
 			{ property: 'og:description', content: seo.metaDescription },
 			{ property: 'og:url', content: seo.url },
 			{ property: 'og:image', content: seo.video.thumbnailUrl },
 			{ property: 'og:image:width', content: String(project.demo?.width ?? 1280) },
 			{ property: 'og:image:height', content: String(project.demo?.height ?? 720) },
-			{ property: 'og:image:alt', content: `${project.title} demo poster` },
+			{ property: 'og:image:alt', content: `${project.title} poster` },
 			{ name: 'twitter:card', content: 'summary_large_image' },
 			{ name: 'twitter:title', content: seo.canonicalTitle },
 			{ name: 'twitter:description', content: seo.metaDescription },

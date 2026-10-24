@@ -21,9 +21,12 @@
 	"compatibility_date": "2026-07-08",
 	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
 	"main": "./dist/_worker.js",
+	// run_worker_first sends static file requests through the Worker too, so
+	// plain HTTP to the production hostname redirects to HTTPS everywhere.
 	"assets": {
 		"binding": "ASSETS",
-		"directory": "./dist"
+		"directory": "./dist",
+		"run_worker_first": true
 	},
 	// Edge-backed limits protect real write paths across Worker isolates.
 	// Namespace IDs are unique within this Cloudflare account.

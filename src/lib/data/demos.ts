@@ -21,41 +21,41 @@ export const DEMOS: Record<string, Demo> = {
 	"quiz_funnel": {
 		"id": "quiz_funnel",
 		"url": "/demos/quiz_funnel.mp4",
-		"poster": "/demos/quiz_funnel.webp",
-		"thumb": "/demos/quiz_funnel-thumb.webp",
+		"poster": "/demos/quiz_funnel.webp?v=2181f1f76dc6",
+		"thumb": "/demos/quiz_funnel-thumb.webp?v=e2fb3097378d",
 		"captions": "/demos/quiz_funnel.vtt",
 		"durationSeconds": 23.2,
 		"width": 1280,
 		"height": 720,
 		"bytes": 2477604,
 		"kind": "system-walkthrough",
-		"caption": "System walkthrough of the documented flow. Sample values, no product footage."
+		"caption": "Workflow overview of the documented flow, drawn with example values and no product footage. The cover image is the public Quelle page, captured on 11 October 2026."
 	},
 	"video_landing": {
 		"id": "video_landing",
 		"url": "/demos/video_landing.mp4",
-		"poster": "/demos/video_landing.webp",
-		"thumb": "/demos/video_landing-thumb.webp",
+		"poster": "/demos/video_landing.webp?v=fdcdfd1fcf98",
+		"thumb": "/demos/video_landing-thumb.webp?v=ee28830e2282",
 		"captions": "/demos/video_landing.vtt",
 		"durationSeconds": 20.7,
 		"width": 1280,
 		"height": 720,
 		"bytes": 2296812,
 		"kind": "system-walkthrough",
-		"caption": "System walkthrough of the documented flow. Sample values, no product footage."
+		"caption": "Workflow overview of the documented flow, drawn with example values and no product footage. The cover image is the public FEEL page, captured on 11 October 2026."
 	},
 	"video_product": {
 		"id": "video_product",
-		"url": "/demos/video_product.mp4",
-		"poster": "/demos/video_product.webp",
-		"thumb": "/demos/video_product-thumb.webp",
-		"captions": "/demos/video_product.vtt",
-		"durationSeconds": 21.5,
+		"url": "/demos/video_product.mp4?v=8c377e659bed",
+		"poster": "/demos/video_product.webp?v=8dce03bd681e",
+		"thumb": "/demos/video_product-thumb.webp?v=60f84d7e02a8",
+		"captions": "/demos/video_product.vtt?v=0ce7b7bbfd8c",
+		"durationSeconds": 21.47,
 		"width": 1280,
 		"height": 720,
-		"bytes": 2711242,
+		"bytes": 2716820,
 		"kind": "system-walkthrough",
-		"caption": "System walkthrough of the documented flow. Status on record: live in test mode."
+		"caption": "Workflow overview of the documented flow. Payments run in the provider's sandbox mode on record."
 	},
 	"experience_engine": {
 		"id": "experience_engine",
@@ -68,7 +68,7 @@ export const DEMOS: Record<string, Demo> = {
 		"height": 720,
 		"bytes": 2591460,
 		"kind": "system-walkthrough",
-		"caption": "System walkthrough of the documented flow. Deployment pending on record."
+		"caption": "Workflow overview of the documented flow. Deployment pending on record."
 	},
 	"dm_triage": {
 		"id": "dm_triage",
@@ -85,81 +85,81 @@ export const DEMOS: Record<string, Demo> = {
 	},
 	"whatsapp_offer": {
 		"id": "whatsapp_offer",
-		"url": "/demos/whatsapp_offer.mp4",
-		"poster": "/demos/whatsapp_offer.webp",
-		"thumb": "/demos/whatsapp_offer-thumb.webp",
-		"captions": "/demos/whatsapp_offer.vtt",
+		"url": "/demos/whatsapp_offer.mp4?v=089f01950363",
+		"poster": "/demos/whatsapp_offer.webp?v=afd5aef066ce",
+		"thumb": "/demos/whatsapp_offer-thumb.webp?v=8333a4469b5e",
+		"captions": "/demos/whatsapp_offer.vtt?v=aacea9d1fb23",
 		"durationSeconds": 26.1,
 		"width": 1280,
 		"height": 720,
-		"bytes": 3111733,
+		"bytes": 3104737,
 		"kind": "system-walkthrough",
-		"caption": "Walkthrough of the documented flow plus the real photo-review screen. Messages, documents and links are simulated."
+		"caption": "Workflow overview of the documented flow plus the real photo-review screen. Messages, documents and links are simulated."
 	},
 	"booking_invoice": {
 		"id": "booking_invoice",
-		"url": "/demos/booking_invoice.mp4",
-		"poster": "/demos/booking_invoice.webp",
-		"thumb": "/demos/booking_invoice-thumb.webp",
-		"captions": "/demos/booking_invoice.vtt",
+		"url": "/demos/booking_invoice.mp4?v=995d4199eb34",
+		"poster": "/demos/booking_invoice.webp?v=dd68b046cc0e",
+		"thumb": "/demos/booking_invoice-thumb.webp?v=7b463bd18306",
+		"captions": "/demos/booking_invoice.vtt?v=982f20d54f03",
 		"durationSeconds": 31,
 		"width": 1280,
 		"height": 720,
-		"bytes": 4561774,
+		"bytes": 4567038,
 		"kind": "app-demo",
-		"caption": "Real wizard UI, de-branded, with synthetic data. Calendar, signature, payment, invoice and email are simulated."
+		"caption": "Real booking wizard UI, de-branded, with example records. Calendar, signature, payment, invoice and email are simulated. The cover image is the public wizard, captured on 11 October 2026."
 	},
 	"tq_chatbot": {
 		"id": "tq_chatbot",
-		"url": "/demos/tq_chatbot.mp4",
-		"poster": "/demos/tq_chatbot.webp",
-		"thumb": "/demos/tq_chatbot-thumb.webp",
-		"captions": "/demos/tq_chatbot.vtt",
+		"url": "/demos/tq_chatbot.mp4?v=6382ea883f50",
+		"poster": "/demos/tq_chatbot.webp?v=7eb7b5589ba2",
+		"thumb": "/demos/tq_chatbot-thumb.webp?v=d140d90bd9ae",
+		"captions": "/demos/tq_chatbot.vtt?v=b74a4faca045",
 		"durationSeconds": 29.8,
 		"width": 1280,
 		"height": 720,
-		"bytes": 4799589,
+		"bytes": 4786355,
 		"kind": "app-demo",
-		"caption": "Real app in no-key mode: built-in mock replies and rule scoring, synthetic tenants and leads."
+		"caption": "Real app in no-key mode: built-in sample replies and rule scoring, example tenants and leads."
 	},
 	"grimoire": {
 		"id": "grimoire",
-		"url": "/demos/grimoire.mp4",
-		"poster": "/demos/grimoire.webp",
-		"thumb": "/demos/grimoire-thumb.webp",
-		"captions": "/demos/grimoire.vtt",
+		"url": "/demos/grimoire.mp4?v=f0536a6bca5f",
+		"poster": "/demos/grimoire.webp?v=5cc31a73adcc",
+		"thumb": "/demos/grimoire-thumb.webp?v=88e444374f3a",
+		"captions": "/demos/grimoire.vtt?v=85dc6ea9e495",
 		"durationSeconds": 36.7,
 		"width": 1280,
 		"height": 720,
-		"bytes": 5876913,
+		"bytes": 5980230,
 		"kind": "app-demo",
-		"caption": "Past project. Real dashboard with synthetic notes and a stand-in embedding provider."
+		"caption": "Real dashboard with example notes and a stand-in embedding provider."
 	},
 	"vault": {
 		"id": "vault",
-		"url": "/demos/vault.mp4",
-		"poster": "/demos/vault.webp",
-		"thumb": "/demos/vault-thumb.webp",
-		"captions": "/demos/vault.vtt",
+		"url": "/demos/vault.mp4?v=07db814ad3aa",
+		"poster": "/demos/vault.webp?v=74a6c6992fb5",
+		"thumb": "/demos/vault-thumb.webp?v=dd285e98685a",
+		"captions": "/demos/vault.vtt?v=3c276cff7875",
 		"durationSeconds": 29,
 		"width": 1280,
 		"height": 720,
-		"bytes": 4703599,
+		"bytes": 4720999,
 		"kind": "app-demo",
-		"caption": "Real Vault UI on a synthetic fixture. The exchange rate shown in demos is a manual sample value."
+		"caption": "Real Vault UI on example records. The exchange rate shown is a manual sample value."
 	},
 	"goatedtracking": {
 		"id": "goatedtracking",
-		"url": "/demos/goatedtracking.mp4",
-		"poster": "/demos/goatedtracking.webp",
-		"thumb": "/demos/goatedtracking-thumb.webp",
-		"captions": "/demos/goatedtracking.vtt",
-		"durationSeconds": 32.4,
-		"width": 1280,
-		"height": 720,
-		"bytes": 3471323,
+		"url": "/demos/goatedtracking.mp4?v=8aed89a31edf",
+		"poster": "/demos/goatedtracking.webp?v=13dca29f9aed",
+		"thumb": "/demos/goatedtracking-thumb.webp?v=b2a50621256b",
+		"captions": "/demos/goatedtracking.vtt?v=736f793e1c56",
+		"durationSeconds": 42.33,
+		"width": 1920,
+		"height": 1080,
+		"bytes": 8802473,
 		"kind": "app-demo",
-		"caption": "Real app with a synthetic herd on a local server."
+		"caption": "Real app screens with an example herd on a local server, staged for the video. The transfer form is shown open, not submitted."
 	},
 	"grece": {
 		"id": "grece",
@@ -172,59 +172,59 @@ export const DEMOS: Record<string, Demo> = {
 		"height": 720,
 		"bytes": 2968864,
 		"kind": "system-walkthrough",
-		"caption": "Walkthrough of the repository code plus its real API with sample readings. No hardware footage."
+		"caption": "Walkthrough of the repository code plus its real API with sample readings. No hardware footage. A hardware prototype."
 	},
 	"standup": {
 		"id": "standup",
-		"url": "/demos/standup.mp4",
-		"poster": "/demos/standup.webp",
-		"thumb": "/demos/standup-thumb.webp",
-		"captions": "/demos/standup.vtt",
+		"url": "/demos/standup.mp4?v=ffc86d5ebe17",
+		"poster": "/demos/standup.webp?v=b6db57539ab3",
+		"thumb": "/demos/standup-thumb.webp?v=d4d910969912",
+		"captions": "/demos/standup.vtt?v=9634482add28",
 		"durationSeconds": 22.1,
 		"width": 1280,
 		"height": 720,
-		"bytes": 4107568,
+		"bytes": 4111669,
 		"kind": "app-demo",
 		"caption": "Real dashboard on fictional users served from a local cache. No GitHub calls."
 	},
 	"almanac": {
 		"id": "almanac",
-		"url": "/demos/almanac.mp4",
-		"poster": "/demos/almanac.webp",
-		"thumb": "/demos/almanac-thumb.webp",
-		"captions": "/demos/almanac.vtt",
+		"url": "/demos/almanac.mp4?v=633d8c7cb2e2",
+		"poster": "/demos/almanac.webp?v=88035d1da2b2",
+		"thumb": "/demos/almanac-thumb.webp?v=87c1cb7eefbf",
+		"captions": "/demos/almanac.vtt?v=dd380c328cf1",
 		"durationSeconds": 24.3,
 		"width": 1280,
 		"height": 720,
-		"bytes": 3557253,
+		"bytes": 3622383,
 		"kind": "app-demo",
-		"caption": "Real app on an in-browser data fixture with synthetic tasks and habits."
+		"caption": "Real app on an in-browser data fixture with example tasks and habits."
 	},
 	"asacafe": {
 		"id": "asacafe",
-		"url": "/demos/asacafe.mp4",
-		"poster": "/demos/asacafe.webp",
-		"thumb": "/demos/asacafe-thumb.webp",
-		"captions": "/demos/asacafe.vtt",
+		"url": "/demos/asacafe.mp4?v=40e89a96d537",
+		"poster": "/demos/asacafe.webp?v=2bfe108868c9",
+		"thumb": "/demos/asacafe-thumb.webp?v=2abe68e596e9",
+		"captions": "/demos/asacafe.vtt?v=3a1ca425e462",
 		"durationSeconds": 22.3,
 		"width": 1280,
 		"height": 720,
-		"bytes": 2954537,
+		"bytes": 2972353,
 		"kind": "app-demo",
 		"caption": "Real app as a guest with generic sample cafes. Map tiles from OpenStreetMap."
 	},
 	"portfolio": {
 		"id": "portfolio",
-		"url": "/demos/portfolio.mp4",
-		"poster": "/demos/portfolio.webp",
-		"thumb": "/demos/portfolio-thumb.webp",
-		"captions": "/demos/portfolio.vtt",
-		"durationSeconds": 25,
+		"url": "/demos/portfolio.mp4?v=cffd7ea3ea4c",
+		"poster": "/demos/portfolio.webp?v=800cddbb7c36",
+		"thumb": "/demos/portfolio-thumb.webp?v=e8336ef24a80",
+		"captions": "/demos/portfolio.vtt?v=98b68940b384",
+		"durationSeconds": 24.17,
 		"width": 1280,
 		"height": 720,
-		"bytes": 3890971,
+		"bytes": 3634242,
 		"kind": "app-demo",
-		"caption": "Local pre-release build of this site with its public project data."
+		"caption": "Local build of this site with its public project data."
 	},
 	"social": {
 		"id": "social",
@@ -237,33 +237,33 @@ export const DEMOS: Record<string, Demo> = {
 		"height": 720,
 		"bytes": 2403678,
 		"kind": "system-walkthrough",
-		"caption": "System walkthrough of the documented publishing pipeline. Drafts drawn as placeholders."
+		"caption": "Workflow overview of the documented publishing pipeline. Drafts drawn as placeholders."
 	},
 	"moajump": {
 		"id": "moajump",
-		"url": "/demos/moajump.mp4",
-		"poster": "/demos/moajump.webp",
-		"thumb": "/demos/moajump-thumb.webp",
-		"captions": "/demos/moajump.vtt",
-		"durationSeconds": 26.7,
+		"url": "/demos/moajump.mp4?v=a8a7e273518a",
+		"poster": "/demos/moajump.webp?v=cf52922db39a",
+		"thumb": "/demos/moajump-thumb.webp?v=092876713726",
+		"captions": "/demos/moajump.vtt?v=7a4f5adccc17",
+		"durationSeconds": 26.67,
 		"width": 1280,
 		"height": 720,
-		"bytes": 2667125,
+		"bytes": 2687452,
 		"kind": "app-demo",
 		"caption": "Real gameplay from the unmodified build. The leaderboard uses built-in mock scores."
 	},
 	"moisture": {
 		"id": "moisture",
-		"url": "/demos/moisture.mp4",
-		"poster": "/demos/moisture.webp",
-		"thumb": "/demos/moisture-thumb.webp",
-		"captions": "/demos/moisture.vtt",
+		"url": "/demos/moisture.mp4?v=88db8090df7c",
+		"poster": "/demos/moisture.webp?v=5756781f10a7",
+		"thumb": "/demos/moisture-thumb.webp?v=a534b103dbea",
+		"captions": "/demos/moisture.vtt?v=0f295c3f42cb",
 		"durationSeconds": 25.7,
 		"width": 1280,
 		"height": 720,
-		"bytes": 4123438,
+		"bytes": 4146334,
 		"kind": "app-demo",
-		"caption": "Real desktop app driven by a simulated device. Synthetic readings, no hardware footage."
+		"caption": "Real desktop app driven by a simulated device. Example readings, no hardware footage."
 	},
 	"smartpot": {
 		"id": "smartpot",
@@ -276,7 +276,7 @@ export const DEMOS: Record<string, Demo> = {
 		"height": 720,
 		"bytes": 2722763,
 		"kind": "system-walkthrough",
-		"caption": "Walkthrough of the repository code plus its real API with sample readings. The repo has no app screen."
+		"caption": "Walkthrough of the repository code plus its real API with sample readings. The repo has no app screen. A hardware prototype."
 	},
 	"carwash": {
 		"id": "carwash",
@@ -289,6 +289,19 @@ export const DEMOS: Record<string, Demo> = {
 		"height": 720,
 		"bytes": 1855990,
 		"kind": "system-walkthrough",
-		"caption": "System walkthrough of the documented flow. Sample job and amounts."
-	}
+		"caption": "Workflow overview of the documented flow. Sample job and amounts."
+	},
+		"leadflow_visenza_dashboard": {
+			"id": "leadflow_visenza_dashboard",
+			"url": "/demos/leadflow_visenza_dashboard.mp4?v=aba6582f1c64",
+			"poster": "/demos/leadflow_visenza_dashboard.webp?v=a6e77f2b7f15",
+			"thumb": "/demos/leadflow_visenza_dashboard-thumb.webp?v=10c0fc9387e9",
+			"captions": "/demos/leadflow_visenza_dashboard.vtt?v=7a126ddbb40f",
+			"durationSeconds": 41.47,
+			"width": 1280,
+			"height": 720,
+			"bytes": 5948753,
+			"kind": "app-demo",
+			"caption": "Real Visenza CRM components with example records. The pipeline stage change is answered locally and nothing is saved; provider calls are off."
+		}
 };

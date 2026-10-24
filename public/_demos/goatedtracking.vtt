@@ -1,58 +1,33 @@
 WEBVTT
 
+NOTE
+GoatedTracking application walkthrough. Narration: local Kokoro-82M voice af_heart.
+The herd is example data in a local app. No public release or farm deployment is shown.
+
 1
-00:00:00.400 --> 00:00:02.650
-goatedtracking. App demo with synthetic data. A synthetic herd on a local server. The internet is optional, not required.
+00:00:00.600 --> 00:00:06.786
+GoatedTracking keeps a goat farm's records in one local app. The herd is an example herd.
 
 2
-00:00:02.650 --> 00:00:04.350
-Every goat gets a QR ear tag from its profile
+00:00:07.350 --> 00:00:11.611
+The Farm page shows each pen, with a separate card for every goat.
 
 3
-00:00:04.400 --> 00:00:06.450
-Print it, tag the goat, and the tag opens this record
+00:00:12.950 --> 00:00:17.502
+Open a card to see that goat's due dates and health history beside the pen.
 
 4
-00:00:06.500 --> 00:00:09.200
-Scan a tag on any phone: the goat profile opens, no login
+00:00:18.950 --> 00:00:23.707
+Pen moves use the transfer form, and the server logs every saved move.
 
 5
-00:00:09.250 --> 00:00:10.750
-Another tag: this goat is overdue for a vaccination
+00:00:24.350 --> 00:00:28.651
+Health lists overdue care first, with the full history one tab away.
 
 6
-00:00:10.800 --> 00:00:12.900
-The worker logs a quick health note
+00:00:30.750 --> 00:00:36.976
+Each ear tag has a QR code. It links to a worker page that opens on a phone without a login.
 
 7
-00:00:12.950 --> 00:00:15.300
-Saved: the note joins the goat history
-
-8
-00:00:15.350 --> 00:00:16.600
-Admins move goats between pens from the dashboard
-
-9
-00:00:16.650 --> 00:00:19.150
-Move Hazel, G-015, into the Nursery
-
-10
-00:00:19.200 --> 00:00:21.150
-Add a reason and transfer
-
-11
-00:00:21.200 --> 00:00:23.950
-Lineage check on every move: it warns, it never blocks
-
-12
-00:00:24.000 --> 00:00:26.150
-The dashboard counts the herd and what is due
-
-13
-00:00:26.200 --> 00:00:29.500
-Overdue and due-soon goats surface on their own
-
-14
-00:00:29.750 --> 00:00:32.300
-goatedtracking. Real app running locally with a synthetic herd. No cloud services in the path.
-
+00:00:37.750 --> 00:00:41.722
+GoatedTracking. Built with Django, Postgres and React.

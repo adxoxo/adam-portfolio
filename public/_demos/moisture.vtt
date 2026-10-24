@@ -2,7 +2,7 @@ WEBVTT
 
 1
 00:00:00.400 --> 00:00:02.650
-moisture sensor. App demo with a simulated device. The real desktop app, driven by a simulated device that speaks the firmware protocol. Synthetic readings.
+moisture sensor. Application walkthrough with a simulated device. The real desktop app, driven by a simulated device that speaks the firmware protocol. Example readings.
 
 2
 00:00:02.650 --> 00:00:04.200
@@ -46,9 +46,9 @@ Average, median and mode, with a status: optimal at 12 to 14 percent
 
 12
 00:00:20.500 --> 00:00:22.950
-The chart plots the last five readings, synthetic here
+The chart plots the last five readings, example values here
 
 13
 00:00:23.100 --> 00:00:25.650
-moisture sensor. Real host app on a simulated device. No hardware footage; readings are synthetic.
+moisture sensor. Real host app on a simulated device. No hardware footage; readings are example values.
 

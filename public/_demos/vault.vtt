@@ -2,7 +2,7 @@ WEBVTT
 
 1
 00:00:00.400 --> 00:00:02.700
-aquryu vault. App demo with synthetic data. Synthetic wallets. The USD rate in this demo is a manual sample value.
+aquryu vault. Application walkthrough on example records. Example wallets. The USD rate shown is a manual sample value.
 
 2
 00:00:02.750 --> 00:00:05.300
@@ -38,5 +38,5 @@ Goals show how many weeks they take at this rate
 
 10
 00:00:26.400 --> 00:00:28.950
-aquryu vault. Real Vault UI running locally. Synthetic data, fixed clock, voice and AI routes blocked.
+aquryu vault. Real Vault UI running locally. Example records, fixed clock, voice and AI routes blocked.
 

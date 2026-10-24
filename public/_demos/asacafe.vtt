@@ -2,7 +2,7 @@ WEBVTT
 
 1
 00:00:00.400 --> 00:00:02.650
-asa cafe. App demo with synthetic data. Generic sample cafes and illustrated photos. Map tiles from OpenStreetMap.
+asa cafe. Application walkthrough on example records. Generic sample cafes and illustrated photos. Map tiles from OpenStreetMap.
 
 2
 00:00:02.650 --> 00:00:04.400
@@ -38,5 +38,5 @@ Only now does the app ask you to log in
 
 10
 00:00:19.700 --> 00:00:22.250
-asa cafe. Real app running locally as a guest on synthetic cafe data. Login shown, never submitted.
+asa cafe. Real app running locally as a guest on example cafe data. Login shown, never submitted.
 

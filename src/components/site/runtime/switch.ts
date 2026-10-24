@@ -1,6 +1,6 @@
 // Site <-> map switch. Browser-only code, called from event handlers. The reveal
-// ratio is written straight to CSS variables so the wipe and the knob follow the
-// pointer without re-rendering; the Qwik store only changes when a mode settles.
+// ratio is written straight to a CSS variable so the wipe follows the
+// transition without re-rendering; the Qwik store only changes when a mode settles.
 
 import type { Mode, SiteState } from '../state';
 import { attachMap } from '../map/runtime';
@@ -18,7 +18,6 @@ function appEl(): HTMLElement | null {
 function setR(app: HTMLElement, value: number): number {
 	const r = Math.min(1, Math.max(0, value));
 	app.style.setProperty('--wipe', `${((1 - r) * 100).toFixed(2)}%`);
-	app.querySelector<HTMLElement>('.slider')?.style.setProperty('--r', String(r));
 	app.dataset.r = String(r);
 	return r;
 }
@@ -47,12 +46,16 @@ function settle(app: HTMLElement, state: SiteState, mode: Mode) {
 	app.dataset.mode = mode;
 	setR(app, mode === 'map' ? 1 : 0);
 	state.mode = mode;
-	const knob = app.querySelector<HTMLElement>('.knob');
-	knob?.setAttribute('aria-valuenow', mode === 'map' ? '100' : '0');
-	knob?.setAttribute('aria-valuetext', mode === 'map' ? 'project map' : 'site');
+	const toggle = app.querySelector<HTMLElement>('.pill-switch');
+	toggle?.setAttribute('aria-checked', String(mode === 'map'));
 	if (mode === 'map') {
 		history.replaceState(history.state, '', '#map');
 		attachMap(state, () => animateTo(state, 0));
+		// motion effects load on the first open; every open replays their entry
+		void import('../map/fx').then(({ attachMapFx, MAP_OPEN }) => {
+			attachMapFx();
+			document.dispatchEvent(new Event(MAP_OPEN));
+		});
 		const focused = document.activeElement;
 		if (previousMode !== mode && (!(focused instanceof HTMLElement) || focused === document.body || !focused.getClientRects().length)) {
 			app.querySelector<HTMLElement>('.map-port')?.focus({ preventScroll: true });
@@ -60,11 +63,18 @@ function settle(app: HTMLElement, state: SiteState, mode: Mode) {
 	} else {
 		history.replaceState(history.state, '', location.pathname + location.search);
 		const y = Number(app.dataset.scroll ?? 0);
-		requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo({ top: y, behavior: 'instant' as ScrollBehavior })));
+		const goto = app.dataset.goto;
+		delete app.dataset.goto;
+		requestAnimationFrame(() =>
+			requestAnimationFrame(() => {
+				window.scrollTo({ top: y, behavior: 'instant' as ScrollBehavior });
+				if (goto) document.getElementById(goto)?.scrollIntoView({ behavior: 'auto', block: 'start' });
+			})
+		);
 		const focused = document.activeElement;
 		if (previousMode !== mode && (!(focused instanceof HTMLElement) || focused === document.body || !focused.getClientRects().length)) {
 			const opener = openers.get(app);
-			const target = opener?.isConnected && opener.getClientRects().length ? opener : knob;
+			const target = opener?.isConnected && opener.getClientRects().length ? opener : toggle;
 			target?.focus({ preventScroll: true });
 		}
 		openers.delete(app);
@@ -93,60 +103,21 @@ export function animateTo(state: SiteState, target: 0 | 1) {
 	timers.set(app, requestAnimationFrame(step));
 }
 
-/** Click on the switch track. Ignores the click that ends a drag. */
-export function toggleFromClick(state: SiteState) {
-	const app = appEl();
-	if (!app) return;
-	if (app.dataset.dragged) {
-		delete app.dataset.dragged;
-		return;
-	}
+/** Switch click: flips between the site and the map. */
+export function toggleView(state: SiteState) {
 	animateTo(state, state.mode === 'map' ? 0 : 1);
 }
 
-/** Starts a drag on the knob. A partial drag shows a partial reveal. */
-export function startDrag(state: SiteState, e: PointerEvent, knob: HTMLElement) {
+/** Jumps to a section of the site. From the map it returns to the site first. */
+export function goToSection(state: SiteState, id: string) {
 	const app = appEl();
-	const slider = knob.parentElement;
-	if (!app || !slider) return;
-	try {
-		knob.setPointerCapture(e.pointerId);
-	} catch {
-		return; // the pointer was already released; the click handler toggles
+	if (!app) return;
+	if (state.mode === 'map') {
+		app.dataset.goto = id;
+		animateTo(state, 0);
+		return;
 	}
-	beginReveal(app, state);
-	const downX = e.clientX;
-	let moved = false;
-	const move = (ev: PointerEvent) => {
-		if (Math.abs(ev.clientX - downX) > 3) moved = true;
-		if (!moved) return;
-		const rect = slider.getBoundingClientRect();
-		setR(app, (ev.clientX - rect.left - knob.offsetWidth / 2) / (rect.width - knob.offsetWidth));
-	};
-	const end = () => {
-		knob.removeEventListener('pointermove', move);
-		knob.removeEventListener('pointerup', end);
-		knob.removeEventListener('pointercancel', end);
-		if (!moved) {
-			// a plain press: let the click toggle, but drop the reveal state if no click follows
-			setTimeout(() => {
-				if (app.hasAttribute('data-revealing') && !timers.get(app)) settle(app, state, state.mode);
-			}, 400);
-			return;
-		}
-		app.dataset.dragged = '1';
-		setTimeout(() => delete app.dataset.dragged, 400);
-		animateTo(state, currentR(app, state) >= 0.5 ? 1 : 0);
-	};
-	knob.addEventListener('pointermove', move);
-	knob.addEventListener('pointerup', end);
-	knob.addEventListener('pointercancel', end);
-}
-
-export function keyOnKnob(state: SiteState, key: string) {
-	if (['ArrowRight', 'ArrowUp', 'End'].includes(key)) animateTo(state, 1);
-	else if (['ArrowLeft', 'ArrowDown', 'Home'].includes(key)) animateTo(state, 0);
-	else if (key === 'Enter' || key === ' ') animateTo(state, state.mode === 'map' ? 0 : 1);
+	document.getElementById(id)?.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'start' });
 }
 
 /** Opens the map at once, used for /#map deep links. */

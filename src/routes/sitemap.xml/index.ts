@@ -1,7 +1,7 @@
 import type { RequestHandler } from '@qwik.dev/router';
 import { SITE_URL } from '~/components/site/state';
 import { present } from '~/lib/data/presentation';
-import { FEATURED_PROJECT_SLUGS, projectPath } from '~/lib/seo';
+import { FEATURED_PROJECT_SLUGS, SITE_UPDATED, projectPath } from '~/lib/seo';
 import { loadPublicProjects } from '~/lib/server/projects';
 
 const escapeXml = (value: string) =>
@@ -17,7 +17,7 @@ const serveSitemap: RequestHandler = async (event) => {
 		...FEATURED_PROJECT_SLUGS.filter((slug) => selected.has(slug)).map(projectPath)
 	];
 	const urls = paths
-		.map((path) => `  <url><loc>${escapeXml(`${SITE_URL}${path}`)}</loc><lastmod>2026-10-04</lastmod></url>`)
+		.map((path) => `  <url><loc>${escapeXml(`${SITE_URL}${path}`)}</loc><lastmod>${SITE_UPDATED}</lastmod></url>`)
 		.join('\n');
 	const body = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
 	throw event.send(

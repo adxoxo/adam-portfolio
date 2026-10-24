@@ -2,7 +2,7 @@ WEBVTT
 
 1
 00:00:00.400 --> 00:00:02.650
-standup dashboard. App demo with synthetic data. Fictional users served from a local cache. No GitHub request was made.
+standup dashboard. Application walkthrough on example records. Fictional users served from a local cache. No GitHub request was made.
 
 2
 00:00:02.650 --> 00:00:04.350
@@ -34,5 +34,5 @@ One section hits a rate limit, every other section still renders
 
 9
 00:00:19.500 --> 00:00:22.050
-standup dashboard. Real app running locally on synthetic cache rows. No GitHub calls.
+standup dashboard. Real app running locally on example cache rows. No GitHub calls.
 

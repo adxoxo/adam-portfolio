@@ -1,7 +1,9 @@
-import { component$, useContext } from '@qwik.dev/core';
+import { $, component$, sync$, useContext } from '@qwik.dev/core';
 import { CLUSTER_LABEL } from '~/lib/data/projects';
+import { LEADFLOW_LABEL } from '~/lib/data/leadflow';
 import type { ViewProject } from '~/lib/data/presentation';
-import { SiteStateCtx } from '../state';
+import { projectPath, slugForId } from '~/lib/seo';
+import { SiteStateCtx, type SiteState } from '../state';
 import { openProject } from '../runtime/dialogs';
 import { Icon } from '../icons';
 import { CLUSTER_ORDER, layoutCircuit, type CircuitLayout, type MapItem, type Rect } from './layout';
@@ -14,7 +16,9 @@ const pct = (r: Rect, L: CircuitLayout) => ({
 });
 
 function toItem(p: ViewProject): MapItem {
-	const tag = p.selected ? 'selected work' : p.labels[0] ?? '';
+	// company work names the company in the metadata line; the green outline still marks selected work
+	const company = p.labels.includes(LEADFLOW_LABEL);
+	const tag = company ? (p.year ? 'Lead Flow' : LEADFLOW_LABEL) : p.selected ? 'selected work' : p.labels[0] ?? '';
 	return {
 		id: p.id,
 		title: p.title,
@@ -24,6 +28,33 @@ function toItem(p: ViewProject): MapItem {
 		muted: p.labels.includes('past project') || p.labels.includes('design concept')
 	};
 }
+
+const preventPlainProjectClick = sync$((event: MouseEvent) => {
+	if (event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) event.preventDefault();
+});
+
+/** Replays the press effect on a node, then opens its project dialog. */
+function openNode(state: SiteState, el: HTMLElement, projectId: string, openerId: string) {
+	el.classList.remove('hit');
+	void el.offsetWidth;
+	el.classList.add('hit');
+	return openProject(state, projectId, openerId);
+}
+
+/** One electrical packet: halo, green body and a white leading core on the same
+ *  trace path. The shared custom properties sit on the group. The negative delay
+ *  starts each packet mid-run at its own phase, so the board shows staggered
+ *  packets at once. */
+const Packet = component$<{ t: CircuitLayout['traces'][number] }>(({ t }) => {
+	const phase = -Math.round(t.duration * ((t.delay * 2.718 + 0.37) % 1) * 100) / 100;
+	return (
+		<g class="pkt" style={{ '--len': t.length, '--dur': `${t.duration}s`, '--delay': `${phase}s` }}>
+			<path class="pulse pulse-halo" d={t.d} />
+			<path class="pulse pulse-body" d={t.d} />
+			<path class="pulse pulse-core" d={t.d} />
+		</g>
+	);
+});
 
 const Board = component$<{ L: CircuitLayout; total: number }>(({ L, total }) => {
 	const state = useContext(SiteStateCtx);
@@ -48,6 +79,8 @@ const Board = component$<{ L: CircuitLayout; total: number }>(({ L, total }) => 
 					<line key={i} class={p.on ? 'pin on' : 'pin'} x1={p.x1} y1={p.y1} x2={p.x2} y2={p.y2} />
 				))}
 				<rect class="chip-body" x={L.chip.x} y={L.chip.y} width={L.chip.w} height={L.chip.h} />
+				<rect class="chip-rim" x={L.chip.x + 6} y={L.chip.y + 6} width={L.chip.w - 12} height={L.chip.h - 12} />
+				<circle class="chip-dot" cx={L.chip.x + 14} cy={L.chip.y + 14} r={2.5} />
 				{L.pads.map((p, i) => (
 					<rect key={i} class="pad" x={p.x} y={p.y} width={p.w} height={p.h} />
 				))}
@@ -58,13 +91,13 @@ const Board = component$<{ L: CircuitLayout; total: number }>(({ L, total }) => 
 					{L.traces
 						.filter((t) => t.kind === 'cluster')
 						.map((t) => (
-							<path key={t.id} class="pulse" d={t.d} style={{ '--len': t.length, '--dur': `${t.duration}s`, '--delay': `${t.delay}s` }} />
+							<Packet key={t.id} t={t} />
 						))}
 				</g>
 				{byCluster.map((g) => (
 					<g key={g.cluster!.id} class="pulses" data-c={g.cluster!.id}>
 						{g.traces.map((t) => (
-							<path key={t.id} class="pulse" d={t.d} style={{ '--len': t.length, '--dur': `${t.duration}s`, '--delay': `${t.delay}s` }} />
+							<Packet key={t.id} t={t} />
 						))}
 					</g>
 				))}
@@ -72,8 +105,10 @@ const Board = component$<{ L: CircuitLayout; total: number }>(({ L, total }) => 
 			<div class="chip-node" style={pct(L.chip, L)}>
 				<img src="/brand/dragon-field.webp" alt="" width={160} height={200} loading="lazy" />
 				<div>
-					<strong>adam</strong>
-					<span>{total} projects</span>
+					<strong>Adam</strong>
+					<span>
+						<b>{total}</b> projects
+					</span>
 				</div>
 			</div>
 			<div data-zone="bus" style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }} />
@@ -93,24 +128,48 @@ const Board = component$<{ L: CircuitLayout; total: number }>(({ L, total }) => 
 						</p>
 						{g.nodes.map((n) => {
 							const id = `map-${L.variant}-${n.id}`;
-							return (
+							const slug = slugForId(n.id);
+							const cls = ['cnode', n.selected && 'sel', n.muted && 'muted'];
+							const style = { ...pct(n.rect, L), '--d': `${n.delay}s` };
+							// decorative ring clip for the moving gold outline of selected work
+							const gold = n.selected && <span class="gold" aria-hidden="true" />;
+							// projects with a case page are real links, so crawlers and modified
+							// clicks reach the page; a plain click opens the same dialog
+							return slug ? (
+								<a
+									key={n.id}
+									id={id}
+									class={cls}
+									href={projectPath(slug)}
+									data-id={n.id}
+									data-c={n.cluster}
+									style={style}
+									onClick$={[
+										preventPlainProjectClick,
+										$((event: MouseEvent, el: HTMLAnchorElement) => {
+											if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+											return openNode(state, el, n.id, id);
+										})
+									]}
+								>
+									<span class="t">{n.title}</span>
+									<span class="m">{n.meta}</span>
+									{gold}
+								</a>
+							) : (
 								<button
 									key={n.id}
 									type="button"
 									id={id}
-									class={['cnode', n.selected && 'sel', n.muted && 'muted']}
+									class={cls}
 									data-id={n.id}
 									data-c={n.cluster}
-									style={{ ...pct(n.rect, L), '--d': `${n.delay}s` }}
-									onClick$={(_, el) => {
-										el.classList.remove('hit');
-										void el.offsetWidth;
-										el.classList.add('hit');
-										return openProject(state, n.id, id);
-									}}
+									style={style}
+									onClick$={(_, el) => openNode(state, el, n.id, id)}
 								>
 									<span class="t">{n.title}</span>
 									<span class="m">{n.meta}</span>
+									{gold}
 								</button>
 							);
 						})}
@@ -131,11 +190,14 @@ export const CircuitMap = component$<{ projects: ViewProject[] }>(({ projects })
 	return (
 		<div class="map-view" id="map-view" role="region" aria-labelledby="map-h">
 			<h2 id="map-h" class="sr-only">
-				project map, {projects.length} projects
+				Project map, {projects.length} projects
 			</h2>
 			<div class="map-grid" aria-hidden="true" />
 			<div class="map-top">
-				<nav class="jump" aria-label="jump to a cluster">
+				<p class="map-title">
+					Project map <b>{projects.length}</b> projects
+				</p>
+				<nav class="jump" aria-label="Jump to a cluster">
 					{counts.map(({ c, n }) => (
 						<button key={c} type="button" data-jump={c}>
 							{CLUSTER_LABEL[c]} <b>{n}</b>
@@ -143,7 +205,7 @@ export const CircuitMap = component$<{ projects: ViewProject[] }>(({ projects })
 					))}
 				</nav>
 			</div>
-			<div class="map-port" tabIndex={0} aria-label="project board. scroll or drag to pan">
+			<div class="map-port" tabIndex={0} aria-label="Project board. Scroll or drag to pan">
 				<div class="map-pad">
 					<Board L={boards.tall1} total={projects.length} />
 					<Board L={boards.tall2} total={projects.length} />
@@ -152,41 +214,41 @@ export const CircuitMap = component$<{ projects: ViewProject[] }>(({ projects })
 			</div>
 			<details class="legend">
 				<summary>
-					legend <b>{projects.length}</b> projects
+					Legend <b>{projects.length}</b>
 				</summary>
 				<ul>
 					<li>
 						<i class="lg-node" />
-						selected work, {selected}
+						Selected work, {selected}
 					</li>
 					<li>
 						<i class="lg-node plain" />
-						other project, {projects.length - selected}
+						Other project, {projects.length - selected}
 					</li>
 					<li>
 						<i class="lg-node dash" />
-						past project or design concept
+						Past project or design concept
 					</li>
 					<li>
 						<i class="lg-via" />
-						via, where a trace changes layer or joins a bus
+						Via, where a trace changes layer or joins a bus
 					</li>
 					<li>
 						<i class="lg-pulse" />
-						current, moving from adam to a project
+						Current, moving from Adam to a project
 					</li>
 				</ul>
 			</details>
-			<p class="map-hint">drag to pan. ctrl or cmd and scroll to zoom. esc returns to the site.</p>
+			<p class="map-hint">Drag to pan. Ctrl or Cmd and scroll to zoom. Esc returns home.</p>
 			<div class="map-ctl">
-				<button type="button" data-zoom="out" aria-label="zoom out">
+				<button type="button" data-zoom="out" aria-label="Zoom out">
 					<Icon name="minus" />
 				</button>
-				<button type="button" data-zoom="in" aria-label="zoom in">
+				<button type="button" data-zoom="in" aria-label="Zoom in">
 					<Icon name="plus" />
 				</button>
-				<button type="button" class="fit" data-zoom="fit" title="fit the board to the screen">
-					fit <span data-zoom-level>100%</span>
+				<button type="button" class="fit" data-zoom="fit" title="Fit the board to the screen">
+					Fit <span data-zoom-level>100%</span>
 				</button>
 			</div>
 		</div>

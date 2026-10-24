@@ -2,7 +2,7 @@ WEBVTT
 
 1
 00:00:00.400 --> 00:00:02.650
-tq chatbot. App demo with synthetic data. No AI keys in this demo: built-in mock replies and rule scoring. Synthetic tenants and leads.
+tq chatbot. Application walkthrough on example records. No AI keys here: built-in sample replies and rule scoring. Example tenants and leads.
 
 2
 00:00:02.650 --> 00:00:03.700
@@ -22,7 +22,7 @@ Hot lead: the bot stops asking and offers a call
 
 6
 00:00:11.200 --> 00:00:12.600
-Behind the scenes: the same chat in the admin test console
+Behind the scenes: the same chat in the admin console
 
 7
 00:00:12.650 --> 00:00:14.900

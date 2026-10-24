@@ -14,10 +14,12 @@ export default component$(() => {
 			<head>
 				<meta charset="utf-8" />
 				<meta name="viewport" content="width=device-width, initial-scale=1" />
-				<meta name="theme-color" content="#FAFBF7" />
+				<meta name="theme-color" content="#FFFFFF" />
 				<link rel="icon" type="image/png" sizes="32x32" href="/brand/favicon-32.png" />
 				<link rel="icon" type="image/png" sizes="192x192" href="/brand/icon-192.png" />
 				<link rel="apple-touch-icon" sizes="180x180" href="/brand/apple-touch-icon.png" />
+				<link rel="preload" as="font" type="font/woff2" href="/fonts/geist-latin.woff2" crossOrigin="anonymous" />
+				<link rel="preload" as="font" type="font/woff2" href="/fonts/geist-mono-latin.woff2" crossOrigin="anonymous" />
 				<DocumentHeadTags />
 				<style dangerouslySetInnerHTML="body{margin:0}" />
 			</head>
