@@ -272,8 +272,8 @@ export const PROJECTS: Project[] = [
 			{ label: 'no crm lock-in', detail: 'hot-lead events fire to a single per-client n8n webhook, and n8n fans them out to email, slack, or wherever the client already works.' }
 		],
 		outcomes: ['runs for zero dollars with no api keys', 'promotes to production one key at a time'],
-		stack: ['react', 'fastapi', 'supabase', 'groq', 'n8n', 'cloudflare'],
-		schematic: ['widget', 'fastapi', 'supabase', 'groq', 'n8n', 'booked call'],
+		stack: ['react', 'fastapi', 'supabase', 'deepseek', 'n8n', 'cloudflare'],
+		schematic: ['widget', 'fastapi', 'supabase', 'deepseek', 'n8n', 'booked call'],
 		github: 'https://github.com/adxoxo/chatbot-closer',
 		live: '',
 		loom: 'a3f34d52e411418a850961601e9de768',
@@ -294,7 +294,7 @@ export const PROJECTS: Project[] = [
 			{ label: 'time-weighted scoring', detail: 'results rank by similarity times a recency decay, so what i touched recently surfaces first.' }
 		],
 		outcomes: ['retrieval, memory and compaction all verified', 'embeddings running on a local gpu'],
-		stack: ['python', 'sqlite-vec', 'fastmcp', 'ollama', 'opentelemetry'],
+		stack: ['python', 'sqlite-vec', 'fastmcp', 'ollama', 'deepseek', 'opentelemetry'],
 		schematic: ['agents', 'mcp gateway', 'sqlite-vec'],
 		github: 'https://github.com/adxoxo/grimoire',
 		live: '',
@@ -309,14 +309,14 @@ export const PROJECTS: Project[] = [
 			'i wanted logging money to be friction-free. every added tap is a logged expense that never happens, so the whole app is built around three taps or fewer, or by voice.',
 		features: [
 			{ label: 'three taps or fewer', detail: 'the app opens on the quick-log screen with a glanceable total balance, so recording money is the first thing you do, not something buried in menus.' },
-			{ label: 'voice logging in taglish', detail: 'speak an entry and groq whisper transcribes it, then llama parses it into a structured transaction and maps spoken wallet names to your real accounts, with a one-line confirm before it commits.' },
+			{ label: 'voice logging in taglish', detail: 'speak an entry and groq whisper transcribes it, then deepseek parses it into a structured transaction and maps spoken wallet names to your real accounts, with a one-line confirm before it commits.' },
 			{ label: 'multi-currency at the bsp rate', detail: 'usd income converts to php at the official bsp rate for the day it landed, stored per transaction so history is never retroactively recomputed.' },
 			{ label: 'balances that never drift', detail: 'every wallet balance is derived from a starting balance plus every transaction, stored as integer centavos so rounding never creeps in.' },
 			{ label: 'offline-first pwa', detail: 'installable on a mid-range phone and tuned for high-glare outdoor use, it keeps logging offline then reconciles when the connection returns.' }
 		],
 		outcomes: ['secrets never reach the browser; every table locked by row-level security', 'runs on cloudflare pages with supabase, no server to manage'],
-		stack: ['sveltekit', 'supabase', 'cloudflare', 'groq', 'typescript'],
-		schematic: ['pwa', 'cloudflare functions', 'supabase', 'groq'],
+		stack: ['sveltekit', 'supabase', 'cloudflare', 'groq', 'deepseek', 'typescript'],
+		schematic: ['pwa', 'cloudflare functions', 'supabase', 'groq + deepseek'],
 		github: 'https://github.com/adxoxo/aquryu-vault',
 		live: '',
 		loom: ''

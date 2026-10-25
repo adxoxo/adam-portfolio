@@ -29,6 +29,7 @@ const NAME: Record<string, string> = {
 	'mcp servers': 'MCP servers',
 	claude: 'Claude',
 	groq: 'Groq',
+	deepseek: 'DeepSeek',
 	ollama: 'Ollama',
 	'aws bedrock': 'AWS Bedrock',
 	mollie: 'Mollie',

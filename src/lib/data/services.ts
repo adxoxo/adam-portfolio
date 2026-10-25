@@ -35,7 +35,7 @@ export const STACK: StackGroup[] = [
 	{ label: 'languages', items: ['python', 'javascript', 'typescript'] },
 	{ label: 'frontend', items: ['react', 'svelte', 'next.js', 'angular'] },
 	{ label: 'backend', items: ['django', 'fastapi', 'node.js'] },
-	{ label: 'ai and mcp', items: ['claude', 'groq', 'aws bedrock', 'ollama', 'mcp servers'] },
+	{ label: 'ai and mcp', items: ['claude', 'deepseek', 'groq', 'aws bedrock', 'ollama', 'mcp servers'] },
 	{ label: 'business apis', items: ['mollie', 'stripe', 'hubspot', 'yousign', 'everbill', 'zoho books', 'brevo'] },
 	{ label: 'automation and infra', items: ['n8n', 'supabase', 'cloudflare', 'docker'] },
 	{ label: 'embedded', items: ['esp32', 'stm32', 'arduino', 'raspberry pi', 'c++'] },
