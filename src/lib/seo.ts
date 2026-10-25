@@ -14,7 +14,7 @@ export const FEATURED_PROJECT_SLUGS = [
 export type FeaturedProjectSlug = (typeof FEATURED_PROJECT_SLUGS)[number];
 
 /** Date of the last public content release. Feeds sitemap lastmod and ProfilePage dateModified; bump it with each content release. */
-export const SITE_UPDATED = '2026-10-24';
+export const SITE_UPDATED = '2026-10-25';
 
 /** One-line summary of Adam, shared by the home description, its structured data and llms.txt. */
 export const SITE_SUMMARY =

@@ -8,7 +8,7 @@ import { animateTo } from './runtime/switch';
 
 // Previewed from the live public rows, by id. A row that is missing or hidden is
 // left out; nothing is restored from a second snapshot.
-const PREVIEW_IDS = ['vault', 'leadflow_cockpit', 'grimoire', 'goatedtracking', 'leadflow_visenza_dashboard', 'whatsapp_offer'] as const;
+const PREVIEW_IDS = ['vault', 'leadflow_cockpit', 'grimoire', 'tq_chatbot', 'goatedtracking', 'leadflow_visenza_dashboard', 'whatsapp_offer'] as const;
 
 const preventPlainProjectClick = sync$((event: MouseEvent) => {
 	if (event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) event.preventDefault();

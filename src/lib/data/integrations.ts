@@ -5,13 +5,14 @@ import type { Feature } from './projects';
 
 const PROJECT_INTEGRATIONS: Record<string, readonly Feature[]> = {
 	vault: [
-		{ label: 'Groq', detail: 'Whisper transcribes voice entries. Llama parses the text into structured transactions for confirmation.' },
+		{ label: 'Groq Whisper', detail: 'Transcribes spoken money notes into text.' },
+		{ label: 'DeepSeek', detail: 'Parses the transcript into a structured transaction for confirmation, and answers questions about spending.' },
 		{ label: 'Supabase', detail: 'Authentication and stored finance records support the app across devices.' }
 	],
 	grimoire: [
 		{ label: 'MCP / FastMCP', detail: 'Exposes shared knowledge and memory tools to coding agents through one MCP gateway.' },
-		{ label: 'Ollama', detail: 'Supplies embeddings for semantic retrieval and a local completion fallback.' },
-		{ label: 'Groq', detail: 'Provides completions over retrieved knowledge and tool results.' }
+		{ label: 'DeepSeek', detail: 'Provides completions over retrieved knowledge and drives the planner agent’s tool calls.' },
+		{ label: 'Ollama', detail: 'Supplies embeddings for semantic retrieval and a local completion fallback.' }
 	],
 	goatedtracking: [
 		{ label: 'Django REST API', detail: 'Connects the dashboard and QR-based worker pages to herd records, health history and pen transfers.' }
@@ -46,7 +47,7 @@ const PROJECT_INTEGRATIONS: Record<string, readonly Feature[]> = {
 		{ label: 'Brevo', detail: 'Handles double opt-in and report-delivery emails.' }
 	],
 	tq_chatbot: [
-		{ label: 'Groq / Llama', detail: 'Generates conversation replies and extracts lead-scoring signals, with a deterministic fallback.' },
+		{ label: 'DeepSeek', detail: 'Generates conversation replies and extracts lead-scoring signals, with a deterministic fallback.' },
 		{ label: 'n8n webhooks', detail: 'Routes qualified-lead events to the client’s notification and follow-up workflows.' }
 	]
 };
@@ -68,12 +69,12 @@ export const INTEGRATION_GROUPS = [
 	},
 	{
 		id: 'llms', title: 'LLM APIs',
-		description: 'Claude personalizes outreach. Groq and Llama support voice records. Bedrock personalizes quiz reports.',
-		projectIds: ['whatsapp_offer', 'vault', 'quiz_funnel']
+		description: 'Claude personalizes outreach. DeepSeek scores chatbot leads and parses voice records. Bedrock personalizes quiz reports.',
+		projectIds: ['whatsapp_offer', 'tq_chatbot', 'vault', 'quiz_funnel']
 	},
 	{
 		id: 'mcp', title: 'MCP & tool servers',
-		description: 'FastMCP exposes shared knowledge tools. Ollama supplies embeddings, with Groq for completions.',
+		description: 'FastMCP exposes shared knowledge tools. Ollama supplies embeddings, with DeepSeek for completions.',
 		projectIds: ['grimoire']
 	}
 ] as const;
